@@ -1,0 +1,74 @@
+name: Run Data Sync
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  push:
+    branches:
+      - master
+    paths:
+      - scripts/nike_sync.py
+      - scripts/strava.py
+      - scripts/gen_json.py
+      - scripts/gpxtrackposter/cli.py
+      - requirements.txt
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Configure pip cache
+        uses: actions/cache@v1
+        id: pip-cache
+        with:
+          path: venv
+          key: pip-1-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+        if: steps.pip-cache.outputs.cache-hit != 'true'
+
+      - name: Run sync script
+        run: |
+          source venv/bin/activate
+          python scripts/nike_sync.py ${{ secrets.N_TOKEN }}
+
+      - name: Generate New gpx upload to strava
+        run: |
+          source venv/bin/activate
+          python scripts/strava.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN}}
+
+      - name: Generate new data files
+        run: |
+          source venv/bin/activate
+          python scripts/gen_json.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN}}
+        
+      - name: Make svg GitHub profile
+        run: |
+          source venv/bin/activate
+          python scripts/gpxtrackposter/cli.py  --language zh_CN --gpx-dir ./GPX_OUT --title "Running Data" --type github --athlete "DuanFei" --special-distance 2 --special-distance2 5 --special-color yellow --special-color2 red --output assets/github.svg
+          python scripts/gpxtrackposter/cli.py  --language zh_CN --gpx-dir ./GPX_OUT --title "Picked Over 10km Runs" --type grid --athlete "DuanFei"  --output assets/grid.svg --min-distance 2.0 --special-color yellow --special-color2 red --special-distance 2 --special-distance2 5
+
+      - name: Push new runs
+        uses: github-actions-x/commit@v2.6
+        with:
+          github-token: ${{ secrets.G_TOKEN }}
+          commit-message: "Add new runs"
+          files: activities src/static/ scripts/data.db GPX_OUT
+          rebase: 'true'
+          name: shaonianche
+          email: duanfei.job@gmail.com
