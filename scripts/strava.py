@@ -189,6 +189,7 @@ def upload_gpx(file_name):
 
 
 def make_new_gpxs(files):
+    # TODO refactor maybe we do not need to upload
     if not files:
         return
     if not os.path.exists(GPX_FOLDER):
@@ -199,6 +200,7 @@ def make_new_gpxs(files):
                 json_data = json.loads(f.read())
             except JSONDecodeError:
                 pass
+        # ALL save name using utc if you want local please offset
         gpx_name = str(datetime.utcfromtimestamp(int(json_data["start_epoch_ms"]) / 1000).strftime('%Y-%m-%d %H-%M-%S'))
         parsed_data = parse_activity_data(json_data)
         if parsed_data:

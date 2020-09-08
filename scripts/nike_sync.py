@@ -28,6 +28,7 @@ class Nike:
                 "client_id": NIKE_CLIENT_ID,
                 "grant_type": "refresh_token",
             },
+            timeout=60
         )
         response.raise_for_status()
 
@@ -99,18 +100,6 @@ def save_activity(activity):
     except Exception:
         os.unlink(path)
         raise
-
-
-def activity_name(activity):
-    tags = activity["tags"]
-    if "com.nike.name" in tags:
-        return tags["com.nike.name"]
-    elif "com.nike.running.audioguidedrun" in tags:
-        return tags["com.nike.running.audioguidedrun"].replace("_", " ").title()
-    elif "location" in tags:
-        return f"{tags['location']} run".title()
-    else:
-        return activity["type"].title()
 
 
 def get_last_id():
