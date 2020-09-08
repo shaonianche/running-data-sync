@@ -1,9 +1,6 @@
 """Create a poster from track data."""
-# Copyright 2016-2019 Florian Pigorsch & Contributors. All rights reserved.
-#
-# Use of this source code is governed by a MIT-style
-# license that can be found in the LICENSE file.
-
+from datetime import datetime
+import pytz
 from collections import defaultdict
 import gettext
 import locale
@@ -59,6 +56,7 @@ class Poster:
         self.tracks_drawer = None
         self.trans = None
         self.set_language(None)
+        self.tc_offset = datetime.now(pytz.timezone('Asia/Shanghai')).utcoffset()
 
     def set_language(self, language):
         if language:
