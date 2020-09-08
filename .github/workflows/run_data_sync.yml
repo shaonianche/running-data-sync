@@ -61,14 +61,14 @@ jobs:
         run: |
           source venv/bin/activate
           python scripts/gpxtrackposter/cli.py  --language zh_CN --gpx-dir ./GPX_OUT --title "Running Data" --type github --athlete "DuanFei" --special-distance 2 --special-distance2 5 --special-color yellow --special-color2 red --output assets/github.svg
-          python scripts/gpxtrackposter/cli.py  --language zh_CN --gpx-dir ./GPX_OUT --title "Picked Over 10km Runs" --type grid --athlete "DuanFei"  --output assets/grid.svg --min-distance 1.0 --special-color yellow --special-color2 red --special-distance 2 --special-distance2 5
+          python scripts/gpxtrackposter/cli.py  --language zh_CN --gpx-dir ./GPX_OUT --title "Picked Over 5km Runs" --type grid --athlete "DuanFei"  --output assets/grid.svg --min-distance 1.0 --special-color yellow --special-color2 red --special-distance 2 --special-distance2 5
 
       - name: Push new runs
         uses: github-actions-x/commit@v2.6
         with:
           github-token: ${{ secrets.G_TOKEN }}
           commit-message: "Add new runs"
-          files: activities src/static/ scripts/data.db GPX_OUT
+          files: activities src/static/ scripts/data.db assets/ GPX_OUT/
           rebase: 'true'
           name: shaonianche
           email: duanfei.job@gmail.com
