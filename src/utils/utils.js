@@ -1,4 +1,5 @@
 import * as mapboxPolyline from '@mapbox/polyline';
+import { WebMercatorViewport } from 'react-map-gl';
 import { chinaGeojson } from '../static/run_countries';
 import { MUNICIPALITY_CITIES_ARR } from './const';
 
@@ -29,6 +30,7 @@ const scrollToMap = () => {
   window.scroll(rect.left + window.scrollX, rect.top + window.scrollY);
 };
 
+// what about oversea?
 const locationForRun = (run) => {
   const location = run.location_country;
   let [city, province, country] = ['', '', ''];
@@ -113,9 +115,36 @@ const titleForRun = (run) => {
   return '夜晚跑步';
 };
 
+const applyToArray = (func, array) => func.apply(Math, array);
+const getBoundsForGeoData = (geoData, totalLength) => {
+  const { features } = geoData;
+  const points = features[0].geometry.coordinates;
+
+  // Calculate corner values of bounds
+  const pointsLong = points.map((point) => point[0]);
+  const pointsLat = points.map((point) => point[1]);
+  const cornersLongLat = [
+    [applyToArray(Math.min, pointsLong), applyToArray(Math.min, pointsLat)],
+    [applyToArray(Math.max, pointsLong), applyToArray(Math.max, pointsLat)],
+  ];
+  const viewport = new WebMercatorViewport({ width: 800, height: 600 })
+    .fitBounds(cornersLongLat, { padding: 200 });
+  let { longitude, latitude, zoom } = viewport;
+  if (features.length > 1) {
+    zoom = 11.5;
+  }
+  if (features.length === totalLength) {
+    zoom = 5;
+  }
+  return { longitude, latitude, zoom };
+};
+
 const filterYearRuns = ((run, year) => run.start_date_local.slice(0, 4) === year);
 const filterAndSortRuns = (activities, year, sortFunc) => {
-  const s = activities.filter((run) => filterYearRuns(run, year));
+  let s = activities;
+  if (year !== 'Total') {
+     s = activities.filter((run) => filterYearRuns(run, year));
+  }
   return s.sort(sortFunc);
 };
 
@@ -123,5 +152,5 @@ const sortDateFunc = (a, b) => new Date(b.start_date_local.replace(' ', 'T')) - 
 const sortDateFuncReverse = (a, b) => new Date(a.start_date_local.replace(' ', 'T')) - new Date(b.start_date_local.replace(' ', 'T'));
 
 export {
-  titleForShow, formatPace, scrollToMap, locationForRun, intComma, pathForRun, geoJsonForRuns, geoJsonForMap, titleForRun, filterYearRuns, filterAndSortRuns, sortDateFunc, sortDateFuncReverse,
+  titleForShow, formatPace, scrollToMap, locationForRun, intComma, pathForRun, geoJsonForRuns, geoJsonForMap, titleForRun, filterYearRuns, filterAndSortRuns, sortDateFunc, sortDateFuncReverse, getBoundsForGeoData,
 };

@@ -2,8 +2,8 @@ const path = require("path");
 
 module.exports = {
   siteMetadata: {
-    title: "Yi Hong",
-    siteUrl: "https://yihong.run",
+    title: "Running page",
+    siteUrl: "http://run.duangfei.org/",
     description: "Personal site and blog",
   },
   plugins: [
@@ -48,12 +48,6 @@ module.exports = {
     },
     "gatsby-transformer-yaml",
     "gatsby-transformer-json",
-    {
-      resolve: "gatsby-source-filesystem",
-      options: {
-        path: "./data/",
-      },
-    },
     {
       resolve: "gatsby-source-filesystem",
       options: {
