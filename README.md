@@ -1,3 +1,4 @@
+![Run Data Sync](https://github.com/shaonianche/running-data-sync/workflows/Run%20Data%20Sync/badge.svg?branch=master)
 ### Nike Run Club / Runtastic Running Data Visualization
 这是一个来自 [@yihong0618](https://github.com/yihong0618/blog) 的项目，它可以帮助您做以下事情：
 - 获取 Nike Run Club/Runtastic 的运动数据，生成 GPX 文件
