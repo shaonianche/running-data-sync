@@ -10,11 +10,11 @@ import math
 import svgwrite
 import s2sphere as s2
 
-from exceptions import ParameterError
-from poster import Poster
-from tracks_drawer import TracksDrawer
-from xy import XY
-import utils
+from .exceptions import ParameterError
+from .poster import Poster
+from .tracks_drawer import TracksDrawer
+from .xy import XY
+from .utils import project
 
 
 log = logging.getLogger(__name__)
@@ -126,7 +126,7 @@ class HeatmapDrawer(TracksDrawer):
         bbox = self._determine_bbox()
         for tr in self.poster.tracks:
             color = self.color(self.poster.length_range, tr.length, tr.special)
-            for line in utils.project(bbox, size, offset, tr.polylines):
+            for line in project(bbox, size, offset, tr.polylines):
                 for opacity, width in [(0.1, 5.0), (0.2, 2.0), (1.0, 0.3)]:
                     dr.add(
                         dr.polyline(

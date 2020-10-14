@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: Run Data Sync Beat
 
 on:
@@ -71,3 +72,79 @@ jobs:
           rebase: 'true'
           name: shaonianche
           email: duanfei.job@gmail.com
+||||||| b94df8e
+=======
+name: Run Data Sync Beta
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  push:
+    branches:
+      - beta
+    paths:
+      - scripts/nike_sync.py
+      - scripts/runtastic_sync.py
+      - scripts/strava_sync.py
+      - scripts/gen_svg.py
+      - requirements.txt
+
+env:
+  RUN_TYPE: nike # support runtastic/strava/nike
+  ATHLETE: DuanFei
+  TITLE: DuanFei`s Running
+  TITLE_GRID: Over 10km Runs
+
+jobs:
+  sync:
+    name: Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+
+      - name: Configure pip cache
+        uses: actions/cache@v1
+        id: pip-cache
+        with:
+          path: venv
+          key: pip-1-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            pip-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+        if: steps.pip-cache.outputs.cache-hit != 'true'
+
+      - name: Run sync Nike script
+        if: env.RUN_TYPE == 'nike'
+        run: |
+          python scripts/nike_sync.py ${{ secrets.N_TOKEN }}
+      - name: Run sync Runtastic script
+        if: env.RUN_TYPE == 'runtastic'
+        run: |
+          python scripts/runtastic_sync.py ${{ secrets.RUNTASTIC_EMAIL }} ${{ secrets.RUNTASTIC_PASSWORD }}
+  
+      - name: Run sync Strava script
+        if: env.RUN_TYPE == 'strava'
+        run: |
+          python scripts/strava_sync.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
+      - name: Make svg GitHub profile
+        run: |
+          python scripts/gen_svg.py --from-db --title "${{ env.TITLE }}" --type github --athlete "${{ env.ATHLETE }}" --special-distance 5 --special-distance2 10 --special-color yellow --special-color2 red --output assets/github.svg --use-localtime --min-distance 0.5
+          python scripts/gen_svg.py --from-db --title "${{ env.TITLE_GRID }}" --type grid --athlete "${{ env.ATHLETE }}"  --output assets/grid.svg --min-distance 5.0 --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime
+      - name: Push new runs
+        uses: github-actions-x/commit@v2.6
+        with:
+          github-token: ${{ secrets.G_TOKEN }}
+          commit-message: "Add new runs"
+          files: activities src/static/ scripts/data.db assets/ GPX_OUT/
+          rebase: 'true'
+          name: shaonianche
+          email: duanfei.job@gmail.com
+>>>>>>> beta

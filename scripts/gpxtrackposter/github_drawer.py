@@ -3,11 +3,11 @@ import datetime
 import locale
 import svgwrite
 
-import utils
-from exceptions import PosterError
-from poster import Poster
-from tracks_drawer import TracksDrawer
-from xy import XY
+from .utils import format_float
+from .exceptions import PosterError
+from .poster import Poster
+from .tracks_drawer import TracksDrawer
+from .xy import XY
 
 
 class GithubDrawer(TracksDrawer):
@@ -33,7 +33,7 @@ class GithubDrawer(TracksDrawer):
                 -start_date_weekday
             )
             year_length = total_length_year_dict.get(year, 0)
-            year_length = utils.format_float(self.poster.m2u(year_length))
+            year_length = format_float(self.poster.m2u(year_length))
             month_names = [
                 locale.nl_langinfo(day)[:3]  # Get only first three letters
                 for day in [
@@ -108,7 +108,7 @@ class GithubDrawer(TracksDrawer):
                             color = self.poster.colors.get(
                                 "special2"
                             ) or self.poster.colors.get("special")
-                        str_length = utils.format_float(self.poster.m2u(length))
+                        str_length = format_float(self.poster.m2u(length))
                         date_title = f"{date_title} {str_length} {km_or_mi}"
 
                     rect = dr.rect((rect_x, rect_y), dom, fill=color)

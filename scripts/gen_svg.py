@@ -1,77 +1,16 @@
-#!/usr/bin/env python
-"""Create a variety of poster-style visualizations from GPX data
-
-usage: create_poster.py [-h] [--gpx-dir DIR] [--output FILE]
-                        [--language LANGUAGE] [--year YEAR] [--title TITLE]
-                        [--athlete NAME] [--special FILE] [--type TYPE]
-                        [--background-color COLOR] [--track-color COLOR]
-                        [--track-color2 COLOR] [--text-color COLOR]
-                        [--special-color COLOR] [--special-color2 COLOR]
-                        [--units UNITS] [--clear-cache] [--verbose]
-                        [--logfile FILE] [--heatmap-center LAT,LNG]
-                        [--heatmap-radius RADIUS_KM] [--circular-rings]
-                        [--circular-ring-color COLOR]
-                        [--special_distance DISTANCE][--special_distance2 DISTANCE]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --gpx-dir DIR         Directory containing GPX files (default: current
-                        directory).
-  --output FILE         Name of generated SVG image file (default:
-                        "poster.svg").
-  --language LANGUAGE   Language (default: english).
-  --year YEAR           Filter tracks by year; "NUM", "NUM-NUM", "all"
-                        (default: all years)
-  --title TITLE         Title to display.
-  --athlete NAME        Athlete name to display (default: "John Doe").
-  --special FILE        Mark track file from the GPX directory as special; use
-                        multiple times to mark multiple tracks.
-  --type TYPE           Type of poster to create (default: "grid", available:
-                        "grid", "calendar", "heatmap", "circular", "github").
-  --background-color COLOR
-                        Background color of poster (default: "#222222").
-  --track-color COLOR   Color of tracks (default: "#4DD2FF").
-  --track-color2 COLOR  Secondary color of tracks (default: none).
-  --text-color COLOR    Color of text (default: "#FFFFFF").
-  --special-color COLOR
-                        Special track color (default: "#FFFF00").
-  --special-color2 COLOR
-                        Secondary color of special tracks (default: none).
-  --units UNITS         Distance units; "metric", "imperial" (default:
-                        "metric").
-  --clear-cache         Clear the track cache.
-  --verbose             Verbose logging.
-  --logfile FILE
-
-Heatmap Type Options:
-  --heatmap-center LAT,LNG
-                        Center of the heatmap (default: automatic).
-  --heatmap-radius RADIUS_KM
-                        Scale the heatmap such that at least a circle with
-                        radius=RADIUS_KM is visible (default: automatic).
-
-Circular Type Options:
-  --circular-rings      Draw distance rings.
-  --circular-ring-color COLOR
-                        Color of distance rings.
-"""
-# Copyright 2016-2019 Florian Pigorsch & Contributors. All rights reserved.
-#
-# Use of this source code is governed by a MIT-style
-# license that can be found in the LICENSE file.
-
 import argparse
 import appdirs
 import logging
 import os
 import sys
 
-import poster, track_loader
-import grid_drawer, circular_drawer, heatmap_drawer
-import github_drawer, calendar_drawer
-from exceptions import ParameterError, PosterError
+from gpxtrackposter import poster, track_loader
+from gpxtrackposter import grid_drawer, circular_drawer, heatmap_drawer
+from gpxtrackposter import github_drawer, calendar_drawer
+from gpxtrackposter.exceptions import ParameterError, PosterError
+from config import SQL_FILE
 
-
+# from flopp great repo
 __app_name__ = "create_poster"
 __app_author__ = "flopp.net"
 
@@ -238,6 +177,13 @@ def main():
         help="Use utc time or local time",
     )
 
+    args_parser.add_argument(
+        "--from-db",
+        dest="from_db",
+        action="store_true",
+        help="activities db file",
+    )
+
     for _, drawer in drawers.items():
         drawer.create_args(args_parser)
 
@@ -267,7 +213,11 @@ def main():
         print("Clearing cache...")
         loader.clear_cache()
 
-    tracks = loader.load_tracks(args.gpx_dir)
+    if args.from_db:
+        # for svg from db here if you want gpx please do not use --from-db
+        tracks = loader.load_tracks_from_db(SQL_FILE)
+    else:
+        tracks = loader.load_tracks(args.gpx_dir)
     if not tracks:
         if not args.clear_cache:
             print("No tracks found.")
