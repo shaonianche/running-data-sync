@@ -6859,15 +6859,15 @@ gatsby-plugin-feed@^2.5.14:
     lodash.merge "^4.6.2"
     rss "^1.2.2"
 
-gatsby-plugin-manifest@^2.4.11:
-  version "2.4.24"
-  resolved "https://registry.yarnpkg.com/gatsby-plugin-manifest/-/gatsby-plugin-manifest-2.4.24.tgz#836fac2fc60f03cee9d155451a1353a12dc8c505"
-  integrity sha512-ub2KvHPUcKHzsSdkRcpVzp43sTnnof7bG7w5cVHWUDfNIrxW+Pt3S6XYycqHGOB+Xd7cja1sW56qr+DR5pU49Q==
+gatsby-plugin-manifest@^2.4.34:
+  version "2.4.34"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-manifest/-/gatsby-plugin-manifest-2.4.34.tgz#3628df53ccf59e04e93eca397287484315fea715"
+  integrity sha512-LTyhKVuTvORuDER1yAzdi8V/l82PgAGlLBJfxMDtJrGLg9BG83SghbLo64bSJv+9SrRnokn92/DRQteSwo7SkQ==
   dependencies:
-    "@babel/runtime" "^7.10.3"
-    gatsby-core-utils "^1.3.16"
+    "@babel/runtime" "^7.11.2"
+    gatsby-core-utils "^1.3.23"
     semver "^7.3.2"
-    sharp "^0.25.1"
+    sharp "^0.25.4"
 
 gatsby-plugin-meta-redirect@^1.1.1:
   version "1.1.1"
@@ -7204,18 +7204,10 @@ gatsby-telemetry@^1.3.38:
     node-fetch "^2.6.1"
     uuid "3.4.0"
 
-gatsby-transformer-json@^2.4.14:
-  version "2.4.14"
-  resolved "https://registry.yarnpkg.com/gatsby-transformer-json/-/gatsby-transformer-json-2.4.14.tgz#86b244254c6575af6e525bc6f39b9d1449501c02"
-  integrity sha512-rAyP2i3bKRnKPCS0SpsnwBjMeWJ+VcgVrpGwedsI3DjpnGSv2gBEKeF26S4G/DR/lkT8gU5GtEDUcYmjtrjyaw==
-  dependencies:
-    "@babel/runtime" "^7.11.2"
-    bluebird "^3.7.2"
-
-gatsby-transformer-remark@^2.8.38:
-  version "2.8.38"
-  resolved "https://registry.yarnpkg.com/gatsby-transformer-remark/-/gatsby-transformer-remark-2.8.38.tgz#2e87df8de3f4dedc9149a1d8f75d5e383985f948"
-  integrity sha512-3zTdLAtawz0WF1aaj/vdhCuuaV1imUzZcZlUuZG0FxtjPOOYsvOOVwe56iN30adLkqZa8XGgr70B/rOUgUs/+A==
+gatsby-transformer-remark@^2.8.15:
+  version "2.8.39"
+  resolved "https://registry.yarnpkg.com/gatsby-transformer-remark/-/gatsby-transformer-remark-2.8.39.tgz#be14f83ce63342ab1b907718e049e59284dab509"
+  integrity sha512-XVBOtUSJxTFY8XfGqc8q64V3EkXkKd2UaGvWLN+zhH/leywv9BLuW7JTspcHwIdow+a+zzBL9EtR/ptNCSRpQA==
   dependencies:
     "@babel/runtime" "^7.11.2"
     bluebird "^3.7.2"
@@ -13913,7 +13905,7 @@ semver-truncate@^1.1.2:
   dependencies:
     semver "^5.3.0"
 
-"semver@2 || 3 || 4 || 5", semver@^5.3.0, semver@^5.4.1, semver@^5.5.0, semver@^5.5.1, semver@^5.6.0, semver@^5.7.1:
+"semver@2 || 3 || 4 || 5", semver@^5.3.0, semver@^5.4.1, semver@^5.5.0, semver@^5.5.1, semver@^5.6.0:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
   integrity sha512-sauaDf/PZdVgrLTNYHRtpXa1iRiKcaebiKQ1BJdpQlWH2lCvexQdX55snPFyK7QzpudqbCI0qXFfOasHdyNDGQ==
@@ -14058,7 +14050,7 @@ sharkdown@^0.1.0:
     minimist "0.0.5"
     split "~0.2.10"
 
-sharp@^0.25.1, sharp@^0.25.4:
+sharp@^0.25.4:
   version "0.25.4"
   resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.25.4.tgz#1a8e542144a07ab7e9316ab89de80182b827c363"
   integrity sha512-umSzJJ1oBwIOfwFFt/fJ7JgCva9FvrEU2cbbm7u/3hSDZhXvkME8WE5qpaJqLIe2Har5msF5UG4CzYlEg5o3BQ==
