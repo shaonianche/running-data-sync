@@ -63,7 +63,7 @@ jobs:
           python scripts/gen_svg.py --from-db --title "${{ env.TITLE }}" --type github --athlete "${{ env.ATHLETE }}" --special-distance 5 --special-distance2 10 --special-color yellow --special-color2 red --output assets/github.svg --use-localtime --min-distance 0.5
           python scripts/gen_svg.py --from-db --title "${{ env.TITLE_GRID }}" --type grid --athlete "${{ env.ATHLETE }}"  --output assets/grid.svg --min-distance 5.0 --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime
       - name: Push new runs
-        uses: github-actions-x/commit@v2.6
+        uses: github-actions-x/commit@v2.7
         with:
           github-token: ${{ secrets.G_TOKEN }}
           commit-message: "Add new runs"
