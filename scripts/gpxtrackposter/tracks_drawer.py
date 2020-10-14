@@ -6,10 +6,10 @@
 
 import argparse
 import svgwrite
-from poster import Poster
-from value_range import ValueRange
-from xy import XY
-import utils
+from .poster import Poster
+from .value_range import ValueRange
+from .xy import XY
+from .utils import interpolate_color
 
 
 class TracksDrawer:
@@ -46,6 +46,4 @@ class TracksDrawer:
         if diff == 0:
             return color1
 
-        return utils.interpolate_color(
-            color1, color2, (length - length_range.lower()) / diff
-        )
+        return interpolate_color(color1, color2, (length - length_range.lower()) / diff)

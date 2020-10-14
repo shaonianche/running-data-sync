@@ -9,11 +9,11 @@ import datetime
 import locale
 import svgwrite
 
-import utils
-from exceptions import PosterError
-from poster import Poster
-from tracks_drawer import TracksDrawer
-from xy import XY
+from .utils import compute_grid, format_float
+from .exceptions import PosterError
+from .poster import Poster
+from .tracks_drawer import TracksDrawer
+from .xy import XY
 
 
 class CalendarDrawer(TracksDrawer):
@@ -27,7 +27,7 @@ class CalendarDrawer(TracksDrawer):
         if self.poster.tracks is None:
             raise PosterError("No tracks to draw.")
         years = self.poster.years.count()
-        _, counts = utils.compute_grid(years, size)
+        _, counts = compute_grid(years, size)
         if counts is None:
             raise PosterError("Unable to compute grid.")
         count_x, count_y = counts[0], counts[1]
@@ -127,7 +127,7 @@ class CalendarDrawer(TracksDrawer):
                     dr.add(dr.rect(pos, dim, fill=color))
                     dr.add(
                         dr.text(
-                            utils.format_float(self.poster.m2u(length)),
+                            format_float(self.poster.m2u(length)),
                             insert=(
                                 pos[0] + cell_size / 2,
                                 pos[1] + cell_size + cell_size / 2,

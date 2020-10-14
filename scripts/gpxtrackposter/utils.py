@@ -11,9 +11,9 @@ import pytz
 from datetime import datetime
 from typing import List, Optional, Tuple
 import s2sphere as s2
-from value_range import ValueRange
+from .value_range import ValueRange
 from timezonefinder import TimezoneFinder
-from xy import XY
+from .xy import XY
 
 
 # mercator projection
@@ -111,7 +111,9 @@ def format_float(f) -> str:
     return locale.format_string("%.1f", f)
 
 
-def parse_datetime_to_local(start_time: datetime,  end_time: datetime, gpx: "mod_gpxpy.gpx.GPX") -> Tuple[datetime, datetime]:
+def parse_datetime_to_local(
+    start_time: datetime, end_time: datetime, gpx: "mod_gpxpy.gpx.GPX"
+) -> Tuple[datetime, datetime]:
     # just parse the start time, because start/end maybe different
     offset = start_time.utcoffset()
     if offset:
