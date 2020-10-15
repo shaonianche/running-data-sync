@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = {
   siteMetadata: {
     title: "Running page",
-    siteUrl: "https://run.duangfei.org/",
+    siteUrl: "https://yihong.run",
     description: "Personal site and blog",
   },
   plugins: [
