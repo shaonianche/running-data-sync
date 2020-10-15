@@ -66,7 +66,7 @@ jobs:
         uses: github-actions-x/commit@v2.7
         with:
           github-token: ${{ secrets.G_TOKEN }}
-          commit-message: "nike:add new runs"
+          commit-message: "chore(nike):add new runs"
           files: activities src/static/ scripts/data.db assets/ GPX_OUT/
           rebase: 'true'
           name: shaonianche
