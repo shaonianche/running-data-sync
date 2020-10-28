@@ -397,7 +397,7 @@ const RunMap = ({
           }}
         />
       </Source>
-      <span className={styles.runTitle}>{title}</span>
+      <span className={styles.runTitle}>{title.split('-').join('/')}</span>
     </ReactMapGL>
   );
 };
