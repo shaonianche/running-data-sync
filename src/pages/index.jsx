@@ -533,7 +533,10 @@ const RunRow = ({
       <td>{distance}</td>
       {pace && <td>{paceParts}</td>}
       <td>{heartRate && heartRate.toFixed(0)}</td>
-      <td className={styles.runDate}>{run.start_date_local}</td>
+      <td className={styles.runDate}>
+
+        {run.start_date_local.split('-').join('/')}
+      </td>
     </tr>
   );
 };
