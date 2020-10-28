@@ -19,7 +19,6 @@ $dark: rgb(26, 26, 26);
 .runTable {
   width: 100%;
   min-width: 700px;
-
   margin: 2rem 0 5rem 0;
 
   thead {
@@ -93,4 +92,5 @@ $dark: rgb(26, 26, 26);
   left: 120px;
   font-family: sans-serif;
   cursor: pointer;
+  text-transform:uppercase;
 }

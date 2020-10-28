@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Helmet } from 'react-helmet';
 import MapboxLanguage from '@mapbox/mapbox-gl-language';
-import ReactMapGL, { Source, Layer } from 'react-map-gl';
-
-import Layout from '../components/layout';
-import { activities } from '../static/activities';
+import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
+import ReactMapGL, { Layer, Source } from 'react-map-gl';
 import GitHubSvg from '../../assets/github.svg';
 import GridSvg from '../../assets/grid.svg';
+import Layout from '../components/layout';
+import { activities } from '../static/activities';
+import { IS_CHINESE, MAPBOX_TOKEN } from '../utils/const';
 import {
-  titleForShow, formatPace, scrollToMap, locationForRun, intComma, geoJsonForRuns, geoJsonForMap,
-  titleForRun, filterAndSortRuns, sortDateFunc, sortDateFuncReverse, getBoundsForGeoData,
+  filterAndSortRuns, formatPace, geoJsonForMap, geoJsonForRuns,
+  getBoundsForGeoData, intComma, locationForRun, scrollToMap,
+  sortDateFunc, sortDateFuncReverse, titleForRun, titleForShow
 } from '../utils/utils';
-import { MAPBOX_TOKEN, IS_CHINESE } from '../utils/const';
-
 import styles from './running.module.scss';
+
+
 
 const cities = {};
 const runPeriod = {};
@@ -533,7 +534,7 @@ const RunRow = ({
       <td>{heartRate && heartRate.toFixed(0)}</td>
       <td className={styles.runDate}>
 
-        {run.start_date_local.split('-').join('/')}
+        {run.start_date_local.split('-').join('/').slice(0,-3)} 
       </td>
     </tr>
   );
