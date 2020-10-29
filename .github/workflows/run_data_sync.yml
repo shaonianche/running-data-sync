@@ -63,7 +63,8 @@ jobs:
       
       - name: Generate New gpx upload to strava
         run: |
-          python scripts/strava.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN}}
+          source venv/bin/activate
+          python scripts/upload_strava.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN}}
 
       - name: Make svg GitHub profile
         run: |
