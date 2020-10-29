@@ -12,6 +12,7 @@ on:
       - scripts/runtastic_sync.py
       - scripts/strava_sync.py
       - scripts/gen_svg.py
+      - scripts/upload_strava.py
       - requirements.txt
 
 env:
@@ -59,6 +60,12 @@ jobs:
         if: env.RUN_TYPE == 'strava'
         run: |
           python scripts/strava_sync.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
+      
+      - name: Generate New gpx upload to strava
+        run: |
+          source venv/bin/activate
+          python scripts/strava.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN}}
+
       - name: Make svg GitHub profile
         run: |
           python scripts/gen_svg.py --from-db --title "${{ env.TITLE }}" --type github --athlete "${{ env.ATHLETE }}" --special-distance 5 --special-distance2 10 --special-color yellow --special-color2 red --output assets/github.svg --use-localtime --min-distance 0.5
