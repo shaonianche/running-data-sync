@@ -8,6 +8,7 @@
 img::selection {
   background: transparent;
 }
+
 img::-moz-selection {
   background: transparent;
 }
@@ -19,6 +20,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
+
 // div {
 //   overflow-x: hidden !important;
 // }
@@ -103,9 +105,11 @@ a.post-colophon-link:visited {
 h2 .header-link {
   margin-top: 2rem;
 }
+
 h3 .header-link {
   margin-top: 2rem;
 }
+
 h5 .header-link {
   margin-top: -0.14rem;
 }
@@ -114,6 +118,7 @@ h5 .header-link {
   @extend .bg-light-gray;
 
   font-size: 0.875rem !important;
+
   &::-webkit-scrollbar {
     display: none;
   }

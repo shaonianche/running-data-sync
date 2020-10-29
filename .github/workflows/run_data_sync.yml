@@ -1,6 +1,7 @@
 name: Run Data Sync
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 * * * *"
   push:
@@ -17,7 +18,7 @@ env:
   RUN_TYPE: nike # support runtastic/strava/nike
   ATHLETE: DuanFei
   TITLE: Running Data
-  TITLE_GRID: Over 10km Runs
+  TITLE_GRID: Over 5km Runs
 
 jobs:
   sync:
