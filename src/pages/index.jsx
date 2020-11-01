@@ -493,7 +493,7 @@ const RunTable = ({ runs, year, locateActivity, setActivity }) => {
 			? a.distance - b.distance
 			: b.distance - a.distance;
 	const sortPaceFunc = (a, b) =>
-		sortFuncInfo === "Pace"
+		sortFuncInfo === "PACE"
 			? a.average_speed - b.average_speed
 			: b.average_speed - a.average_speed;
 	const sortBPMFunc = (a, b) =>
