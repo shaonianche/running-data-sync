@@ -74,7 +74,7 @@ jobs:
         with:
           github-token: ${{ secrets.G_TOKEN }}
           commit-message: "chore(nike): add new runs"
-          files: activities src/static/ scripts/data.db assets/ GPX_OUT/
+          files: activities src/static/ scripts/ assets/ GPX_OUT/
           rebase: 'true'
           name: shaonianche
           email: duanfei.job@gmail.com
