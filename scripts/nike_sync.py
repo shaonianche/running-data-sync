@@ -105,6 +105,7 @@ def save_activity(activity):
 def get_last_id():
     try:
         file_names = os.listdir(OUTPUT_DIR)
+        file_names = [i for i in file_names if not i.startswith(".")]
         file_names.sort()
         file_name = file_names[-1]
         with open(os.path.join(OUTPUT_DIR, file_name)) as f:
@@ -120,7 +121,6 @@ def sanitise_json(d):
     """
     Gatsby's JSON loading for GraphQL queries doesn't support "." characters in
     names, which Nike uses a lot for reverse-domain notation.
-
     We recursively transform all dict keys to use underscores instead.
     """
 
@@ -139,16 +139,15 @@ def sanitise_json(d):
 def get_to_generate_files():
     file_names = os.listdir(GPX_FOLDER)
     try:
-        last_time = max(int(i.split(".")[0]) for i in file_names)
+        last_time = max(
+            int(i.split(".")[0]) for i in file_names if not i.startswith(".")
+        )
     except:
         last_time = 0
-    if not os.listdir(OUTPUT_DIR):
-        print("There is no nike running data")
-        return 
     return [
         OUTPUT_DIR + "/" + i
         for i in os.listdir(OUTPUT_DIR)
-        if int(i.split(".")[0]) > last_time
+        if not i.startswith(".") and int(i.split(".")[0]) > last_time
     ]
 
 
@@ -305,6 +304,8 @@ def make_new_gpxs(files):
 
 
 if __name__ == "__main__":
+    if not os.path.exists(OUTPUT_DIR):
+        os.mkdir(OUTPUT_DIR)
     parser = argparse.ArgumentParser()
     parser.add_argument("refresh_token", help="API refresh access token for nike.com")
     options = parser.parse_args()
