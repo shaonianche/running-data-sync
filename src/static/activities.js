@@ -992,6 +992,20 @@ const activities = [
     "average_heartrate": null,
     "average_speed": 3.0750702496701914,
     "streak": 5
+  },
+  {
+    "run_id": 1604660956781,
+    "name": "run from gpx",
+    "distance": 5677.03430445613,
+    "moving_time": "0:32:29.220000",
+    "type": "Run",
+    "start_date": "2020-11-06 11:09:16",
+    "start_date_local": "2020-11-06 19:09:16",
+    "location_country": "\u5e38\u987a\u8def, \u679c\u5bb6\u5e97, \u5e38\u8425\u4e61, \u671d\u9633\u533a, \u5317\u4eac\u5e02, 100024, China \u4e2d\u56fd",
+    "summary_polyline": "c{urFqdtfUnAi@vDb@`C_Cp@mBoCsHF}GbBkFdIeMyNaRo@TgIpNs@tEb@~n@xHj@nGzB`DUrBcAa@cDeAmCkFyGgA{G^oEnA_EhIuM_O_Rc@NgIvNq@bE`@~n@X^|Gb@dFtBbFY",
+    "average_heartrate": 146.0,
+    "average_speed": 2.9124646291625007,
+    "streak": 6
   }
 ];
 
