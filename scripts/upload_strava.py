@@ -14,8 +14,9 @@ from stravalib.client import Client
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("strava")
 
-GET_DIR = "activities"
-GPX_FOLDER = os.path.join(os.getcwd(), "GPX_OUT")
+
+from config import (BASE_URL, GPX_FOLDER, JSON_FILE, NIKE_CLIENT_ID,
+                    OUTPUT_DIR, SQL_FILE, TOKEN_REFRESH_URL)
 
 
 def make_client(client_id, client_secret, refresh_token):
@@ -168,7 +169,6 @@ def parse_activity_data(activity):
     )
     return gpx_doc
 
-
 def upload_gpx(file_name):
     with open(file_name, "rb") as f:
         r = client.upload_activity(activity_file=f, data_type="gpx")
@@ -177,6 +177,17 @@ def upload_gpx(file_name):
 
 def make_new_gpxs(files):
     # TODO refactor maybe we do not need to upload
+    if not files:
+        return
+    if not os.path.exists(GPX_FOLDER):
+        os.mkdir(GPX_FOLDER)
+    for file in files:
+        with open(file, "r") as f:
+            try:
+                json_data = json.loads(f.read())
+            except JSONDecodeError:
+                pass
+
     gpx_files = sorted(os.listdir(GPX_FOLDER))
     # get new, TODO: not mind the delete stai
     gpx_files = gpx_files[-len(files) :]
