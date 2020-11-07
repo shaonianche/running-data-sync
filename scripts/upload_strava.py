@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("strava")
 
 
-from config import (BASE_URL, GPX_FOLDER, JSON_FILE, NIKE_CLIENT_ID,
+from config import (BASE_URL, GET_DIR, GPX_FOLDER, JSON_FILE, NIKE_CLIENT_ID,
                     OUTPUT_DIR, SQL_FILE, TOKEN_REFRESH_URL)
 
 
@@ -168,6 +168,7 @@ def parse_activity_data(activity):
         title, latitude_data, longitude_data, elevation_data, heart_rate_data
     )
     return gpx_doc
+
 
 def upload_gpx(file_name):
     with open(file_name, "rb") as f:
