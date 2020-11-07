@@ -190,11 +190,11 @@ def make_new_gpxs(files):
                 pass
 
         gpx_name = str(json_data["end_epoch_ms"])
-        gpx_files = sorted(GPX_FOLDER)
+        gpx_files = sorted(os.listdir(GPX_FOLDER))
                 # get new, TODO: not mind the delete stai
         gpx_files = gpx_files[-len(files) :]
         for f in gpx_files:
-            upload_gpx(GPX_FOLDER, f)
+            upload_gpx(os.path.join(GPX_FOLDER, f))
             logger.info(f + " uploaded")
 
 
