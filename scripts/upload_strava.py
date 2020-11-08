@@ -189,13 +189,12 @@ def make_new_gpxs(files):
             except JSONDecodeError:
                 pass
 
-        gpx_name = str(json_data["end_epoch_ms"])
-        gpx_files = sorted(os.listdir(GPX_FOLDER))
-                # get new, TODO: not mind the delete stai
-        gpx_files = gpx_files[-len(files) :]
-        for f in gpx_files:
-            upload_gpx(os.path.join(GPX_FOLDER, f))
-            logger.info(f + " uploaded")
+    gpx_files = sorted(os.listdir(GPX_FOLDER))
+    # get new, TODO: not mind the delete stai
+    gpx_files = gpx_files[-len(files) :]
+    for f in gpx_files:
+        upload_gpx(os.path.join(GPX_FOLDER, f))
+        logger.info(f + " uploaded")
 
 
 if __name__ == "__main__":
