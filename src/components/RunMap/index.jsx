@@ -1,17 +1,17 @@
-import React from 'react';
-import MapboxLanguage from '@mapbox/mapbox-gl-language';
-import ReactMapGL, { Source, Layer } from 'react-map-gl';
+import React from "react";
+import MapboxLanguage from "@mapbox/mapbox-gl-language";
+import ReactMapGL, { Source, Layer } from "react-map-gl";
 import {
   MAPBOX_TOKEN,
   IS_CHINESE,
   MAIN_COLOR,
   PROVINCE_FILL_COLOR,
-} from 'src/utils/const';
-import {geoJsonForMap} from 'src/utils/utils'
-import useActivities from 'src/hooks/useActivities';
-import RunMapButtons from './RunMapButtons';
-import RunMarker from './RunMaker';
-import styles from './style.module.scss';
+} from "src/utils/const";
+import { geoJsonForMap } from "src/utils/utils";
+import useActivities from "src/hooks/useActivities";
+import RunMapButtons from "./RunMapButtons";
+import RunMarker from "./RunMaker";
+import styles from "./style.module.scss";
 
 const RunMap = ({
   title,
@@ -28,18 +28,18 @@ const RunMap = ({
     if (map && IS_CHINESE) {
       map.addControl(
         new MapboxLanguage({
-          defaultLanguage: 'zh',
+          defaultLanguage: "zh",
         })
       );
-      map.setLayoutProperty('country-label-lg', 'text-field', [
-        'get',
-        'name_zh',
+      map.setLayoutProperty("country-label-lg", "text-field", [
+        "get",
+        "name_zh",
       ]);
     }
   };
   const filterProvinces = provinces.slice();
   // for geojson format
-  filterProvinces.unshift('in', 'name');
+  filterProvinces.unshift("in", "name");
 
   const isBigMap = viewport.zoom <= 3;
   if (isBigMap && IS_CHINESE) {
@@ -73,7 +73,7 @@ const RunMap = ({
           id="prvince"
           type="fill"
           paint={{
-            'fill-color': PROVINCE_FILL_COLOR,
+            "fill-color": PROVINCE_FILL_COLOR,
           }}
           filter={filterProvinces}
         />
@@ -81,12 +81,12 @@ const RunMap = ({
           id="runs2"
           type="line"
           paint={{
-            'line-color': MAIN_COLOR,
-            'line-width': isBigMap ? 1 : 2,
+            "line-color": MAIN_COLOR,
+            "line-width": isBigMap ? 1 : 2,
           }}
           layout={{
-            'line-join': 'round',
-            'line-cap': 'round',
+            "line-join": "round",
+            "line-cap": "round",
           }}
         />
       </Source>

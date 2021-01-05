@@ -1,7 +1,7 @@
-import React from 'react';
-import { formatPace, titleForRun } from 'src/utils/utils';
-import { MAIN_COLOR } from 'src/utils/const';
-import styles from './style.module.scss';
+import React from "react";
+import { formatPace, titleForRun } from "src/utils/utils";
+import { MAIN_COLOR } from "src/utils/const";
+import styles from "./style.module.scss";
 
 const RunRow = ({ runs, run, locateActivity, runIndex, setRunIndex }) => {
   const distance = (run.distance / 1000.0).toFixed(1);
@@ -14,7 +14,7 @@ const RunRow = ({ runs, run, locateActivity, runIndex, setRunIndex }) => {
   // change click color
   const handleClick = (e, runs, run) => {
     const elementIndex = runs.indexOf(run);
-    e.target.parentElement.style.color = 'red';
+    e.target.parentElement.style.color = "red";
 
     const elements = document.getElementsByClassName(styles.runRow);
     if (runIndex !== -1 && elementIndex !== runIndex) {

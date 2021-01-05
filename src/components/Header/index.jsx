@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'gatsby';
-import { AVATAR, NAVS } from 'src/utils/const';
+import React from "react";
+import { Link } from "gatsby";
+import { AVATAR, NAVS } from "src/utils/const";
 
 const Header = ({ siteTitle }) => {
   if (!AVATAR && !NAVS) return null;
@@ -8,7 +8,7 @@ const Header = ({ siteTitle }) => {
     <>
       <nav
         className="db flex justify-between w-100 ph5-l"
-        style={{ marginTop: '3rem' }}
+        style={{ marginTop: "3rem" }}
       >
         {AVATAR && (
           <div className="dib w-25 v-mid">
@@ -16,7 +16,7 @@ const Header = ({ siteTitle }) => {
               <picture>
                 <img
                   className="dib w3 h3 br-100"
-                  alt={siteTitle || 'avatar'}
+                  alt={siteTitle || "avatar"}
                   src={AVATAR}
                 />
               </picture>

@@ -1,5 +1,5 @@
-import { useStaticQuery, graphql } from 'gatsby';
-import { locationForRun, titleForRun } from 'src/utils/utils';
+import { useStaticQuery, graphql } from "gatsby";
+import { locationForRun, titleForRun } from "src/utils/utils";
 
 const useActivities = () => {
   const { allActivitiesJson } = useStaticQuery(
@@ -32,7 +32,7 @@ const useActivities = () => {
   const provinces = new Set();
   const countries = new Set();
   let years = new Set();
-  let thisYear = '';
+  let thisYear = "";
 
   activities.forEach((run) => {
     const location = locationForRun(run);

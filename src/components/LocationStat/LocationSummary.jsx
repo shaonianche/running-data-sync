@@ -1,12 +1,12 @@
-import React from 'react';
-import Stat from 'src/components/Stat';
-import useActivities from 'src/hooks/useActivities';
+import React from "react";
+import Stat from "src/components/Stat";
+import useActivities from "src/hooks/useActivities";
 
 // only support China for now
 const LocationSummary = () => {
   const { years, countries, provinces, cities } = useActivities();
   return (
-    <div style={{ cursor: 'pointer' }}>
+    <div style={{ cursor: "pointer" }}>
       <section>
         {years && <Stat value={`${years.length}`} description=" 年里我跑过" />}
         {countries && <Stat value={countries.length} description=" 个国家" />}

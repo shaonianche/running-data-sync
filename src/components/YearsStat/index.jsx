@@ -1,7 +1,7 @@
-import React from 'react';
-import { INFO_MESSAGE } from 'src/utils/const';
-import YearStat from 'src/components/YearStat';
-import useActivities from 'src/hooks/useActivities';
+import React from "react";
+import { INFO_MESSAGE } from "src/utils/const";
+import YearStat from "src/components/YearStat";
+import useActivities from "src/hooks/useActivities";
 
 const YearsStat = ({ year, onClick }) => {
   const { years } = useActivities();
@@ -13,7 +13,7 @@ const YearsStat = ({ year, onClick }) => {
   // for short solution need to refactor
   return (
     <div className="fl w-100 w-30-l pb5 pr5-l">
-      <section className="pb4" style={{ paddingBottom: '0rem' }}>
+      <section className="pb4" style={{ paddingBottom: "0rem" }}>
         <p>
           {INFO_MESSAGE(years.length, year)}
           <br />

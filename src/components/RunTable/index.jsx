@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import RunRow from './RunRow';
-import styles from './style.module.scss';
-import { sortDateFunc, sortDateFuncReverse } from 'src/utils/utils';
-import { MAIN_COLOR } from 'src/utils/const';
+import React, { useState } from "react";
+import RunRow from "./RunRow";
+import styles from "./style.module.scss";
+import { sortDateFunc, sortDateFuncReverse } from "src/utils/utils";
+import { MAIN_COLOR } from "src/utils/const";
 
 const RunTable = ({
   runs,
@@ -11,30 +11,30 @@ const RunTable = ({
   runIndex,
   setRunIndex,
 }) => {
-  const [sortFuncInfo, setSortFuncInfo] = useState('');
+  const [sortFuncInfo, setSortFuncInfo] = useState("");
   // TODO refactor?
   const sortKMFunc = (a, b) =>
-    sortFuncInfo === 'KM' ? a.distance - b.distance : b.distance - a.distance;
+    sortFuncInfo === "KM" ? a.distance - b.distance : b.distance - a.distance;
   const sortPaceFunc = (a, b) =>
-    sortFuncInfo === 'Pace'
+    sortFuncInfo === "Pace"
       ? a.average_speed - b.average_speed
       : b.average_speed - a.average_speed;
   const sortBPMFunc = (a, b) =>
-    sortFuncInfo === 'BPM'
+    sortFuncInfo === "BPM"
       ? a.average_heartrate - b.average_heartrate
       : b.average_heartrate - a.average_heartrate;
   const sortDateFuncClick =
-    sortFuncInfo === 'Date' ? sortDateFunc : sortDateFuncReverse;
+    sortFuncInfo === "Date" ? sortDateFunc : sortDateFuncReverse;
   const sortFuncMap = new Map([
-    ['KM', sortKMFunc],
-    ['Pace', sortPaceFunc],
-    ['BPM', sortBPMFunc],
-    ['Date', sortDateFuncClick],
+    ["KM", sortKMFunc],
+    ["Pace", sortPaceFunc],
+    ["BPM", sortBPMFunc],
+    ["Date", sortDateFuncClick],
   ]);
   const handleClick = (e) => {
     const funcName = e.target.innerHTML;
     if (sortFuncInfo === funcName) {
-      setSortFuncInfo('');
+      setSortFuncInfo("");
     } else {
       setSortFuncInfo(funcName);
     }

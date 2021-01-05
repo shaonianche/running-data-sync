@@ -1,10 +1,10 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Helmet } from 'react-helmet';
-import useSiteMetadata from 'src/hooks/useSiteMetadata';
-import Header from 'src/components/Header';
-import 'src/styles/index.scss';
-import styles from './style.module.scss';
+import React from "react";
+import PropTypes from "prop-types";
+import { Helmet } from "react-helmet";
+import useSiteMetadata from "src/hooks/useSiteMetadata";
+import Header from "src/components/Header";
+import "src/styles/index.scss";
+import styles from "./style.module.scss";
 
 const Layout = ({ children }) => {
   const { title, description } = useSiteMetadata();
@@ -15,10 +15,10 @@ const Layout = ({ children }) => {
         title={title}
         meta={[
           {
-            name: 'description',
+            name: "description",
             content: description,
           },
-          { name: 'keywords', content: 'running' },
+          { name: "keywords", content: "running" },
         ]}
         bodyAttributes={{ class: styles.body }}
       >

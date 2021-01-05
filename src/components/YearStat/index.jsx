@@ -1,9 +1,9 @@
-import React from 'react';
-import useHover from 'src/hooks/useHover';
-import Stat from 'src/components/Stat';
-import { formatPace } from 'src/utils/utils';
-import useActivities from 'src/hooks/useActivities';
-import styles from './style.module.scss';
+import React from "react";
+import useHover from "src/hooks/useHover";
+import Stat from "src/components/Stat";
+import { formatPace } from "src/utils/utils";
+import useActivities from "src/hooks/useActivities";
+import styles from "./style.module.scss";
 
 const YearStat = ({ year, onClick }) => {
   let { activities: runs, years } = useActivities();
@@ -49,7 +49,7 @@ const YearStat = ({ year, onClick }) => {
   );
   return (
     <div
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: "pointer" }}
       onClick={() => onClick(year)}
       {...eventHandlers}
     >

@@ -1,5 +1,5 @@
-import React from 'react';
-import { intComma } from 'src/utils/utils';
+import React from "react";
+import { intComma } from "src/utils/utils";
 
 const Stat = ({ value, description, className, citySize, onClick }) => (
   <div className={`${className} pb2 w-100`} onClick={onClick}>

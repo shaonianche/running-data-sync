@@ -3,30 +3,30 @@ module.exports = {
     browser: true,
     es6: true,
   },
-  extends: ['airbnb'],
+  extends: ["airbnb"],
   globals: {
-    Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
+    Atomics: "readonly",
+    SharedArrayBuffer: "readonly",
   },
-  parser: 'babel-eslint',
+  parser: "babel-eslint",
   parserOptions: {
-    sourceType: 'module',
+    sourceType: "module",
     allowImportExportEverywhere: true,
   },
-  plugins: ['react'],
+  plugins: ["react"],
   rules: {
     indent: [
-      'error',
+      "error",
       2,
       {
-        ignoredNodes: ['TemplateLiteral'],
+        ignoredNodes: ["TemplateLiteral"],
       },
     ],
-    'template-curly-spacing': ['off'],
-    'import/no-unresolved': [
+    "template-curly-spacing": ["off"],
+    "import/no-unresolved": [
       2,
       {
-        ignore: ['src'],
+        ignore: ["src"],
         caseSensitive: false,
       },
     ],
