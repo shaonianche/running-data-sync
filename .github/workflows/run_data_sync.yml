@@ -23,6 +23,8 @@ env:
   ATHLETE: DuanFei
   TITLE: Running Data
   TITLE_GRID: Over 5km Runs
+  GITHUB_NAME: shaonianche
+  GITHUB_EMAIL: duanfei.job@gmail.com
 
 jobs:
   sync:
@@ -97,5 +99,5 @@ jobs:
           commit-message: "chore(nike): add new runs"
           files: activities src/static/ scripts/ assets/ GPX_OUT/
           rebase: 'true'
-          name: shaonianche
-          email: duanfei.job@gmail.com
+          name: ${{ env.GITHUB_NAME }}
+          email: ${{ env.GITHUB_EMAIL }}
