@@ -1,5 +1,3 @@
-const path = require("path");
-
 module.exports = {
   siteMetadata: {
     title: "Running page",
@@ -7,6 +5,19 @@ module.exports = {
     description: "Personal site and blog",
   },
   plugins: [
+    "gatsby-transformer-json",
+    {
+      resolve: "gatsby-source-filesystem",
+      options: {
+        path: "./src/static/",
+      },
+    },
+    {
+      resolve: "gatsby-alias-imports",
+      options: {
+        rootFolder: "./",
+      },
+    },
     "gatsby-plugin-react-helmet",
     {
       resolve: "gatsby-transformer-remark",
@@ -32,12 +43,12 @@ module.exports = {
       },
     },
     {
-      resolve: 'gatsby-plugin-react-svg',
+      resolve: "gatsby-plugin-react-svg",
       options: {
         rule: {
-          include: /assets/
-        }
-      }
+          include: /assets/,
+        },
+      },
     },
     "gatsby-transformer-sharp",
     "gatsby-plugin-sharp",

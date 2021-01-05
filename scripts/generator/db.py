@@ -1,23 +1,27 @@
-import time
 import datetime
+import random
+import string
+import time
 
 from geopy.geocoders import Nominatim
-from sqlalchemy import (
-    create_engine,
-    Column,
-    Float,
-    Integer,
-    Interval,
-    String,
-)
+from sqlalchemy import Column, Float, Integer, Interval, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-
+from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
+import random
+import string
+
+
+# random user name 8 letters
+def randomword():
+    letters = string.ascii_lowercase
+    return "".join(random.choice(letters) for i in range(8))
+
+
 # reverse the location (lan, lon) -> location detail
-g = Nominatim(user_agent="yihong0618")
+g = Nominatim(user_agent=randomword())
 
 
 ACTIVITY_KEYS = [
@@ -70,11 +74,13 @@ class Activity(Base):
 def update_or_create_activity(session, run_activity):
     created = False
     try:
-        activity = session.query(Activity).filter_by(run_id=int(run_activity.id)).first()
+        activity = (
+            session.query(Activity).filter_by(run_id=int(run_activity.id)).first()
+        )
         if not activity:
             start_point = run_activity.start_latlng
-            location_country = ""
-            if start_point:
+            location_country = getattr(run_activity, "location_country", "")
+            if not location_country and start_point:
                 try:
                     location_country = str(
                         g.reverse(f"{start_point.lat}, {start_point.lon}")
@@ -82,10 +88,13 @@ def update_or_create_activity(session, run_activity):
                 # limit (only for the first time)
                 except:
                     print("+++++++limit+++++++")
-                    time.sleep(60)
-                    location_country = str(
-                        g.reverse(f"{start_point.lat}, {start_point.lon}")
-                    )
+                    time.sleep(2)
+                    try:
+                        location_country = str(
+                            g.reverse(f"{start_point.lat}, {start_point.lon}")
+                        )
+                    except:
+                        pass
 
             activity = Activity(
                 run_id=run_activity.id,
