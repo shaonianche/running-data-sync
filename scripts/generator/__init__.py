@@ -3,8 +3,8 @@ import time
 import sys
 
 
-import arrow  # type: ignore
-import stravalib  # type: ignore
+import arrow
+import stravalib
 from sqlalchemy import func
 from gpxtrackposter import track_loader
 
@@ -82,6 +82,20 @@ class Generator:
 
         self.session.commit()
 
+    def sync_from_app(self, app_tracks):
+        if not app_tracks:
+            print("No tracks found.")
+            return
+        for t in app_tracks:
+            created = update_or_create_activity(self.session, t)
+            if created:
+                sys.stdout.write("+")
+            else:
+                sys.stdout.write(".")
+            sys.stdout.flush()
+
+        self.session.commit()
+
     def load(self):
         activities = self.session.query(Activity).order_by(Activity.start_date_local)
         activity_list = []
@@ -108,3 +122,12 @@ class Generator:
                 activity_list.append(activity.to_dict())
 
         return activity_list
+
+    def get_old_tracks_ids(self):
+        try:
+            activities = self.session.query(Activity).all()
+            return [str(a.run_id) for a in activities]
+        except Exception as e:
+            # pass the error
+            print(f"something wrong with {str(e)}")
+            return []

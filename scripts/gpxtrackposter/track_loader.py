@@ -107,9 +107,16 @@ class TrackLoader:
         # filter out tracks with length < min_length
         return [t for t in tracks if t.length >= self.min_length]
 
-    def load_tracks_from_db(self, sql_file):
+    def load_tracks_from_db(self, sql_file, is_grid=False):
         session = init_db(sql_file)
-        activities = session.query(Activity).order_by(Activity.start_date_local)
+        if is_grid:
+            activities = (
+                session.query(Activity)
+                .filter(Activity.summary_polyline != "")
+                .order_by(Activity.start_date_local)
+            )
+        else:
+            activities = session.query(Activity).order_by(Activity.start_date_local)
         tracks = []
         for activate in activities:
             t = Track()
@@ -218,6 +225,8 @@ class TrackLoader:
         if not os.path.isdir(base_dir):
             raise ParameterError(f"Not a directory: {base_dir}")
         for name in os.listdir(base_dir):
+            if name.startswith("."):
+                continue
             path_name = os.path.join(base_dir, name)
             if name.endswith(".gpx") and os.path.isfile(path_name):
                 yield path_name
