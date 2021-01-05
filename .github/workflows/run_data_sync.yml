@@ -59,7 +59,7 @@ jobs:
       - name: Run sync Nike to Strava(Run with nike data backup and show with strava)
         if: env.RUN_TYPE == 'nike_to_strava'
         run: |
-          python scripts/nike_to_strava_sync.py ${{ secrets.NIKE_REFRESH_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
+          python scripts/nike_to_strava_sync.py ${{ secrets.N_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
   
       - name: Run sync Runtastic script
         if: env.RUN_TYPE == 'runtastic'
@@ -72,7 +72,7 @@ jobs:
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
         run: |
-          python scripts/strava_sync.py ${{ secrets.STRAVA_CLIENT_ID }} ${{ secrets.STRAVA_CLIENT_SECRET }} ${{ secrets.STRAVA_CLIENT_REFRESH_TOKEN }}
+          python scripts/strava_sync.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
       - name: Run sync Garmin script
         if: env.RUN_TYPE == 'garmin'
         run: |
