@@ -19,7 +19,7 @@ on:
       - requirements.txt
 
 env:
-  RUN_TYPE: nike # support runtastic/strava/nike
+  RUN_TYPE: nike_to_strava 
   ATHLETE: DuanFei
   TITLE: Running Data
   TITLE_GRID: Over 5km Runs
@@ -55,11 +55,11 @@ jobs:
       - name: Run sync Nike script
         if: env.RUN_TYPE == 'nike'
         run: |
-          python scripts/nike_sync.py ${{ secrets.NIKE_REFRESH_TOKEN }}
+          python scripts/nike_sync.py ${{ secrets.N_TOKEN }}
       - name: Run sync Nike to Strava(Run with nike data backup and show with strava)
         if: env.RUN_TYPE == 'nike_to_strava'
         run: |
-          python scripts/nike_to_strava_sync.py ${{ secrets.NIKE_REFRESH_TOKEN }} ${{ secrets.STRAVA_CLIENT_ID }} ${{ secrets.STRAVA_CLIENT_SECRET }} ${{ secrets.STRAVA_CLIENT_REFRESH_TOKEN }}
+          python scripts/nike_to_strava_sync.py ${{ secrets.NIKE_REFRESH_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
   
       - name: Run sync Runtastic script
         if: env.RUN_TYPE == 'runtastic'
