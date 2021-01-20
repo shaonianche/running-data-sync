@@ -6871,16 +6871,16 @@ gatsby-page-utils@^0.6.1:
     lodash "^4.17.20"
     micromatch "^4.0.2"
 
-gatsby-plugin-feed@^2.5.5:
-  version "2.10.0"
-  resolved "https://registry.npm.taobao.org/gatsby-plugin-feed/download/gatsby-plugin-feed-2.10.0.tgz#c11b5daacfdc5f51bdd77ced12eacd50ea2d7821"
-  integrity sha1-wRtdqs/cX1G913ztEurNUOoteCE=
+gatsby-plugin-feed@^2.12.0:
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-feed/-/gatsby-plugin-feed-2.12.0.tgz#3013d0919b037f2aa56ae0661a98ab34d2b574c9"
+  integrity sha512-Ag53hbQfs3y5C4aV0EtC7udhB7eyjAvqcGY6NsbtEvjpEMWqgOXO5qIL+jyk9FZz5OacSQsMX2EodITb090RSA==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@hapi/joi" "^15.1.1"
     common-tags "^1.8.0"
     fs-extra "^8.1.0"
-    gatsby-plugin-utils "^0.6.0"
+    gatsby-plugin-utils "^0.8.0"
     lodash.merge "^4.6.2"
     rss "^1.2.2"
 
@@ -7012,6 +7012,13 @@ gatsby-plugin-utils@^0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/gatsby-plugin-utils/-/gatsby-plugin-utils-0.6.0.tgz#ec40fe484e1a46e81175adbf9cc4d6eee9c5dd35"
   integrity sha512-xoniyZtU1NLQJtb1JQaGQOjt7rriJcklfSaUnWfWojg0HmOxs+tm1ImpfHL9AOhNkVGim/YbQFXZqOQj/oUM+Q==
+  dependencies:
+    joi "^17.2.1"
+
+gatsby-plugin-utils@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-utils/-/gatsby-plugin-utils-0.8.0.tgz#2ecd848e6e3362ee929e496bc11528267d2fb96e"
+  integrity sha512-EQC1U7LQVHaI6jXMbx4ryvA8rV1yYrlyxwO2T4nuLUDOO1STUpKTYCH4ySOEtXi6f4P5v7NxgHkFoid6ayY9HA==
   dependencies:
     joi "^17.2.1"
 
