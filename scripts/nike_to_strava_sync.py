@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import argparse
 import os
 import time
@@ -15,9 +18,17 @@ def get_last_time(client):
     if there is no activities cause exception return 0
     """
     try:
-        activate = next(client.get_activities(limit=3))
-        # add 30 minutes to make sure after the end of this activate
-        end_date = activate.start_date + activate.elapsed_time + timedelta(minutes=30)
+        activity = None
+        activities = client.get_activities(limit=10)
+        # for else in python if you don't know please google it.
+        for a in activities:
+            if a.type == "Run":
+                activity = a
+                break
+        else:
+            return 0
+        # add 30 minutes to make sure after the end of this activity
+        end_date = activity.start_date + activity.elapsed_time + timedelta(minutes=30)
         return int(datetime.timestamp(end_date) * 1000)
     except:
         return 0
@@ -70,7 +81,7 @@ if __name__ == "__main__":
     last_time = get_last_time(client)
     files = get_to_generate_files(last_time)
     new_gpx_files = make_new_gpxs(files)
-    time.sleep(5)  # just wait
+    time.sleep(10)  # just wait
     if new_gpx_files:
         for f in new_gpx_files:
             upload_gpx(client, f)
