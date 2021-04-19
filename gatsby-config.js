@@ -3,7 +3,6 @@ module.exports = {
     title: 'Running page',
     siteUrl: 'https://run.duangfei.org',
     description: 'Personal site and blog',
-    favicon: './src/images/logo_favicon.ico',
   },
   plugins: [
     'gatsby-transformer-json',

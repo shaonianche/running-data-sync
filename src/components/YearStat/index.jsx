@@ -1,20 +1,18 @@
-import React from "react";
-import useHover from "src/hooks/useHover";
-import Stat from "src/components/Stat";
-import { formatPace } from "src/utils/utils";
-import useActivities from "src/hooks/useActivities";
-import styles from "./style.module.scss";
+import React from 'react';
+import Stat from 'src/components/Stat';
+import useActivities from 'src/hooks/useActivities';
+import useHover from 'src/hooks/useHover';
+import { formatPace } from 'src/utils/utils';
+import styles from './style.module.scss';
 
 const YearStat = ({ year, onClick }) => {
   let { activities: runs, years } = useActivities();
   // for hover
   const [hovered, eventHandlers] = useHover();
   // lazy Component
-  const YearSVG = React.lazy(() =>
-    import(`assets/year_${year}.svg`).catch(() => ({
-      default: () => <div />,
-    }))
-  );
+  const YearSVG = React.lazy(() => import(`assets/year_${year}.svg`).catch(() => ({
+    default: () => <div />,
+  })));
 
   if (years.includes(year)) {
     runs = runs.filter((run) => run.start_date_local.slice(0, 4) === year);
@@ -45,11 +43,11 @@ const YearStat = ({ year, onClick }) => {
   const avgPace = formatPace(pace / (runs.length - paceNullCount));
   const hasHeartRate = !(heartRate === 0);
   const avgHeartRate = (heartRate / (runs.length - heartRateNullCount)).toFixed(
-    0
+    0,
   );
   return (
     <div
-      style={{ cursor: "pointer" }}
+      style={{ cursor: 'pointer' }}
       onClick={() => onClick(year)}
       {...eventHandlers}
     >

@@ -1,39 +1,37 @@
-import React, { useState, useEffect } from "react";
-import Layout from "src/components/Layout";
-import SVGStat from "src/components/SVGStat";
-import YearsStat from "src/components/YearsStat";
-import LocationStat from "src/components/LocationStat";
-import RunTable from "src/components/RunTable";
-import RunMap from "src/components/RunMap";
-import useActivities from "src/hooks/useActivities";
+import React, { useEffect, useState } from 'react';
+import Layout from 'src/components/Layout';
+import LocationStat from 'src/components/LocationStat';
+import RunMap from 'src/components/RunMap';
+import RunTable from 'src/components/RunTable';
+import SVGStat from 'src/components/SVGStat';
+import YearsStat from 'src/components/YearsStat';
+import useActivities from 'src/hooks/useActivities';
+import { IS_CHINESE } from 'src/utils/const';
 import {
-  titleForShow,
-  scrollToMap,
-  geoJsonForRuns,
-  filterCityRuns,
-  filterYearRuns,
-  filterTitleRuns,
-  filterAndSortRuns,
-  sortDateFunc,
-  getBoundsForGeoData,
-} from "src/utils/utils";
-import { IS_CHINESE } from "src/utils/const";
+  filterAndSortRuns, filterCityRuns,
+
+  filterTitleRuns, filterYearRuns, geoJsonForRuns,
+
+  getBoundsForGeoData, scrollToMap,
+
+  sortDateFunc, titleForShow
+} from 'src/utils/utils';
 
 export default () => {
   const { activities, thisYear } = useActivities();
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
   const [runs, setActivity] = useState(
-    filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc)
+    filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc),
   );
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
   // for auto zoom
   const bounds = getBoundsForGeoData(geoData);
   const [intervalId, setIntervalId] = useState();
 
   const [viewport, setViewport] = useState({
-    width: "100%",
+    width: '100%',
     height: 400,
     ...bounds,
   });
@@ -49,21 +47,21 @@ export default () => {
     setYear(y);
     if (viewport.zoom > 3) {
       setViewport({
-        width: "100%",
+        width: '100%',
         height: 400,
         ...bounds,
       });
     }
-    changeByItem(y, "Year", filterYearRuns);
+    changeByItem(y, 'Year', filterYearRuns);
     clearInterval(intervalId);
   };
 
   const changeCity = (city) => {
-    changeByItem(city, "City", filterCityRuns);
+    changeByItem(city, 'City', filterCityRuns);
   };
 
   const changeTitle = (title) => {
-    changeByItem(title, "Title", filterTitleRuns);
+    changeByItem(title, 'Title', filterTitleRuns);
   };
 
   const locateActivity = (run) => {
@@ -75,7 +73,7 @@ export default () => {
 
   useEffect(() => {
     setViewport({
-      width: "100%",
+      width: '100%',
       height: 400,
       ...bounds,
     });
@@ -99,18 +97,18 @@ export default () => {
 
   // TODO refactor
   useEffect(() => {
-    if (year !== "Total") {
+    if (year !== 'Total') {
       return;
     }
-    let rectArr = document.querySelectorAll("rect");
+    let rectArr = document.querySelectorAll('rect');
     if (rectArr.length !== 0) {
       rectArr = Array.from(rectArr).slice(1);
     }
 
     rectArr.forEach((rect) => {
-      const rectColor = rect.getAttribute("fill");
+      const rectColor = rect.getAttribute('fill');
       // not run has no click event
-      if (rectColor !== "#444444") {
+      if (rectColor !== '#444444') {
         const runDate = rect.innerHTML;
         // ingnore the error
         const [runName] = runDate.match(/\d{4}-\d{1,2}-\d{1,2}/) || [];
@@ -122,14 +120,14 @@ export default () => {
         // maybe a better way?
         if (runLocate) {
           rect.addEventListener(
-            "click",
+            'click',
             () => locateActivity(runLocate),
-            false
+            false,
           );
         }
       }
     });
-    let polylineArr = document.querySelectorAll("polyline");
+    let polylineArr = document.querySelectorAll('polyline');
     if (polylineArr.length !== 0) {
       polylineArr = Array.from(polylineArr).slice(1);
     }
@@ -148,7 +146,7 @@ export default () => {
       // do not add the event next time
       // maybe a better way?
       if (run) {
-        polyline.addEventListener("click", () => locateActivity(run), false);
+        polyline.addEventListener('click', () => locateActivity(run), false);
       }
     });
   }, [year]);
@@ -179,7 +177,7 @@ export default () => {
             changeYear={changeYear}
             thisYear={thisYear}
           />
-          {year === "Total" ? (
+          {year === 'Total' ? (
             <SVGStat />
           ) : (
             <RunTable

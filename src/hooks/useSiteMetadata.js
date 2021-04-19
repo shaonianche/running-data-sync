@@ -9,7 +9,6 @@ const useSiteMetadata = () => {
             title
             siteUrl
             description
-            favicon
           }
         }
       }
