@@ -1,13 +1,13 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { Helmet } from "react-helmet";
-import useSiteMetadata from "src/hooks/useSiteMetadata";
-import Header from "src/components/Header";
-import "src/styles/index.scss";
-import styles from "./style.module.scss";
+import PropTypes from 'prop-types';
+import React from 'react';
+import { Helmet } from 'react-helmet';
+import Header from 'src/components/Header';
+import useSiteMetadata from 'src/hooks/useSiteMetadata';
+import 'src/styles/index.scss';
+import styles from './style.module.scss';
 
 const Layout = ({ children }) => {
-  const { title, description } = useSiteMetadata();
+  const { favicon, title, description } = useSiteMetadata();
 
   return (
     <>
@@ -15,13 +15,15 @@ const Layout = ({ children }) => {
         title={title}
         meta={[
           {
-            name: "description",
+            name: 'description',
             content: description,
           },
-          { name: "keywords", content: "running" },
+          { name: 'keywords', content: 'running' },
         ]}
         bodyAttributes={{ class: styles.body }}
+
       >
+        <link rel="icon" href={favicon} />
         <html lang="en" />
       </Helmet>
       <Header siteTitle={title} />
