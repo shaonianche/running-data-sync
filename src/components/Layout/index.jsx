@@ -23,10 +23,10 @@ const Layout = ({ children }) => {
         bodyAttributes={{ class: styles.body }}
 
       >
-        <link rel="icon" href={favicon} />
         <html lang="en" />
       </Helmet>
       <Header siteTitle={title} />
+      <link rel="shortcut icon" href={favicon} />
       <div className="pa3 pa5-l">{children}</div>
     </>
   );
