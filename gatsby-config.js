@@ -1,15 +1,38 @@
+
 module.exports = {
+  pathPrefix: '/',
   siteMetadata: {
+
     title: 'Running page',
     siteUrl: 'https://run.duangfei.org',
     description: 'Personal site and blog',
+    logo: 'https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg',
+    navLinks: [
+        {
+            name: 'Blog',
+            url: 'https://blog.duanfei.org',
+        },
+        {
+            name: 'About',
+            url: 'https://blog.duanfei.org/about',
+        },
+    ],
   },
+
   plugins: [
     'gatsby-transformer-json',
     {
       resolve: 'gatsby-source-filesystem',
       options: {
-        path: './src/static/',
+        name: 'data',
+        path: './src/static',
+      },
+    },
+    {
+      resolve: 'gatsby-source-filesystem',
+      options: {
+        name: 'images',
+        path: './src/images',
       },
     },
     {
@@ -50,8 +73,27 @@ module.exports = {
         },
       },
     },
-    'gatsby-transformer-sharp',
+    'gatsby-plugin-image',
     'gatsby-plugin-sharp',
+    {
+      resolve: 'gatsby-transformer-sharp',
+      options: {
+        // The option defaults to true
+        checkSupportedExtensions: true,
+      },
+    },
+    {
+      resolve: 'gatsby-plugin-manifest',
+      options: {
+        name: 'gatsby-starter-default',
+        short_name: 'starter',
+        start_url: '/',
+        background_color: '#e1e1e1',
+        theme_color: '#e1e1e1',
+        display: 'minimal-ui',
+        icon: 'src/images/logo-favicon.png', // This path is relative to the root of the site.
+      },
+    },
     'gatsby-plugin-sitemap',
     {
       resolve: 'gatsby-plugin-robots-txt',

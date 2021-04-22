@@ -9,6 +9,19 @@ const useSiteMetadata = () => {
             title
             siteUrl
             description
+            logo
+            navLinks {
+              name
+              url
+            }
+          }
+        }
+        allFile (filter: {sourceInstanceName: {eq: "images"}}) {
+          edges {
+            node {
+              name
+              publicURL
+            }
           }
         }
       }

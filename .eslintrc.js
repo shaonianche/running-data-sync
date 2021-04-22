@@ -13,7 +13,11 @@ module.exports = {
     sourceType: 'module',
     allowImportExportEverywhere: true,
   },
-  plugins: ['react'],
+  plugins: [
+    'jest',
+    'react',
+    'react-internal',
+  ],
   rules: {
     indent: [
       'error',

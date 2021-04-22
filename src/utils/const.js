@@ -10,7 +10,7 @@ const MUNICIPALITY_CITIES_ARR = [
 ];
 
 // IF you outside China please make sure IS_CHINESE = false
-const IS_CHINESE = true;
+const IS_CHINESE = false;
 const CHINESE_INFO_MESSAGE = (yearLength, year) => `我用 App 记录自己跑步 ${yearLength} 年了，下面列表展示的是 ${year} 的数据`;
 const ENGLISH_INFO_MESSAGE = (yearLength, year) => `Running Journey with ${yearLength} Years, the table shows year ${year} data`;
 
@@ -50,3 +50,4 @@ export const NAVS = [
 const nike = 'rgb(224,237,94)';
 export const MAIN_COLOR = nike;
 export const PROVINCE_FILL_COLOR = '#47b8e0';
+

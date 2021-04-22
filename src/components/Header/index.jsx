@@ -1,29 +1,30 @@
-import React from "react";
-import { Link } from "gatsby";
-import { AVATAR, NAVS } from "src/utils/const";
+import { Link } from 'gatsby';
+import React from 'react';
+import useSiteMetadata from 'src/hooks/useSiteMetadata';
+import { NAVS } from 'src/utils/const';
 
 const Header = ({ siteTitle }) => {
-  if (!AVATAR && !NAVS) return null;
+  const { logo,siteUrl } = useSiteMetadata();
+
+  if (!NAVS) return null;
   return (
     <>
       <nav
         className="db flex justify-between w-100 ph5-l"
-        style={{ marginTop: "3rem" }}
+        style={{ marginTop: '3rem' }}
       >
-        {AVATAR && (
-          <div className="dib w-25 v-mid">
-            <Link to="/" className="link dim">
-              <picture>
-                <img
-                  className="dib w3 h3 br-100"
-                  alt={siteTitle || "avatar"}
-                  src={AVATAR}
-                />
-              </picture>
-            </Link>
-          </div>
-        )}
-        {NAVS && (
+        <div className="dib w-25 v-mid">
+          <Link to={siteUrl} className="link dim">
+            <picture>
+              <img
+                className="dib w3 h3 br-100"
+                alt="logo"
+                src={logo}
+              />
+            </picture>
+          </Link>
+        </div>
+        {/* {NAVS && (
           <div className="dib w-75 v-mid tr">
             {NAVS.map((n, i) => (
               <a
@@ -35,10 +36,11 @@ const Header = ({ siteTitle }) => {
               </a>
             ))}
           </div>
-        )}
+        )}  */}
       </nav>
     </>
   );
 };
+
 
 export default Header;

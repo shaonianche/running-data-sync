@@ -17,6 +17,7 @@ import {
   sortDateFunc, titleForShow
 } from 'src/utils/utils';
 
+
 export default () => {
   const { activities, thisYear } = useActivities();
   const [year, setYear] = useState(thisYear);
@@ -151,11 +152,12 @@ export default () => {
     });
   }, [year]);
 
+  
   return (
     <Layout>
       <div className="mb5">
         <div className="w-100">
-          <h1 className="f1 fw9 i">Running</h1>
+          <h1 className="f1 fw9 i">Running page </h1>
         </div>
         {viewport.zoom <= 3 && IS_CHINESE ? (
           <LocationStat
