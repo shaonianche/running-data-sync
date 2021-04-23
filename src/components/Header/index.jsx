@@ -1,14 +1,12 @@
 import { Link } from 'gatsby';
 import React from 'react';
 import useSiteMetadata from 'src/hooks/useSiteMetadata';
-import { NAVS } from 'src/utils/const';
 
 const Header = ({ siteTitle }) => {
-  const { logo,siteUrl } = useSiteMetadata();
+  const { logo,siteUrl,navLinks } = useSiteMetadata();
 
-  if (!NAVS) return null;
   return (
-    <>
+    <div>
       <nav
         className="db flex justify-between w-100 ph5-l"
         style={{ marginTop: '3rem' }}
@@ -24,21 +22,19 @@ const Header = ({ siteTitle }) => {
             </picture>
           </Link>
         </div>
-        {/* {NAVS && (
-          <div className="dib w-75 v-mid tr">
-            {NAVS.map((n, i) => (
+        <div className="dib w-75 v-mid tr">
+            {navLinks.map((n, i) => (
               <a
-                key={i}
-                href={n.link}
+                key={i.name}
+                href={n.url}
                 className="light-gray link dim f6 f5-l mr3 mr4-l"
               >
-                {n.text}
+                {n.name}
               </a>
             ))}
-          </div>
-        )}  */}
+        </div>
       </nav>
-    </>
+    </div>
   );
 };
 
