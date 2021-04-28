@@ -1,22 +1,18 @@
 import argparse
 import base64
 import json
+import os
 import time
 import zlib
-import os
 from collections import namedtuple
 from datetime import datetime, timedelta
 
+import gpxpy
 import polyline
 import pytz
-import gpxpy
 import requests
 
-from config import (
-    GPX_FOLDER,
-    JSON_FILE,
-    SQL_FILE,
-)
+from config import GPX_FOLDER, JSON_FILE, SQL_FILE
 from generator import Generator
 
 start_point = namedtuple("start_point", "lat lon")

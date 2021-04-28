@@ -5,15 +5,16 @@ Copy most code from https://github.com/cyberjunky/python-garminconnect
 """
 
 import argparse
+import asyncio
 import logging
 import os
-import time
 import re
 import sys
+import time
 import traceback
-import asyncio
-import httpx
+
 import aiofiles
+import httpx
 
 from config import GPX_FOLDER, JSON_FILE, SQL_FILE, config
 from utils import make_activities_file

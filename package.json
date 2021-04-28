@@ -57,9 +57,9 @@
     "data:analysis": "python3 scripts/gen_svg.py --from-db --type github --output assets/github.svg",
     "build": "gatsby build",
     "develop": "gatsby develop",
-    "serve": "gatsby serve",
-    "format": "prettier --write '**/*.js' '**/*.jsx' '**/*.md' '**/*.scss'",
-    "check": "prettier --check '**/*.js' '**/*.jsx' '**/*.md' '**/*.scss'",
+    "lint:css": "stylelint '**/*.{css,scss}'",
+    "prettier": "prettier '**/*.{js,css,scss,html,hbs,md}' --write",
+    "lint:js": "eslint .",
     "test": "node test.js",
     "ci": "yarn run check && yarn run build && yarn run test"
   },
@@ -71,6 +71,9 @@
     "url": "https://github.com/shaonianche/running-data-sync"
   },
   "devDependencies": {
+    "@zestia/eslint-config": "^4.0.3",
+    "@zestia/prettier-config": "^1.0.4",
+    "@zestia/stylelint-config": "^2.0.47",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.13.0",
     "eslint-config-airbnb": "^18.2.1",

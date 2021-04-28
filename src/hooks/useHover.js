@@ -11,7 +11,7 @@ const useHover = () => {
     onMouseOut() {
       clearTimeout(timer);
       setHovered(false);
-    },
+    }
   };
 
   return [hovered, eventHandlers];

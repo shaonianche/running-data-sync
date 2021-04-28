@@ -14,10 +14,13 @@ const Layout = ({ children }) => {
         <title>{title}</title>
         <meta name="description" content={description} />
         <meta name="keywords" content="running" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-      </Helmet >
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+      </Helmet>
       <Header siteTitle={title} />
-      <div className="pa3 pa5-l" style={{ paddingTop: '2rem' }} >
+      <div className="pa3 pa5-l" style={{ paddingTop: '2rem' }}>
         {children}
       </div>
     </div>

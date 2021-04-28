@@ -16,7 +16,7 @@ const useSiteMetadata = () => {
             }
           }
         }
-        allFile (filter: {sourceInstanceName: {eq: "images"}}) {
+        allFile(filter: { sourceInstanceName: { eq: "images" } }) {
           edges {
             node {
               name
@@ -25,7 +25,7 @@ const useSiteMetadata = () => {
           }
         }
       }
-    `,
+    `
   );
   return site.siteMetadata;
 };

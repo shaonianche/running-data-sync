@@ -14,7 +14,7 @@ import gpxpy.gpx
 import httpx
 
 from config import (
-    run_map,
+    BASE_TIMEZONE,
     BASE_URL,
     GPX_FOLDER,
     JSON_FILE,
@@ -22,10 +22,10 @@ from config import (
     OUTPUT_DIR,
     SQL_FILE,
     TOKEN_REFRESH_URL,
-    BASE_TIMEZONE,
+    run_map,
 )
-from utils import make_activities_file, adjust_time
 from generator import Generator
+from utils import adjust_time, make_activities_file
 
 # logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nike_sync")

@@ -8,22 +8,23 @@ import YearsStat from 'src/components/YearsStat';
 import useActivities from 'src/hooks/useActivities';
 import { IS_CHINESE } from 'src/utils/const';
 import {
-  filterAndSortRuns, filterCityRuns,
-
-  filterTitleRuns, filterYearRuns, geoJsonForRuns,
-
-  getBoundsForGeoData, scrollToMap,
-
-  sortDateFunc, titleForShow
+  filterAndSortRuns,
+  filterCityRuns,
+  filterTitleRuns,
+  filterYearRuns,
+  geoJsonForRuns,
+  getBoundsForGeoData,
+  scrollToMap,
+  sortDateFunc,
+  titleForShow
 } from 'src/utils/utils';
-
 
 export default () => {
   const { activities, thisYear } = useActivities();
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
   const [runs, setActivity] = useState(
-    filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc),
+    filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc)
   );
   const [title, setTitle] = useState('');
   const [geoData, setGeoData] = useState(geoJsonForRuns(runs));
@@ -34,8 +35,9 @@ export default () => {
   const [viewport, setViewport] = useState({
     width: '100%',
     height: 400,
-    ...bounds,
+    ...bounds
   });
+
   const changeByItem = (item, name, func) => {
     scrollToMap();
     setActivity(filterAndSortRuns(activities, item, func, sortDateFunc));
@@ -46,13 +48,15 @@ export default () => {
   const changeYear = (y) => {
     // default year
     setYear(y);
+
     if (viewport.zoom > 3) {
       setViewport({
         width: '100%',
         height: 400,
-        ...bounds,
+        ...bounds
       });
     }
+
     changeByItem(y, 'Year', filterYearRuns);
     clearInterval(intervalId);
   };
@@ -76,7 +80,7 @@ export default () => {
     setViewport({
       width: '100%',
       height: 400,
-      ...bounds,
+      ...bounds
     });
   }, [geoData]);
 
@@ -89,6 +93,7 @@ export default () => {
       if (i >= runsNum) {
         clearInterval(id);
       }
+
       const tempRuns = runs.slice(0, i);
       setGeoData(geoJsonForRuns(tempRuns));
       i += sliceNume;
@@ -101,13 +106,16 @@ export default () => {
     if (year !== 'Total') {
       return;
     }
+
     let rectArr = document.querySelectorAll('rect');
+
     if (rectArr.length !== 0) {
       rectArr = Array.from(rectArr).slice(1);
     }
 
     rectArr.forEach((rect) => {
       const rectColor = rect.getAttribute('fill');
+
       // not run has no click event
       if (rectColor !== '#444444') {
         const runDate = rect.innerHTML;
@@ -123,22 +131,24 @@ export default () => {
           rect.addEventListener(
             'click',
             () => locateActivity(runLocate),
-            false,
+            false
           );
         }
       }
     });
     let polylineArr = document.querySelectorAll('polyline');
+
     if (polylineArr.length !== 0) {
       polylineArr = Array.from(polylineArr).slice(1);
     }
+
     // add picked runs svg event
     polylineArr.forEach((polyline) => {
       // not run has no click event
       const runDate = polyline.innerHTML;
       // `${+thisYear + 1}` ==> 2021
       const [runName] = runDate.match(/\d{4}-\d{1,2}-\d{1,2}/) || [
-        `${+thisYear + 1}`,
+        `${+thisYear + 1}`
       ];
       const run = runs
         .filter((r) => r.start_date_local.slice(0, 10) === runName)
@@ -152,7 +162,6 @@ export default () => {
     });
   }, [year]);
 
-  
   return (
     <Layout>
       <div className="mb5">

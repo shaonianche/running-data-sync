@@ -1,17 +1,17 @@
 const chinaGeojson = {
-  type: "FeatureCollection",
+  type: 'FeatureCollection',
   features: [
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "65",
-        size: "550",
-        name: "新疆维吾尔自治区",
+        id: '65',
+        size: '550',
+        name: '新疆维吾尔自治区',
         cp: [84.9023, 42.148],
-        childNum: 18,
+        childNum: 18
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [96.416, 42.7588],
@@ -164,22 +164,22 @@ const chinaGeojson = {
             [95.5371, 43.9014],
             [95.8887, 43.2422],
             [96.3281, 42.9346],
-            [96.416, 42.7588],
-          ],
-        ],
-      },
+            [96.416, 42.7588]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "54",
-        size: "550",
-        name: "西藏自治区",
+        id: '54',
+        size: '550',
+        name: '西藏自治区',
         cp: [87.8695, 31.6846],
-        childNum: 7,
+        childNum: 7
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [79.0137, 34.3213],
@@ -328,22 +328,22 @@ const chinaGeojson = {
             [78.6621, 33.6621],
             [78.6621, 34.1016],
             [78.9258, 34.1455],
-            [79.0137, 34.3213],
-          ],
-        ],
-      },
+            [79.0137, 34.3213]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "15",
-        size: "450",
-        name: "内蒙古自治区",
+        id: '15',
+        size: '450',
+        name: '内蒙古自治区',
         cp: [112.5977, 46.3408],
-        childNum: 12,
+        childNum: 12
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [97.207, 42.8027],
@@ -570,22 +570,22 @@ const chinaGeojson = {
             [97.4707, 41.4844],
             [97.8223, 41.6162],
             [97.8223, 41.748],
-            [97.207, 42.8027],
-          ],
-        ],
-      },
+            [97.207, 42.8027]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "63",
-        size: "800",
-        name: "青海省",
+        id: '63',
+        size: '800',
+        name: '青海省',
         cp: [95.2402, 35.4199],
-        childNum: 8,
+        childNum: 8
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [89.7363, 36.0791],
@@ -722,22 +722,22 @@ const chinaGeojson = {
             [89.7363, 35.7715],
             [89.4727, 35.9033],
             [89.3848, 36.0352],
-            [89.7363, 36.0791],
-          ],
-        ],
-      },
+            [89.7363, 36.0791]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "51",
-        size: "900",
-        name: "四川省",
+        id: '51',
+        size: '900',
+        name: '四川省',
         cp: [101.9199, 30.1904],
-        childNum: 21,
+        childNum: 21
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [101.7773, 33.5303],
@@ -867,22 +867,22 @@ const chinaGeojson = {
             [101.6016, 33.1348],
             [101.7773, 33.2227],
             [101.6895, 33.3105],
-            [101.7773, 33.5303],
-          ],
-        ],
-      },
+            [101.7773, 33.5303]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "23",
-        size: "700",
-        name: "黑龙江省",
+        id: '23',
+        size: '700',
+        name: '黑龙江省',
         cp: [126.1445, 48.7156],
-        childNum: 13,
+        childNum: 13
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [121.4648, 53.3496],
@@ -1005,22 +1005,22 @@ const chinaGeojson = {
             [121.6406, 52.4268],
             [121.2012, 52.5586],
             [121.8164, 53.042],
-            [121.4648, 53.3496],
-          ],
-        ],
-      },
+            [121.4648, 53.3496]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "62",
-        size: "690",
-        name: "甘肃省",
+        id: '62',
+        size: '690',
+        name: '甘肃省',
         cp: [99.7129, 38.166],
-        childNum: 14,
+        childNum: 14
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [96.416, 42.7148],
@@ -1197,22 +1197,22 @@ const chinaGeojson = {
             [96.2402, 42.2314],
             [96.0645, 42.3193],
             [95.9766, 42.4951],
-            [96.416, 42.7148],
-          ],
-        ],
-      },
+            [96.416, 42.7148]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "53",
-        size: "1200",
-        name: "云南省",
+        id: '53',
+        size: '1200',
+        name: '云南省',
         cp: [101.0652, 25.1807],
-        childNum: 16,
+        childNum: 16
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [98.1738, 28.125],
@@ -1340,22 +1340,22 @@ const chinaGeojson = {
             [98.7012, 27.5098],
             [98.5254, 27.6416],
             [98.3496, 27.5098],
-            [98.1738, 28.125],
-          ],
-        ],
-      },
+            [98.1738, 28.125]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "45",
-        size: "1450",
-        name: "广西壮族自治区",
+        id: '45',
+        size: '1450',
+        name: '广西壮族自治区',
         cp: [107.7813, 23.6426],
-        childNum: 14,
+        childNum: 14
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [104.502, 24.7412],
@@ -1442,22 +1442,22 @@ const chinaGeojson = {
             [105.0293, 24.4336],
             [104.7656, 24.4775],
             [104.6777, 24.3457],
-            [104.502, 24.7412],
-          ],
-        ],
-      },
+            [104.502, 24.7412]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "43",
-        size: "1700",
-        name: "湖南省",
+        id: '43',
+        size: '1700',
+        name: '湖南省',
         cp: [111.5332, 27.3779],
-        childNum: 14,
+        childNum: 14
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [109.248, 28.4766],
@@ -1534,22 +1534,22 @@ const chinaGeojson = {
             [109.4238, 27.5977],
             [109.3359, 27.9053],
             [109.3359, 28.2568],
-            [109.248, 28.4766],
-          ],
-        ],
-      },
+            [109.248, 28.4766]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "61",
-        size: "1150",
-        name: "陕西省",
+        id: '61',
+        size: '1150',
+        name: '陕西省',
         cp: [109.5996, 35.7396],
-        childNum: 10,
+        childNum: 10
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [105.4688, 32.915],
@@ -1635,22 +1635,22 @@ const chinaGeojson = {
             [106.084, 32.7393],
             [106.084, 32.8711],
             [105.5566, 32.7393],
-            [105.4688, 32.915],
-          ],
-        ],
-      },
+            [105.4688, 32.915]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "44",
-        size: "1600",
-        name: "广东省",
+        id: '44',
+        size: '1600',
+        name: '广东省',
         cp: [113.4668, 22.8076],
-        childNum: 21,
+        childNum: 21
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [109.7754, 21.4014],
@@ -1736,7 +1736,7 @@ const chinaGeojson = {
             [109.8633, 20.3027],
             [109.5996, 20.918],
             [109.7754, 21.4014],
-            [109.7754, 21.4014],
+            [109.7754, 21.4014]
           ],
           [
             [113.5986, 22.1649],
@@ -1744,22 +1744,22 @@ const chinaGeojson = {
             [113.5547, 22.11],
             [113.5437, 22.2034],
             [113.5767, 22.2034],
-            [113.5986, 22.1649],
-          ],
-        ],
-      },
+            [113.5986, 22.1649]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "22",
-        size: "1120",
-        name: "吉林省",
+        id: '22',
+        size: '1120',
+        name: '吉林省',
         cp: [125.7746, 43.5938],
-        childNum: 9,
+        childNum: 9
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [123.2227, 46.2305],
@@ -1840,22 +1840,22 @@ const chinaGeojson = {
             [122.4316, 45.8789],
             [122.6953, 45.7031],
             [122.7832, 46.0107],
-            [123.2227, 46.2305],
-          ],
-        ],
-      },
+            [123.2227, 46.2305]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "13",
-        size: "1300",
-        name: "河北省",
+        id: '13',
+        size: '1300',
+        name: '河北省',
         cp: [115.4004, 39.4688],
-        childNum: 11,
+        childNum: 11
       },
       geometry: {
-        type: "MultiPolygon",
+        type: 'MultiPolygon',
         coordinates: [
           [
             [
@@ -1960,8 +1960,8 @@ const chinaGeojson = {
               [113.8184, 38.9355],
               [113.9063, 39.0234],
               [114.3457, 39.0674],
-              [114.5215, 39.5068],
-            ],
+              [114.5215, 39.5068]
+            ]
           ],
           [
             [
@@ -1971,23 +1971,23 @@ const chinaGeojson = {
               [116.8945, 39.6826],
               [116.8945, 39.8145],
               [116.8066, 39.9902],
-              [117.2461, 40.0781],
-            ],
-          ],
-        ],
-      },
+              [117.2461, 40.0781]
+            ]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "42",
-        size: "1500",
-        name: "湖北省",
+        id: '42',
+        size: '1500',
+        name: '湖北省',
         cp: [112.2363, 31.1572],
-        childNum: 17,
+        childNum: 17
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [110.2148, 31.1572],
@@ -2066,22 +2066,22 @@ const chinaGeojson = {
             [109.4238, 30.542],
             [109.8633, 30.8936],
             [110.0391, 30.8057],
-            [110.2148, 31.1572],
-          ],
-        ],
-      },
+            [110.2148, 31.1572]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "52",
-        size: "2000",
-        name: "贵州省",
+        id: '52',
+        size: '2000',
+        name: '贵州省',
         cp: [106.6113, 26.9385],
-        childNum: 9,
+        childNum: 9
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [104.1504, 27.2461],
@@ -2162,22 +2162,22 @@ const chinaGeojson = {
             [103.7109, 26.9824],
             [103.623, 27.0264],
             [103.8867, 27.4219],
-            [104.1504, 27.2461],
-          ],
-        ],
-      },
+            [104.1504, 27.2461]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "37",
-        size: "1500",
-        name: "山东省",
+        id: '37',
+        size: '1500',
+        name: '山东省',
         cp: [118.7402, 36.4307],
-        childNum: 17,
+        childNum: 17
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [115.4883, 36.167],
@@ -2244,22 +2244,22 @@ const chinaGeojson = {
             [115.4883, 35.7275],
             [116.1035, 36.0791],
             [115.3125, 35.8154],
-            [115.4883, 36.167],
-          ],
-        ],
-      },
+            [115.4883, 36.167]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "36",
-        size: "1700",
-        name: "江西省",
+        id: '36',
+        size: '1700',
+        name: '江西省',
         cp: [116.0156, 27.29],
-        childNum: 11,
+        childNum: 11
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [114.2578, 28.3447],
@@ -2323,22 +2323,22 @@ const chinaGeojson = {
             [113.6426, 27.3779],
             [113.6426, 27.5977],
             [113.7305, 27.9492],
-            [114.2578, 28.3447],
-          ],
-        ],
-      },
+            [114.2578, 28.3447]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "41",
-        size: "1700",
-        name: "河南省",
+        id: '41',
+        size: '1700',
+        name: '河南省',
         cp: [113.0668, 33.8818],
-        childNum: 17,
+        childNum: 17
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [110.3906, 34.585],
@@ -2403,22 +2403,22 @@ const chinaGeojson = {
             [110.6543, 33.8379],
             [110.6543, 34.1455],
             [110.4785, 34.2334],
-            [110.3906, 34.585],
-          ],
-        ],
-      },
+            [110.3906, 34.585]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "21",
-        size: "1500",
-        name: "辽宁省",
+        id: '21',
+        size: '1500',
+        name: '辽宁省',
         cp: [122.0438, 41.0889],
-        childNum: 14,
+        childNum: 14
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [119.2676, 41.3086],
@@ -2473,22 +2473,22 @@ const chinaGeojson = {
             [119.5313, 40.5615],
             [119.2676, 40.5176],
             [118.8281, 40.8252],
-            [119.2676, 41.3086],
-          ],
-        ],
-      },
+            [119.2676, 41.3086]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "14",
-        size: "1450",
-        name: "山西省",
+        id: '14',
+        size: '1450',
+        name: '山西省',
         cp: [112.4121, 37.6611],
-        childNum: 11,
+        childNum: 11
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [110.918, 38.7158],
@@ -2542,22 +2542,22 @@ const chinaGeojson = {
             [110.4785, 37.9688],
             [110.4785, 38.1885],
             [110.8301, 38.4961],
-            [110.918, 38.7158],
-          ],
-        ],
-      },
+            [110.918, 38.7158]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "34",
-        size: "1700",
-        name: "安徽省",
+        id: '34',
+        size: '1700',
+        name: '安徽省',
         cp: [117.2461, 32.0361],
-        childNum: 17,
+        childNum: 17
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [116.6309, 33.9258],
@@ -2627,22 +2627,22 @@ const chinaGeojson = {
             [115.6641, 34.0576],
             [116.0156, 33.9697],
             [116.1914, 33.7061],
-            [116.6309, 33.9258],
-          ],
-        ],
-      },
+            [116.6309, 33.9258]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "35",
-        size: "2000",
-        name: "福建省",
+        id: '35',
+        size: '2000',
+        name: '福建省',
         cp: [118.3008, 25.9277],
-        childNum: 9,
+        childNum: 9
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [118.4766, 28.3008],
@@ -2700,22 +2700,22 @@ const chinaGeojson = {
             [117.5098, 27.9932],
             [117.7734, 27.8174],
             [118.3008, 28.0811],
-            [118.4766, 28.3008],
-          ],
-        ],
-      },
+            [118.4766, 28.3008]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "33",
-        size: "2100",
-        name: "浙江省",
+        id: '33',
+        size: '2100',
+        name: '浙江省',
         cp: [120.498, 29.0918],
-        childNum: 11,
+        childNum: 11
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [118.2129, 29.3994],
@@ -2764,22 +2764,22 @@ const chinaGeojson = {
             [118.3887, 28.7842],
             [118.0371, 29.0479],
             [118.0371, 29.1797],
-            [118.2129, 29.3994],
-          ],
-        ],
-      },
+            [118.2129, 29.3994]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "32",
-        size: "1950",
-        name: "江苏省",
+        id: '32',
+        size: '1950',
+        name: '江苏省',
         cp: [118.8586, 32.915],
-        childNum: 13,
+        childNum: 13
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [116.3672, 34.6289],
@@ -2837,22 +2837,22 @@ const chinaGeojson = {
             [117.5977, 34.0137],
             [117.1582, 34.0576],
             [116.8945, 34.4092],
-            [116.3672, 34.6289],
-          ],
-        ],
-      },
+            [116.3672, 34.6289]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "50",
-        size: "2380",
-        name: "重庆市",
+        id: '50',
+        size: '2380',
+        name: '重庆市',
         cp: [107.7539, 30.1904],
-        childNum: 40,
+        childNum: 40
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [108.5449, 31.6846],
@@ -2920,22 +2920,22 @@ const chinaGeojson = {
             [107.4902, 30.8496],
             [107.9297, 30.8496],
             [108.1934, 31.5088],
-            [108.5449, 31.6846],
-          ],
-        ],
-      },
+            [108.5449, 31.6846]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "64",
-        size: "2100",
-        name: "宁夏回族自治区",
+        id: '64',
+        size: '2100',
+        name: '宁夏回族自治区',
         cp: [105.9961, 37.3096],
-        childNum: 5,
+        childNum: 5
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [104.3262, 37.4414],
@@ -2976,22 +2976,22 @@ const chinaGeojson = {
             [104.8535, 37.2217],
             [104.5898, 37.2217],
             [104.5898, 37.4414],
-            [104.3262, 37.4414],
-          ],
-        ],
-      },
+            [104.3262, 37.4414]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "46",
-        size: "4500",
-        name: "海南省",
+        id: '46',
+        size: '4500',
+        name: '海南省',
         cp: [109.9512, 19.2041],
-        childNum: 18,
+        childNum: 18
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [108.6328, 19.3799],
@@ -3012,22 +3012,22 @@ const chinaGeojson = {
             [109.6875, 18.1055],
             [108.9844, 18.2813],
             [108.6328, 18.457],
-            [108.6328, 19.3799],
-          ],
-        ],
-      },
+            [108.6328, 19.3799]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "71",
-        size: "3000",
-        name: "台湾省",
+        id: '71',
+        size: '3000',
+        name: '台湾省',
         cp: [120.0254, 23.5986],
-        childNum: 1,
+        childNum: 1
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [121.9043, 25.0488],
@@ -3045,22 +3045,22 @@ const chinaGeojson = {
             [120.1465, 23.6865],
             [121.0254, 25.0488],
             [121.5527, 25.3125],
-            [121.9043, 25.0488],
-          ],
-        ],
-      },
+            [121.9043, 25.0488]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "11",
-        size: "5000",
-        name: "北京市",
+        id: '11',
+        size: '5000',
+        name: '北京市',
         cp: [116.4551, 40.2539],
-        childNum: 19,
+        childNum: 19
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [117.4219, 40.21],
@@ -3086,22 +3086,22 @@ const chinaGeojson = {
             [116.9824, 40.6934],
             [117.4219, 40.6494],
             [117.2461, 40.5176],
-            [117.4219, 40.21],
-          ],
-        ],
-      },
+            [117.4219, 40.21]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "12",
-        size: "5000",
-        name: "天津市",
+        id: '12',
+        size: '5000',
+        name: '天津市',
         cp: [117.4219, 39.4189],
-        childNum: 18,
+        childNum: 18
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [116.8066, 39.5947],
@@ -3126,22 +3126,22 @@ const chinaGeojson = {
             [116.7188, 38.8037],
             [116.7188, 38.9355],
             [116.8945, 39.1113],
-            [116.8066, 39.5947],
-          ],
-        ],
-      },
+            [116.8066, 39.5947]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "31",
-        size: "7500",
-        name: "上海市",
+        id: '31',
+        size: '7500',
+        name: '上海市',
         cp: [121.4648, 31.2891],
-        childNum: 19,
+        childNum: 19
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [120.9375, 31.0254],
@@ -3153,22 +3153,22 @@ const chinaGeojson = {
             [121.9043, 31.1572],
             [121.9922, 30.8057],
             [121.2891, 30.6738],
-            [120.9375, 31.0254],
-          ],
-        ],
-      },
+            [120.9375, 31.0254]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "81",
-        size: "18000",
-        name: "香港特别行政区",
+        id: '81',
+        size: '18000',
+        name: '香港特别行政区',
         cp: [114.1178, 22.3242],
-        childNum: 1,
+        childNum: 1
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [114.6094, 22.4121],
@@ -3181,22 +3181,22 @@ const chinaGeojson = {
             [114.3457, 22.5439],
             [114.4336, 22.5439],
             [114.4336, 22.4121],
-            [114.6094, 22.4121],
-          ],
-        ],
-      },
+            [114.6094, 22.4121]
+          ]
+        ]
+      }
     },
     {
-      type: "Feature",
+      type: 'Feature',
       properties: {
-        id: "82",
-        size: "27",
-        name: "澳门特别行政区",
+        id: '82',
+        size: '27',
+        name: '澳门特别行政区',
         cp: [111.5547, 22.1484],
-        childNum: 1,
+        childNum: 1
       },
       geometry: {
-        type: "Polygon",
+        type: 'Polygon',
         coordinates: [
           [
             [113.5986, 22.1649],
@@ -3204,12 +3204,12 @@ const chinaGeojson = {
             [113.5547, 22.11],
             [113.5437, 22.2034],
             [113.5767, 22.2034],
-            [113.5986, 22.1649],
-          ],
-        ],
-      },
-    },
-  ],
+            [113.5986, 22.1649]
+          ]
+        ]
+      }
+    }
+  ]
 };
 
 export { chinaGeojson };
