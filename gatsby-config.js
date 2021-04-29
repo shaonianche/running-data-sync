@@ -1,7 +1,7 @@
 module.exports = {
   pathPrefix: '/',
   siteMetadata: {
-    title: 'Running page',
+    siteTitle: 'Running',
     siteUrl: 'https://run.duangfei.org',
     description: 'Personal site and blog',
     logo:

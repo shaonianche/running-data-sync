@@ -6,6 +6,7 @@ import RunTable from 'src/components/RunTable';
 import SVGStat from 'src/components/SVGStat';
 import YearsStat from 'src/components/YearsStat';
 import useActivities from 'src/hooks/useActivities';
+import useSiteMetadata from 'src/hooks/useSiteMetadata';
 import { IS_CHINESE } from 'src/utils/const';
 import {
   filterAndSortRuns,
@@ -20,6 +21,7 @@ import {
 } from 'src/utils/utils';
 
 export default () => {
+  const { siteTitle } = useSiteMetadata();
   const { activities, thisYear } = useActivities();
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
@@ -166,7 +168,7 @@ export default () => {
     <Layout>
       <div className="mb5">
         <div className="w-100">
-          <h1 className="f1 fw9 i">Running page </h1>
+          <h1 className="f1 fw9 i">{siteTitle}</h1>
         </div>
         {viewport.zoom <= 3 && IS_CHINESE ? (
           <LocationStat
