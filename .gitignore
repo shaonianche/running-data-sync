@@ -1,4 +1,5 @@
 # Project dependencies
+.nvmrc
 .idea
 .cache
 *.pyc
@@ -16,3 +17,4 @@ db.csv
 danpalmer.sql
 
 .mypy_cache
+
