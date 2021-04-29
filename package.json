@@ -7,7 +7,7 @@
     "@mapbox/mapbox-gl-language": "^0.10.1",
     "@mapbox/polyline": "^1.1.1",
     "classnames": "^2.2.6",
-    "date-fns": "^2.14.0",
+    "date-fns": "^2.21.1",
     "gatsby": "^2.32.12",
     "gatsby-alias-imports": "^1.0.6",
     "gatsby-image": "^2.8.0",
@@ -47,7 +47,7 @@
     "styled-components": "^4.4.1",
     "tachyons": "^4.12.0",
     "tachyons-sass": "^4.9.5",
-    "webpack": "^5.11.0"
+    "webpack": "^5.36.0"
   },
   "license": "MIT",
   "private": true,
@@ -75,7 +75,7 @@
     "@zestia/prettier-config": "^1.0.4",
     "@zestia/stylelint-config": "^2.0.47",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.13.0",
+    "eslint": "^7.25.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.4.1",
