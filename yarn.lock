@@ -4041,10 +4041,10 @@ class-utils@^0.3.5:
     isobject "^3.0.0"
     static-extend "^0.1.1"
 
-classnames@^2.2.6:
-  version "2.2.6"
-  resolved "https://registry.npm.taobao.org/classnames/download/classnames-2.2.6.tgz"
-  integrity sha1-Q5Nb/90pHzJtrQogUwmzjQD2UM4=
+classnames@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.3.1.tgz#dfcfa3891e306ec1dad105d0e88f4417b8535e8e"
+  integrity sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==
 
 clean-stack@^2.0.0:
   version "2.2.0"
@@ -7081,16 +7081,16 @@ gatsby-plugin-image@^1.3.1:
     objectFitPolyfill "^2.3.0"
     prop-types "^15.7.2"
 
-gatsby-plugin-manifest@^2.4.11:
-  version "2.9.1"
-  resolved "https://registry.npm.taobao.org/gatsby-plugin-manifest/download/gatsby-plugin-manifest-2.9.1.tgz"
-  integrity sha1-ljvSN1QTl3OK2NZvzRXnxG0bHZU=
+gatsby-plugin-manifest@^2.12.1:
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-manifest/-/gatsby-plugin-manifest-2.12.1.tgz#d92f23d2d17d3c69445ef7b7842e5441e8dd785e"
+  integrity sha512-Kiom3IHQ+hsRA/yt+XcBdOn1q+Rqbso5Iw0mXQQg+F+8U23sU66NaJY67ZXUkW8iwU25SOrwZaSw49C8BV0EGw==
   dependencies:
     "@babel/runtime" "^7.12.5"
-    gatsby-core-utils "^1.7.1"
-    gatsby-plugin-utils "^0.6.0"
+    gatsby-core-utils "^1.10.1"
+    gatsby-plugin-utils "^0.9.0"
     semver "^7.3.2"
-    sharp "^0.26.3"
+    sharp "^0.27.0"
 
 gatsby-plugin-meta-redirect@^1.1.1:
   version "1.1.1"
@@ -7126,10 +7126,10 @@ gatsby-plugin-page-creator@^2.10.1:
     globby "^11.0.2"
     lodash "^4.17.20"
 
-gatsby-plugin-react-helmet@^3.7.0:
-  version "3.7.0"
-  resolved "https://registry.npm.taobao.org/gatsby-plugin-react-helmet/download/gatsby-plugin-react-helmet-3.7.0.tgz"
-  integrity sha1-GjylizmeKpn/X+yXQh/yFWs9ZOA=
+gatsby-plugin-react-helmet@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-react-helmet/-/gatsby-plugin-react-helmet-3.10.0.tgz#421bbee87157c351d19031d62145c2ab6c00ef94"
+  integrity sha512-TktmUysb7wDwYOKowNcpXxLJfQiwQ7cSQ8ALH3pJrW63wBaCoBXvAHg3OhgHVR74CrqN2Tb89tr3GXa4JhO4Qw==
   dependencies:
     "@babel/runtime" "^7.12.5"
 
@@ -7140,10 +7140,10 @@ gatsby-plugin-react-svg@^3.0.0:
   dependencies:
     svg-react-loader "^0.4.4"
 
-gatsby-plugin-robots-txt@^1.5.5:
-  version "1.5.5"
-  resolved "https://registry.npmjs.org/gatsby-plugin-robots-txt/-/gatsby-plugin-robots-txt-1.5.5.tgz"
-  integrity sha512-wLIep04R0cnY+3t9uFVFitA/eLbI6o8xkrUPg6gVxnas/LtzMe5tUiMK5P+idC14B0ohY1y2zl2hP+Bu54/dHQ==
+gatsby-plugin-robots-txt@^1.5.6:
+  version "1.5.6"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-robots-txt/-/gatsby-plugin-robots-txt-1.5.6.tgz#5a0d7ac47240ad538d988615a8a8ec648a6b641f"
+  integrity sha512-AxHbrw8WaYOxyu++LPIratjlNgBuu2qb5j3F+Ht+ooD/azutL+BAPbuYexz9CMPqTy1h/kiBxZsojbGLbWpvgA==
   dependencies:
     "@babel/runtime" "^7.11.2"
     generate-robotstxt "^8.0.3"
@@ -7182,10 +7182,10 @@ gatsby-plugin-sharp@^2.14.3:
     svgo "1.3.2"
     uuid "3.4.0"
 
-gatsby-plugin-sitemap@^2.10.0:
-  version "2.10.0"
-  resolved "https://registry.npmjs.org/gatsby-plugin-sitemap/-/gatsby-plugin-sitemap-2.10.0.tgz"
-  integrity sha512-5Q5KJ5xD8jSby0NkWtuSgjCZyVFh3ofqX9mKMUU89rh8TxbdvgoKuFdO560K3inNGqZJyjsr7/VF5Qj4amaFMw==
+gatsby-plugin-sitemap@^2.12.0:
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-sitemap/-/gatsby-plugin-sitemap-2.12.0.tgz#bd3dc88d59ee9a94b0131a28623d79eb738dc375"
+  integrity sha512-oY0SzFl7xDVfIp3f4dhsKuGknc6tLsZIdNWPB9jv3HEDIFpyohFjJ4tcH2rHG8Wm8ceW34XjgSW0fcyu/QQYxQ==
   dependencies:
     "@babel/runtime" "^7.12.5"
     common-tags "^1.8.0"
@@ -16696,10 +16696,12 @@ webpack@^4.44.1:
     watchpack "^1.7.4"
     webpack-sources "^1.4.1"
 
-webpack@^5.36.0:
-  version "5.36.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.36.0.tgz#d008da31b721f8fecce88ef2adaf1b16dc2161d1"
-  integrity sha512-HdOhLXClUEwTnzQnzpSG9iL00ej23ojvfnGpF49ba0MkuAT2q+WhQilHFFJHOIVRBqbzakQ1vCWQV2K+QLX0Qw==
+
+  webpack@^5.36.1:
+    version "5.36.1"
+    resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.36.1.tgz#d82bad3384f84ed45a8de3844c31730f56361ab7"
+    integrity sha512-2u25a82T+6quAxSlzEpN/R/RICwt20ONU3z3Ko05S8KVH9FXILcBYb2hD/rQtZT5y7lRAIsIIs05pdndY7ourQ==
+
   dependencies:
     "@types/eslint-scope" "^3.7.0"
     "@types/estree" "^0.0.47"
