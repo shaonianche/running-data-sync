@@ -39,7 +39,7 @@ jobs:
           python-version: 3.6
 
       - name: Configure pip cache
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.5
         id: pip-cache
         with:
           path: venv
