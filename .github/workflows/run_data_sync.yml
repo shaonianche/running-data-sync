@@ -95,7 +95,7 @@ jobs:
           python scripts/gen_svg.py --from-db --type circular --use-localtime
 
       - name: Push new runs
-        uses: github-actions-x/commit@v2.7
+        uses: github-actions-x/commit@v2.8
         with:
           github-token: ${{ secrets.G_TOKEN }}
           commit-message: 'chore(nike): add new runs'
