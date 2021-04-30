@@ -3,7 +3,7 @@ name: Run Data Sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */2 * * *"
+    - cron: '0 */2 * * *'
   push:
     branches:
       - master
@@ -19,7 +19,7 @@ on:
       - requirements.txt
 
 env:
-  RUN_TYPE: nike_to_strava 
+  RUN_TYPE: nike_to_strava
   ATHLETE: DuanFei
   TITLE: Running Data
   TITLE_GRID: Over 5km Runs
@@ -60,7 +60,7 @@ jobs:
         if: env.RUN_TYPE == 'nike_to_strava'
         run: |
           python scripts/nike_to_strava_sync.py ${{ secrets.N_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
-  
+
       - name: Run sync Runtastic script
         if: env.RUN_TYPE == 'runtastic'
         run: |
@@ -91,14 +91,14 @@ jobs:
           python scripts/gen_svg.py --from-db --title "${{ env.TITLE }}" --type github --athlete "${{ env.ATHLETE }}" --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --output assets/github.svg --use-localtime --min-distance 0.5
 
           python scripts/gen_svg.py --from-db --title "${{ env.TITLE_GRID }}" --type grid --athlete "${{ env.ATHLETE }}"  --output assets/grid.svg --min-distance 5 --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime
-          
+
           python scripts/gen_svg.py --from-db --type circular --use-localtime
 
       - name: Push new runs
         uses: github-actions-x/commit@v2.7
         with:
           github-token: ${{ secrets.G_TOKEN }}
-          commit-message: "chore(nike): add new runs"
+          commit-message: 'chore(nike): add new runs'
           files: activities src/static/ scripts/ assets/ GPX_OUT/
           rebase: 'true'
           name: ${{ env.GITHUB_NAME }}

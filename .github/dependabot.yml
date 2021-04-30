@@ -1,12 +1,26 @@
 version: 2
 updates:
-- package-ecosystem: npm
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
-# - package-ecosystem: pip
-#   directory: "/"
-#   schedule:
-#     interval: daily
-#   open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    labels:
+      - 'npm'
+
+  - package-ecosystem: pip
+    directory: '/'
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
+    labels:
+      - 'pip'
+
+  - package-ecosystem: 'github-actions'
+    # Workflow files stored in the
+    # default location of `.github/workflows`
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    labels:
+      - 'github-actions'
