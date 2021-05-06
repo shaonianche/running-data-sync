@@ -5,9 +5,14 @@ on:
   schedule:
     - cron: '0 */2 * * *'
   pull_request:
-    branches: [master]
+    branches:
+      - master
+    tags:
+      - github_actions
+      - python
   push:
-    branches: [master]
+    branches:
+      - master
     paths:
       - scripts/nike_sync.py
       - scripts/nike_to_strava_sync.py
