@@ -7,7 +7,6 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - 'npm'
-
   - package-ecosystem: pip
     directory: '/'
     schedule:
@@ -15,7 +14,6 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - 'pip'
-
   - package-ecosystem: 'github-actions'
     # Workflow files stored in the
     # default location of `.github/workflows`

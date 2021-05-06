@@ -5,8 +5,10 @@ on:
   schedule:
     - cron: '0 */2 * * *'
   push:
-    branches:
-      - master
+    branches: [master]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
     paths:
       - scripts/nike_sync.py
       - scripts/nike_to_strava_sync.py
