@@ -4,12 +4,9 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 */2 * * *'
-  pull_request:
-    branches:
-      - master
-    tags:
-      - github_actions
-      - python
+  # pull_request:
+  #   branches:
+  #     - master
   push:
     branches:
       - master
@@ -52,6 +49,7 @@ jobs:
           key: pip-1-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             pip-
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -62,7 +60,8 @@ jobs:
         if: env.RUN_TYPE == 'nike'
         run: |
           python scripts/nike_sync.py ${{ secrets.N_TOKEN }}
-      - name: Run sync Nike to Strava(Run with nike data backup and show with strava)
+
+      - name: Run sync Nike to Strava (Run with nike data backup and show with strava)
         if: env.RUN_TYPE == 'nike_to_strava'
         run: |
           python scripts/nike_to_strava_sync.py ${{ secrets.N_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
@@ -76,6 +75,7 @@ jobs:
         if: env.RUN_TYPE == 'keep'
         run: |
           python scripts/keep_sync.py ${{ secrets.KEEP_MOBILE }} ${{ secrets.KEEP_PASSWORD }} --with-gpx
+
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
         run: |
@@ -90,6 +90,7 @@ jobs:
         if: env.RUN_TYPE == 'garmin_cn'
         run: |
           python scripts/garmin_sync.py ${{ secrets.GRAMIN_CN_EMAIL }} ${{ secrets.GARMIN_CN_PASSWORD }} --is-cn
+
       - name: Run sync Only GPX script
         if: env.RUN_TYPE == 'only_gpx'
         run: |
