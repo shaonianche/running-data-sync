@@ -1,3 +1,5 @@
+@import '../../styles/variables.scss';
+
 .locationSVG {
   height: 100%;
   width: 100%;
@@ -16,21 +18,24 @@
   position: relative;
   cursor: pointer;
   width: 10%;
-  padding: 10px;
+  padding: 20px;
   margin-top: 1px;
-  font-size: 10px;
+  font-size: 14px;
   text-align: center;
   color: write;
-  font-family: sans-serif;
-  font-weight: bold;
+  font-family: $global-font-family;
 }
 
 .runTitle {
-  height: 26px;
+  height: 29px;
   width: 710px;
   position: absolute;
   bottom: 0px;
   left: 120px;
-  font-family: sans-serif;
+  font-family: $global-font-family;
   cursor: pointer;
+}
+
+.mapboxgl-ctrl-bottom-right {
+  height: 29px;
 }
