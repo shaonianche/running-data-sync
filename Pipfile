@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-httpx = "==0.18.1"
+httpx = "==0.15.4"
 gpxpy = "==1.4.2"
 stravalib = "==0.10.2"
 appdirs = ">=1.4.0"
@@ -16,10 +16,10 @@ geopy = "*"
 polyline = "*"
 sqlalchemy = "*"
 timezonefinder = "*"
-pyyaml = "*"
 aiofiles = "*"
+PyYAML = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
