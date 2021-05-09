@@ -20,10 +20,10 @@ class GithubDrawer(TracksDrawer):
     def draw(self, dr: svgwrite.Drawing, size: XY, offset: XY):
         if self.poster.tracks is None:
             raise PosterError("No tracks to draw")
-        year_size = 200 * 4.0 / 100.0
+        year_size = 200 * 4.0 / 90.0
         year_style = f"font-size:{year_size}px;"
         year_length_style = f"font-size:{110 * 3.0 / 80.0}px;"
-        month_names_style = f"font-size:2.5px;"
+        month_names_style = f"font-size:3.5px;"
         total_length_year_dict = self.poster.total_length_year_dict
         for year in range(self.poster.years.from_year, self.poster.years.to_year + 1):
             start_date_weekday, _ = calendar.monthrange(year, 1)

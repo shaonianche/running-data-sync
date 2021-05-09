@@ -91,8 +91,8 @@ def main():
         dest="background_color",
         metavar="COLOR",
         type=str,
-        default="#222222",
-        help='Background color of poster (default: "#222222").',
+        default="#1a1a1a",
+        help='Background color of poster (default: "#1a1a1a").',
     )
     args_parser.add_argument(
         "--track-color",
@@ -258,7 +258,7 @@ def main():
     # circular not add footer and header
     p.drawer_type = "plain" if is_circular else "title"
     if args.type == "github":
-        p.height = 55 + p.years.count() * 43
+        p.height = 55 + p.years.count() * 45
     # for special circular
     if is_circular:
         years = p.years.all()[:]

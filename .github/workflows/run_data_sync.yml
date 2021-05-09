@@ -22,7 +22,7 @@ on:
       - requirements.txt
 
 env:
-  RUN_TYPE: nike
+  RUN_TYPE: nike_to_strava
   ATHLETE: DuanFei
   TITLE: Running Data
   TITLE_GRID: Over 5km Runs
