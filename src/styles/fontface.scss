@@ -1,0 +1,270 @@
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-light.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-light.woff)
+      format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-lightitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-lightitalic.woff)
+      format('woff');
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-regular.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-regular.woff)
+      format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-regularitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-regularitalic.woff)
+      format('woff');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-medium.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-medium.woff)
+      format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-mediumitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-mediumitalic.woff)
+      format('woff');
+  font-weight: 500;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-semibold.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-semibold.woff)
+      format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-semibolditalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-semibolditalic.woff)
+      format('woff');
+  font-weight: 600;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-bold.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-bold.woff)
+      format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-bolditalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexsans-bolditalic.woff)
+      format('woff');
+  font-weight: 700;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-light.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-light.woff)
+      format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-lightitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-lightitalic.woff)
+      format('woff');
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-regular.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-regular.woff)
+      format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-regularitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-regularitalic.woff)
+      format('woff');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-medium.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-medium.woff)
+      format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-mediumitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-mediumitalic.woff)
+      format('woff');
+  font-weight: 500;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-semibold.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-semibold.woff)
+      format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-semibolditalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-semibolditalic.woff)
+      format('woff');
+  font-weight: 600;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-bold.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-bold.woff)
+      format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-bolditalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexmono-bolditalic.woff)
+      format('woff');
+  font-weight: 700;
+  font-style: italic;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-light.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-light.woff)
+      format('woff');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-lightitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-lightitalic.woff)
+      format('woff');
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-regular.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-regular.woff)
+      format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-regularitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-regularitalic.woff)
+      format('woff');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-medium.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-medium.woff)
+      format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-mediumitalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-mediumitalic.woff)
+      format('woff');
+  font-weight: 500;
+  font-style: italic;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-semibold.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-semibold.woff)
+      format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-semibolditalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-semibolditalic.woff)
+      format('woff');
+  font-weight: 600;
+  font-style: italic;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-bold.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-bold.woff)
+      format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: ibm-plex-serif;
+  src: url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-bolditalic.woff2)
+      format('woff2'),
+    url(https://1.www.s81c.com/common/fonts/plex/v1/ibmplexserif-bolditalic.woff)
+      format('woff');
+  font-weight: 700;
+  font-style: italic;
+}

@@ -1,5 +1,7 @@
-$global-font-family: 'IBM Plex Mono', 'IBM Plex Sans', 'Microsoft YaHei',
-  ibm-plex-sans, 'Helvetica Neue', Arial, sans-serif;
+@import './fontface.scss';
+
+$global-font-family: 'IBM Plex Mono', 'IBM Plex Sans', ibm-plex-sans,
+  'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
 
 $breakpoint-mobile: 960px;
 $breakpoint-stack: 530px;
