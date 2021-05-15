@@ -1,10 +1,10 @@
 {
-    "id": "471e7264-c96f-4b9f-9c82-213f7f47ad05",
+    "id": "fdd5c4ab-b314-4aac-b1fd-e85f618f8040",
     "type": "run",
     "app_id": "com.nike.sport.running.ios",
     "start_epoch_ms": 1620901388989,
     "end_epoch_ms": 1620902399423,
-    "last_modified": 1620902403187,
+    "last_modified": 1620950710836,
     "active_duration_ms": 943640,
     "session": false,
     "delete_indicator": false,
@@ -100,7 +100,7 @@
         "shoe_id": "cbca52ab-6c7a-44e0-bbe7-fd576340d295"
     },
     "change_tokens": [
-        "e432b7b4ab6c4b5331f8dccd0a8d84c4532de43efc59d1449de22b780b2522a9:1620902403187"
+        "9b0798cca878781fdf4cf6fc73b86ae85f46364b6df78fb74b7b60b49edba863:1620950710836"
     ],
     "metric_types": [
         "elevation",
