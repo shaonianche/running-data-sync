@@ -67,7 +67,7 @@ jobs:
           python scripts/nike_sync.py ${{ secrets.N_TOKEN }}
 
       - name: Run sync Nike to Strava (Run with nike data backup and show with strava)
-        if: env.RUN_TYPE == 'nike_to_strava'
+        if: env.RUN_TYPE == 'nike_to_strava' && ${{ matrix.python-version == '3.6'}}
         run: |
           python scripts/nike_to_strava_sync.py ${{ secrets.N_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
 
