@@ -1,8 +1,8 @@
-httpx==0.15.4
-gpxpy==1.4.2
-stravalib==0.10.2
-appdirs>=1.4.0
-svgwrite>=1.1.9
+httpx
+gpxpy
+stravalib
+appdirs
+svgwrite
 colour
 s2sphere
 arrow
