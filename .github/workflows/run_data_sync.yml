@@ -120,3 +120,13 @@ jobs:
           rebase: 'true'
           name: ${{ env.GITHUB_NAME }}
           email: ${{ env.GITHUB_EMAIL }}
+
+      - name: Gitee Sync
+        if: ${{ matrix.python-version == '3.6'}}
+        uses: Yikun/hub-mirror-action@master
+        with:
+          src: github/running-data-sync
+          dst: gitee/running-data-sync
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
+          dst_token: ${{ secrets.GITEE_TOKEN }}
+          force_update: true
