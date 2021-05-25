@@ -4,8 +4,7 @@ module.exports = {
     siteTitle: 'Running',
     siteUrl: 'https://run.duangfei.org',
     description: 'Personal site and blog',
-    logo:
-      'https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg',
+    logo: 'https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg',
     navLinks: [
       {
         name: 'Blog',
@@ -98,6 +97,21 @@ module.exports = {
       resolve: 'gatsby-plugin-robots-txt',
       options: {
         policy: [{ userAgent: '*', allow: '/' }]
+      }
+    },
+    {
+      resolve: 'gatsby-plugin-firebase',
+      options: {
+        credentials: {
+          apiKey: 'AIzaSyDjHBC567IJXStrdCrXxpmd7hdwHSN-eMY',
+          authDomain: 'running-data-sync.firebaseapp.com',
+          // databaseURL: 'running-data-sync.firebaseapp.com',
+          projectId: 'running-data-sync',
+          storageBucket: 'running-data-sync.appspot.com',
+          messagingSenderId: '967054291585',
+          appId: '1:967054291585:web:ea3c6b820c0ff2373c9380',
+          measurementId: 'G-1RMYP62RLZ'
+        }
       }
     }
   ]
