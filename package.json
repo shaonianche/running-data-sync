@@ -73,7 +73,7 @@
     "url": "git+http://github.com/shaonianche/running-data-sync.git"
   },
   "devDependencies": {
-    "@zestia/eslint-config": "^4.0.3",
+    "@zestia/eslint-config": "^4.0.4",
     "@zestia/prettier-config": "^1.0.5",
     "@zestia/stylelint-config": "^2.0.47",
     "babel-eslint": "^10.1.0",
