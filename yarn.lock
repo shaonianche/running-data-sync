@@ -6282,11 +6282,6 @@ eslint-plugin-react@^7.20.6, eslint-plugin-react@^7.23.2:
     resolve "^2.0.0-next.3"
     string.prototype.matchall "^4.0.4"
 
-eslint-plugin-standard@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.npmjs.org/eslint-plugin-standard/-/eslint-plugin-standard-5.0.0.tgz"
-  integrity sha512-eSIXPc9wBM4BrniMzJRBm2uoVuXz2EPa+NXPk2+itrVt+r5SbKFERx/IgrK/HmfjddyKVz2f+j+7gBRvu19xLg==
-
 eslint-scope@5.1.1, eslint-scope@^5.0.0, eslint-scope@^5.1.1:
   version "5.1.1"
   resolved "https://registry.npm.taobao.org/eslint-scope/download/eslint-scope-5.1.1.tgz?cache=0&sync_timestamp=1599936073302&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Feslint-scope%2Fdownload%2Feslint-scope-5.1.1.tgz"
@@ -7078,9 +7073,9 @@ find-versions@^3.0.0:
   dependencies:
     semver-regex "^2.0.0"
 
-firebase@^8.6.3:
+firebase@^8.6.2:
   version "8.6.3"
-  resolved "https://registry.yarnpkg.com/firebase/-/firebase-8.6.3.tgz#e6e985e78f15543f399f13d476ac6738d35dc7bb"
+  resolved "https://registry.npmjs.org/firebase/-/firebase-8.6.3.tgz#e6e985e78f15543f399f13d476ac6738d35dc7bb"
   integrity sha512-VjaHkR+BsTpXXrQec84FJQiGz/x7K7a+V9JHWDRUbd+XANgxBiCC+p5WDUUv0bgCw5Swg02xLGdFRkqx2LIjSg==
   dependencies:
     "@firebase/analytics" "0.6.10"

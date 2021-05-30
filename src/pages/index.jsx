@@ -168,7 +168,9 @@ export default () => {
     <Layout>
       <div className="mb5">
         <div className="w-100">
-          <h1 className="f1 fw9 i">{siteTitle}</h1>
+          <h1 className="f1 fw9 i">
+            <a href="/"> {siteTitle}</a>
+          </h1>
         </div>
         {viewport.zoom <= 3 && IS_CHINESE ? (
           <LocationStat

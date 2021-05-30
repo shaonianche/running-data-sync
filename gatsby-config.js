@@ -2,7 +2,7 @@ module.exports = {
   pathPrefix: '/',
   siteMetadata: {
     siteTitle: 'Running',
-    siteUrl: 'https://run.duangfei.org',
+    siteUrl: '/',
     description: 'Personal site and blog',
     logo: 'https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg',
     navLinks: [
