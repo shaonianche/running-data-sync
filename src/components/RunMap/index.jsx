@@ -12,6 +12,7 @@ import { geoJsonForMap } from 'src/utils/utils';
 import RunMarker from './RunMaker';
 import RunMapButtons from './RunMapButtons';
 import styles from './style.module.scss';
+require('mapbox-gl/dist/mapbox-gl.css');
 
 const RunMap = ({
   title,
@@ -19,7 +20,8 @@ const RunMap = ({
   setViewport,
   changeYear,
   geoData,
-  thisYear
+  thisYear,
+  mapButtonYear
 }) => {
   const { provinces } = useActivities();
   const addControlHandler = (event) => {
@@ -67,7 +69,11 @@ const RunMap = ({
       onLoad={addControlHandler}
       mapboxApiAccessToken={MAPBOX_TOKEN}
     >
-      <RunMapButtons changeYear={changeYear} thisYear={thisYear} />
+      <RunMapButtons
+        changeYear={changeYear}
+        thisYear={thisYear}
+        mapButtonYear={mapButtonYear}
+      />
       <Source id="data" type="geojson" data={geoData}>
         <Layer
           id="prvince"

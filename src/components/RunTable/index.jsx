@@ -27,9 +27,9 @@ const RunTable = ({
     sortFuncInfo === 'Date' ? sortDateFunc : sortDateFuncReverse;
   const sortFuncMap = new Map([
     ['KM', sortKMFunc],
-    ['PACE', sortPaceFunc],
+    ['Pace', sortPaceFunc],
     ['BPM', sortBPMFunc],
-    ['DATE', sortDateFuncClick]
+    ['Date', sortDateFuncClick]
   ]);
   const handleClick = (e) => {
     const funcName = e.target.innerHTML;
