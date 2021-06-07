@@ -1972,10 +1972,10 @@
   resolved "https://registry.npm.taobao.org/@mapbox/whoots-js/download/@mapbox/whoots-js-3.1.0.tgz"
   integrity sha1-SXxnoc71DRokWbpg8xXkSNKth/4=
 
-"@math.gl/web-mercator@^3.2.0":
-  version "3.4.2"
-  resolved "https://registry.npmjs.org/@math.gl/web-mercator/-/web-mercator-3.4.2.tgz"
-  integrity sha512-Az/WI8vxbqnrTEcYgqDQ3CgCRoFA2a4XT9mkjVrT7iIlfrUF5lrIXcmpljjKvoFNBldKrng7hFSeHHM2ghgSrg==
+"@math.gl/web-mercator@^3.4.3":
+  version "3.4.3"
+  resolved "https://registry.yarnpkg.com/@math.gl/web-mercator/-/web-mercator-3.4.3.tgz#6bcb262a92453399229b173bc9a825ebd3356f38"
+  integrity sha512-wfT1ku2b0k9MmaesFev60PXCCqqDvCR9batcY99ob/nMRXcQ/F5yVChS07OIqjUJseK6+6Gep9iYXiflPyPR2Q==
   dependencies:
     "@babel/runtime" "^7.12.0"
     gl-matrix "^3.0.0"
@@ -10646,10 +10646,10 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-mapbox-gl@^2.0.1:
-  version "2.2.0"
-  resolved "https://registry.npmjs.org/mapbox-gl/-/mapbox-gl-2.2.0.tgz"
-  integrity sha512-/9OQjaOIpQcZfXMFMxnjjAjhVGPjuAxQFAbdvG6CXD5aLhm1j2D3zxCCfxxMCEuILRBCbkxEAhVf3JoT+aFXEQ==
+mapbox-gl@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-2.3.0.tgz#2f8243da89ff639497963d7f865d12523d9b96de"
+  integrity sha512-0ssKvbxNnvkenzmJCS0kbXGTYtFtlaX/UdOFGnGdR0nBW3cB2sXwx3yCK8b+SmvsTt6qumpkxeZy7ahspSCA8A==
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.0"
     "@mapbox/geojson-types" "^1.0.2"
@@ -10671,7 +10671,7 @@ mapbox-gl@^2.0.1:
     potpack "^1.0.1"
     quickselect "^2.0.0"
     rw "^1.3.3"
-    supercluster "^7.1.2"
+    supercluster "^7.1.3"
     tinyqueue "^2.0.3"
     vt-pbf "^3.1.1"
 
@@ -13514,19 +13514,19 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.npm.taobao.org/react-lifecycles-compat/download/react-lifecycles-compat-3.0.4.tgz"
   integrity sha1-TxonOv38jzSIqMUWv9p4+HI1I2I=
 
-react-map-gl@^6.1.15:
-  version "6.1.15"
-  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-6.1.15.tgz#94010b59f177a9a1240b1b6903f965e366fb528f"
-  integrity sha512-U5wuxnH2DBUMX8UtcaFv+KaH6Qlx9d0ZpbjkA/eFH/P3NYvsHSR+vr8RKxtrnZp1t7Pl1n0H75pVFLgGqovXHQ==
+react-map-gl@^6.1.16:
+  version "6.1.16"
+  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-6.1.16.tgz#47e1a200b4dea7f981f2be36f96933f202e6bd7e"
+  integrity sha512-d/4kFMMh2hDeZNeQOUm2wC1/as9q93EZiDmM5mGBx0LIch+9pTFgO6ZINIuUD9Zz4JqWGpthyjoKr3QKgrGiRA==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@types/geojson" "^7946.0.7"
     "@types/mapbox-gl" "^2.0.3"
-    mapbox-gl "^2.0.1"
+    mapbox-gl "^2.3.0"
     mjolnir.js "^2.5.0"
     prop-types "^15.7.2"
     resize-observer-polyfill "^1.5.1"
-    viewport-mercator-project "^6.2.3 || ^7.0.2"
+    viewport-mercator-project "^7.0.3"
 
 react-refresh@^0.8.3:
   version "0.8.3"
@@ -15677,9 +15677,9 @@ sugarss@^2.0.0:
   dependencies:
     postcss "^7.0.2"
 
-supercluster@^7.1.2:
+supercluster@^7.1.3:
   version "7.1.3"
-  resolved "https://registry.npmjs.org/supercluster/-/supercluster-7.1.3.tgz"
+  resolved "https://registry.yarnpkg.com/supercluster/-/supercluster-7.1.3.tgz#8c5412c7d7e53b010f7514e87f279544babc3425"
   integrity sha512-7+bR4FbF5SYsmkHfDp61QiwCKtwNDyPsddk9TzfsDA5DQr5Goii5CVD2SXjglweFCxjrzVZf945ahqYfUIk8UA==
   dependencies:
     kdbush "^3.0.0"
@@ -16890,12 +16890,12 @@ vfile@^4.0.0:
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
 
-"viewport-mercator-project@^6.2.3 || ^7.0.2":
-  version "7.0.2"
-  resolved "https://registry.npmjs.org/viewport-mercator-project/-/viewport-mercator-project-7.0.2.tgz"
-  integrity sha512-gH0pBO4Y5McGCPaKulkpL9MPDg+wtOSXtndwh0467T/WLMerfBi7EkHYw1pp9HE2VeqFqUaAfot98cQPGaIjEA==
+viewport-mercator-project@^7.0.3:
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-7.0.3.tgz#6c7cf15cbfd490003d99d68ff5cbb2443237c79a"
+  integrity sha512-5nSgVK8jKTSKzOvsa8TSSd2IeQCpHfSNiBOOOMQLvzlxgWD0YoF4xRmyZio3GaLtKSE+50UB892X3R1SAMbaww==
   dependencies:
-    "@math.gl/web-mercator" "^3.2.0"
+    "@math.gl/web-mercator" "^3.4.3"
 
 vm-browserify@^1.0.1:
   version "1.1.2"
