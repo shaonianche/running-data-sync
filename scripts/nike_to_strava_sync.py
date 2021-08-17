@@ -6,11 +6,10 @@ import os
 import time
 from datetime import datetime, timedelta
 
-from stravalib.client import Client
-
 from config import OUTPUT_DIR
 from nike_sync import make_new_gpxs, run
 from strava_sync import run_strava_sync
+from utils import make_strava_client
 
 
 def get_last_time(client):
@@ -30,27 +29,18 @@ def get_last_time(client):
         # add 30 minutes to make sure after the end of this activity
         end_date = activity.start_date + activity.elapsed_time + timedelta(minutes=30)
         return int(datetime.timestamp(end_date) * 1000)
-    except:
+    except Exception as e:
+        print(f"Something wrong to get last time err: {str(e)}")
         return 0
 
 
 def get_to_generate_files(last_time):
     file_names = os.listdir(OUTPUT_DIR)
     return [
-        OUTPUT_DIR + "/" + i
+        os.path.join(OUTPUT_DIR, i)
         for i in file_names
         if not i.startswith(".") and int(i.split(".")[0]) > last_time
     ]
-
-
-def make_client(client_id, client_secret, refresh_token):
-    client = Client()
-
-    refresh_response = client.refresh_access_token(
-        client_id=client_id, client_secret=client_secret, refresh_token=refresh_token
-    )
-    client.access_token = refresh_response["access_token"]
-    return client
 
 
 def upload_gpx(client, file_name):
@@ -75,14 +65,21 @@ if __name__ == "__main__":
     time.sleep(2)
 
     # upload new gpx to strava
-    client = make_client(
+    client = make_strava_client(
         options.client_id, options.client_secret, options.strava_refresh_token
     )
-    last_time = get_last_time(client)
+    # last_time = get_last_time(client)
+    last_time = 0
     files = get_to_generate_files(last_time)
+    print(files)
     new_gpx_files = make_new_gpxs(files)
     time.sleep(10)  # just wait
     if new_gpx_files:
+        if len(new_gpx_files) > 10:
+            print(
+                "too many gpx files to upload, will upload 10, because of the rate limit"
+            )
+            new_gpx_files = new_gpx_files[:10]
         for f in new_gpx_files:
             upload_gpx(client, f)
 
