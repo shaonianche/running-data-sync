@@ -13,7 +13,6 @@ on:
     paths:
       - scripts/nike_sync.py
       - scripts/nike_to_strava_sync.py
-      - scripts/runtastic_sync.py
       - scripts/strava_sync.py
       - scripts/gen_svg.py
       - scripts/garmin_sync.py
@@ -71,10 +70,7 @@ jobs:
         run: |
           python scripts/nike_to_strava_sync.py ${{ secrets.N_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
 
-      - name: Run sync Runtastic script
-        if: env.RUN_TYPE == 'runtastic'
-        run: |
-          python scripts/runtastic_sync.py ${{ secrets.RUNTASTIC_EMAIL }} ${{ secrets.RUNTASTIC_PASSWORD }}
+          python scripts/garmin_sync.py ${{ secrets.GRAMIN_EMAIL }} ${{ secrets.GARMIN_PASSWORD }}
 
       - name: Run sync Keep script
         if: env.RUN_TYPE == 'keep'
@@ -130,4 +126,4 @@ jobs:
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
           dst_token: ${{ secrets.GITEE_TOKEN }}
           force_update: true
-          static_list: "running-data-sync"
+          static_list: 'running-data-sync'
