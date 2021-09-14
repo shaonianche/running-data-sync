@@ -2971,10 +2971,10 @@
   resolved "https://registry.yarnpkg.com/@zestia/prettier-config/-/prettier-config-1.0.5.tgz#58a3ca614d6b94b2393286e5246be2212609541d"
   integrity sha512-Ypakv4OZsdCEOcuj9+nYKMugYf13V2yNI3vhEh3ZgeNABEJAP91zZtWZEgQ8JYjtnNX+U+rFHI1Ojw9mSmyLrg==
 
-"@zestia/stylelint-config@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@zestia/stylelint-config/-/stylelint-config-3.0.1.tgz#75351ebdd90b674d23ce7e0bb5e4ea9dcac0e401"
-  integrity sha512-6L5E+AXzu79QkNkYwVKJu/9fYJTGq2FhFXx98GZco5XjEfaew0XyV8lxzQEyfAOiAgUmZIm3BfDyOYSBq/AbXw==
+"@zestia/stylelint-config@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@zestia/stylelint-config/-/stylelint-config-3.0.2.tgz#03a93b7d62480b0a490c6b70b0b821b8b88852fa"
+  integrity sha512-Xejf9Sy+r7TZx+cnRMLbq2UUdJj9Xyd+OMLw+4q8UqMiii9vQRbbx7PQlDnKyP8ZIJknfN1jMZIxiUahnMpPIA==
   dependencies:
     stylelint-config-prettier "^8.0.2"
     stylelint-config-recommended "^5.0.0"
