@@ -60,23 +60,23 @@ jobs:
           pip install -r requirements.txt
         # if: steps.pip-cache.outputs.cache-hit != 'true'
 
-      - name: Run sync Nike script
-        if: env.RUN_TYPE == 'nike'
-        run: |
-          python scripts/nike_sync.py ${{ secrets.N_TOKEN }}
+#       - name: Run sync Nike script
+#         if: env.RUN_TYPE == 'nike'
+#         run: |
+#           python scripts/nike_sync.py ${{ secrets.N_TOKEN }}
 
-      - name: Run sync Nike to Strava (Run with nike data backup and show with strava)
-        if: env.RUN_TYPE == 'nike_to_strava' && ${{ matrix.python-version == '3.6'}}
-        run: |
-          python scripts/nike_to_strava_sync.py ${{ secrets.N_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
+#       - name: Run sync Nike to Strava (Run with nike data backup and show with strava)
+#         if: env.RUN_TYPE == 'nike_to_strava' && ${{ matrix.python-version == '3.6'}}
+#         run: |
+#           python scripts/nike_to_strava_sync.py ${{ secrets.N_TOKEN }} ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
 
-      - name: Run sync Keep script
-        if: env.RUN_TYPE == 'keep'
-        run: |
-          python scripts/keep_sync.py ${{ secrets.KEEP_MOBILE }} ${{ secrets.KEEP_PASSWORD }} --with-gpx
+#       - name: Run sync Keep script
+#         if: env.RUN_TYPE == 'keep'
+#         run: |
+#           python scripts/keep_sync.py ${{ secrets.KEEP_MOBILE }} ${{ secrets.KEEP_PASSWORD }} --with-gpx
 
       - name: Run sync Strava script
-        if: env.RUN_TYPE == 'strava'
+        if: env.RUN_TYPE == 'strava'&& ${{ matrix.python-version == '3.6'}}
         run: |
           python scripts/strava_sync.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
 
