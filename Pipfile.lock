@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "0711eb93120082f251804fec79ed53636201dc908e2a6f7229b928f2896977bd"
+            "sha256": "f57a46f4259ffcf7a4f17c035018bae7d78b574b33431e92f2b04bb774ba04b5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -26,11 +26,11 @@
         },
         "anyio": {
             "hashes": [
-                "sha256:56ceaeed2877723578b1341f4f68c29081db189cfb40a97d1922b9513f6d7db6",
-                "sha256:8eccec339cb4a856c94a75d50fc1d451faf32a05ef406be462e2efc59c9838b0"
+                "sha256:4fd09a25ab7fa01d34512b7249e366cd10358cdafc95022c7ff8c8f8a5026d66",
+                "sha256:67da67b5b21f96b9d3d65daa6ea99f5d5282cb09f50eb4456f8fb51dffefc3ff"
             ],
             "markers": "python_full_version >= '3.6.2'",
-            "version": "==3.3.3"
+            "version": "==3.3.4"
         },
         "appdirs": {
             "hashes": [
@@ -361,10 +361,10 @@
         },
         "stravalib": {
             "hashes": [
-                "sha256:76db248b24cbd6c51cf93b475d8a8df04ec4b6c6287dca244e47f37a433276d7"
+                "sha256:451817c68a11e0c77db9cb628e3c4df0f4806c5a481536598ab3baa1d1c21215"
             ],
             "index": "pypi",
-            "version": "==0.10.2"
+            "version": "==0.10.4"
         },
         "svgwrite": {
             "hashes": [
