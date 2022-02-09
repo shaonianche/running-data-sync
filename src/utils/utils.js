@@ -104,10 +104,10 @@ const geoJsonForRuns = (runs) => ({
       type: 'Feature',
       geometry: {
         type: 'LineString',
-        coordinates: points
-      }
+        coordinates: points,
+      },
     };
-  })
+  }),
 });
 
 const geoJsonForMap = () => chinaGeojson;
@@ -166,11 +166,11 @@ const getBoundsForGeoData = (geoData) => {
   const pointsLat = points.map((point) => point[1]);
   const cornersLongLat = [
     [applyToArray(Math.min, pointsLong), applyToArray(Math.min, pointsLat)],
-    [applyToArray(Math.max, pointsLong), applyToArray(Math.max, pointsLat)]
+    [applyToArray(Math.max, pointsLong), applyToArray(Math.max, pointsLat)],
   ];
   const viewport = new WebMercatorViewport({
     width: 800,
-    height: 600
+    height: 600,
   }).fitBounds(cornersLongLat, { padding: 200 });
   let { longitude, latitude, zoom } = viewport;
 
@@ -230,5 +230,5 @@ export {
   filterAndSortRuns,
   sortDateFunc,
   sortDateFuncReverse,
-  getBoundsForGeoData
+  getBoundsForGeoData,
 };

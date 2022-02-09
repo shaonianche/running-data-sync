@@ -3,14 +3,13 @@
 const MAPBOX_TOKEN =
   'pk.eyJ1IjoiY215a2ZlaSIsImEiOiJja2d0NWpmbHQwdTU3MnltZnoxdXRuZGhkIn0.xWYvjezVwGkzWJ3NbUYRLQ';
 
-
 const MUNICIPALITY_CITIES_ARR = [
   '北京市',
   '上海市',
   '天津市',
   '重庆市',
   '香港特别行政区',
-  '澳门特别行政区'
+  '澳门特别行政区',
 ];
 
 // IF you outside China please make sure IS_CHINESE = false
@@ -40,7 +39,7 @@ const RUN_TITLES = {
   LUNCH_RUN_TITLE,
   AFTERNOON_RUN_TITLE,
   EVENING_RUN_TITLE,
-  NIGHT_RUN_TITLE
+  NIGHT_RUN_TITLE,
 };
 
 export {
@@ -48,7 +47,7 @@ export {
   MUNICIPALITY_CITIES_ARR,
   IS_CHINESE,
   INFO_MESSAGE,
-  RUN_TITLES
+  RUN_TITLES,
 };
 
 const nike = 'rgb(224,237,94)';

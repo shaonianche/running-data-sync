@@ -12,6 +12,7 @@
     "gatsby-alias-imports": "^1.0.6",
     "gatsby-image": "^3.0.0",
     "gatsby-plugin-feed": "^4.6.0",
+    "gatsby-plugin-image": "^2.7.0",
     "gatsby-plugin-manifest": "^4.6.0",
     "gatsby-plugin-meta-redirect": "^1.1.1",
     "gatsby-plugin-offline": "^5.6.0",
@@ -19,7 +20,7 @@
     "gatsby-plugin-react-svg": "^3.0.0",
     "gatsby-plugin-robots-txt": "^1.5.1",
     "gatsby-plugin-sass": "^5.6.0",
-    "gatsby-plugin-sharp": "^4.6.0",
+    "gatsby-plugin-sharp": "^4.7.0",
     "gatsby-plugin-sitemap": "^5.6.0",
     "gatsby-redirect-from": "^0.4.3",
     "gatsby-remark-autolink-headers": "^5.6.0",
@@ -29,15 +30,14 @@
     "gatsby-remark-responsive-iframe": "^5.6.0",
     "gatsby-remark-smartypants": "^5.6.0",
     "gatsby-remark-widows": "^1.0.0",
-    "gatsby-source-filesystem": "^4.6.0",
+    "gatsby-source-filesystem": "^4.7.0",
     "gatsby-transformer-json": "^4.6.0",
     "gatsby-transformer-remark": "^5.6.0",
-    "gatsby-transformer-sharp": "^4.6.0",
+    "gatsby-transformer-sharp": "^4.7.0",
     "gatsby-transformer-yaml": "^4.6.0",
     "gcoord": "^0.3.2",
     "node-sass": "^4.14.1",
     "pngquant-bin": "^6.0.0",
-    "prettier": "^2.2.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -56,11 +56,10 @@
     "data:download:garmin": "python3 scripts/garmin_sync.py",
     "data:analysis": "python3 scripts/gen_svg.py --from-db --type github --output assets/github.svg",
     "build": "gatsby build",
-    "dev": "gatsby develop",
-    "lint:css": "stylelint '**/*.{css,scss}'",
-    "prettier": "prettier '**/*.{js,css,scss,html,hbs,md}' --write",
-    "lint:js": "eslint .",
-    "test": "node test.js",
+    "develop": "gatsby develop",
+    "serve": "gatsby serve",
+    "lint": "eslint --ext .js,.jsx src --fix",
+    "check": "npx prettier --write *.{js,jsx,scss,json,md,yaml}",
     "ci": "yarn run check && yarn run build && yarn run test"
   },
   "engineStrict": true,
@@ -71,34 +70,44 @@
     "type": "git",
     "url": "git+http://github.com/shaonianche/running-data-sync.git"
   },
-  
-
   "browserslist": {
-  "production": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all",
-    "not chrome < 51",
-    "not safari < 10"
-  ],
-  "development": [
-    "last 1 chrome version",
-    "last 1 firefox version",
-    "last 1 safari version"
-  ]
-},
-  
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all",
+      "not chrome < 51",
+      "not safari < 10"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
-    "@zestia/eslint-config": "^4.0.4",
-    "@zestia/prettier-config": "^1.0.5",
-    "@zestia/stylelint-config": "^3.0.1",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.32.0",
+    "eslint": "^7.13.0",
     "eslint-config-airbnb": "^18.2.1",
-    "eslint-plugin-import": "^2.24.2",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-react": "^7.23.2",
-    "eslint-plugin-react-hooks": "^4.2.0"
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "@babel/eslint-parser": "7.16.5",
+    "@babel/eslint-plugin": "7.16.5",
+    "@babel/plugin-syntax-flow": "7.16.7",
+    "@babel/plugin-syntax-jsx": "7.16.7",
+    "@babel/plugin-transform-react-jsx": "7.16.7",
+    "eslint-config-google": "0.14.0",
+    "eslint-find-rules": "4.1.0",
+    "eslint-plugin-babel": "5.3.1",
+    "eslint-plugin-flowtype": "8.0.3",
+    "eslint-plugin-standard": "4.0.2",
+    "eslint-plugin-unicorn": "40.0.0",
+    "jest": "27.4.7",
+    "prettier": "2.5.1",
+    "rimraf": "3.0.2"
   },
   "bugs": {
     "url": "http://github.com/shaonianche/running-data-sync/issues"

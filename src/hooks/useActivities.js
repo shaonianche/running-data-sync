@@ -68,7 +68,7 @@ const useActivities = () => {
     provinces: [...provinces],
     cities,
     runPeriod,
-    thisYear
+    thisYear,
   };
 };
 
