@@ -105,15 +105,11 @@ jobs:
           python scripts/gen_svg.py --from-db --type circular --use-localtime
 
       - name: Push new runs
-        if: ${{ matrix.python-version == '3.6'}}
-        uses: github-actions-x/commit@v2.8
-        with:
-          github-token: ${{ secrets.G_TOKEN }}
-          commit-message: 'chore(nike): add new runs'
-          files: activities src/static/ scripts/ assets/ GPX_OUT/
-          rebase: 'true'
-          name: ${{ env.GITHUB_NAME }}
-          email: ${{ env.GITHUB_EMAIL }}
+        run: |
+          git config --local user.email "${{ env.GITHUB_EMAIL }}"
+          git config --local user.name "${{ env.GITHUB_EMAIL }}"
+          git commit -a -m 'docs: update readme.md' || echo "nothing to commit"
+          git push || echo "nothing to push"
 
       - name: Gitee Sync
         if: ${{ matrix.python-version == '3.6'}}
