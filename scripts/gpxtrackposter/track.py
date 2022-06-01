@@ -45,22 +45,23 @@ class Track:
                 raise TrackLoadError("Empty GPX file")
             with open(file_name, "r") as file:
                 self._load_gpx_data(mod_gpxpy.parse(file))
-        except:
+        except Exception as e:
             print(
-                f"Something went wrong when loading GPX. for file {self.file_names[0]}"
+                f"Something went wrong when loading GPX. for file {self.file_names[0]}, we just ignore this file and continue"
             )
+            print(str(e))
             pass
 
-    def load_from_db(self, activate):
+    def load_from_db(self, activity):
         # use strava as file name
-        self.file_names = [str(activate.run_id)]
+        self.file_names = [str(activity.run_id)]
         start_time = datetime.datetime.strptime(
-            activate.start_date_local, "%Y-%m-%d %H:%M:%S"
+            activity.start_date_local, "%Y-%m-%d %H:%M:%S"
         )
         self.start_time_local = start_time
-        self.end_time = start_time + activate.elapsed_time
-        self.length = float(activate.distance)
-        summary_polyline = activate.summary_polyline
+        self.end_time = start_time + activity.elapsed_time
+        self.length = float(activity.distance)
+        summary_polyline = activity.summary_polyline
         polyline_data = polyline.decode(summary_polyline) if summary_polyline else []
         self.polylines = [[s2.LatLng.from_degrees(p[0], p[1]) for p in polyline_data]]
 
@@ -122,19 +123,24 @@ class Track:
         """Append other track to self."""
         self.end_time = other.end_time
         self.length += other.length
-        self.moving_dict["distance"] += other.moving_dict["distance"]
-        self.moving_dict["moving_time"] += other.moving_dict["moving_time"]
-        self.moving_dict["elapsed_time"] += other.moving_dict["elapsed_time"]
-        self.polyline_container.extend(other.polyline_container)
-
-        self.polyline_str = polyline.encode(self.polyline_container)
-        self.moving_dict["average_speed"] = (
-            self.moving_dict["distance"]
-            / self.moving_dict["moving_time"].total_seconds()
-        )
-
-        self.file_names.extend(other.file_names)
-        self.special = self.special or other.special
+        # TODO maybe a better way
+        try:
+            self.moving_dict["distance"] += other.moving_dict["distance"]
+            self.moving_dict["moving_time"] += other.moving_dict["moving_time"]
+            self.moving_dict["elapsed_time"] += other.moving_dict["elapsed_time"]
+            self.polyline_container.extend(other.polyline_container)
+            self.polyline_str = polyline.encode(self.polyline_container)
+            self.moving_dict["average_speed"] = (
+                self.moving_dict["distance"]
+                / self.moving_dict["moving_time"].total_seconds()
+            )
+            self.file_names.extend(other.file_names)
+            self.special = self.special or other.special
+        except:
+            print(
+                f"something wrong append this {self.end_time},in files {str(self.file_names)}"
+            )
+            pass
 
     def load_cache(self, cache_file_name):
         try:
@@ -199,7 +205,9 @@ class Track:
             "elapsed_time": datetime.timedelta(
                 seconds=(moving_data.moving_time + moving_data.stopped_time)
             ),
-            "average_speed": moving_data.moving_distance / moving_data.moving_time,
+            "average_speed": moving_data.moving_distance / moving_data.moving_time
+            if moving_data.moving_time
+            else 0,
         }
 
     def to_namedtuple(self):

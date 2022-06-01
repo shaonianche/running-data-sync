@@ -45,20 +45,18 @@ def load_cached_track_file(cache_file_name, file_name):
 
 class TrackLoader:
     """Handle the loading of tracks from cache and/or GPX files
-
     Attributes:
         min_length: All tracks shorter than this value are filtered out.
         special_file_names: Tracks marked as special in command line args
         year_range: All tracks outside of this range will be filtered out.
         cache_dir: Directory used to store cached tracks
-
     Methods:
         clear_cache: Remove cache directory
         load_tracks: Load all data from cache and GPX files
     """
 
     def __init__(self):
-        self.min_length = 1000
+        self.min_length = 100
         self.special_file_names = []
         self.year_range = YearRange()
         self.cache_dir = None
@@ -119,9 +117,9 @@ class TrackLoader:
         else:
             activities = session.query(Activity).order_by(Activity.start_date_local)
         tracks = []
-        for activate in activities:
+        for activity in activities:
             t = Track()
-            t.load_from_db(activate)
+            t.load_from_db(activity)
             tracks.append(t)
         print(len(tracks))
         tracks = self._filter_tracks(tracks)
