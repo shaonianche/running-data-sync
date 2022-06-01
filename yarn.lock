@@ -6204,14 +6204,14 @@ gatsby-plugin-sharp@^4.6.0:
     sharp "^0.30.3"
     svgo "1.3.2"
 
-gatsby-plugin-sitemap@^5.6.0:
-  version "5.7.0"
-  resolved "https://registry.yarnpkg.com/gatsby-plugin-sitemap/-/gatsby-plugin-sitemap-5.7.0.tgz#87ab72f9acfac31dcd8f25ad0fb6afe5a2c221fa"
-  integrity sha512-53l+SXOHYp2Bt/8sK0DfLRjGq+K63qQGAPJksv1qC3soDNNe+TlKxmzM7JksACLzDVUkFVQYrvmS2RvMfivqeA==
+gatsby-plugin-sitemap@^5.15.0:
+  version "5.15.0"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-sitemap/-/gatsby-plugin-sitemap-5.15.0.tgz#6035eb3a80de90dda3356deea083653e483fef5f"
+  integrity sha512-2G7ooRqwOHe3zItd2WoOVEbqnFBXaQSQ2whxug3LAJr7PbZa33kukRQQcjK6v5IO5HidWAFpP9t1a5LOIeDpCw==
   dependencies:
     "@babel/runtime" "^7.15.4"
     common-tags "^1.8.2"
-    minimatch "^3.0.4"
+    minimatch "^3.1.2"
     sitemap "^7.0.0"
 
 gatsby-plugin-typescript@^4.7.0:
@@ -9151,10 +9151,10 @@ minimatch@3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimatch@^3.0.4:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.5.tgz#4da8f1290ee0f0f8e83d60ca69f8f134068604a3"
-  integrity sha512-tUpxzX0VAzJHjLu0xUfFv1gwVp9ba3IOuRAVH2EGuRW8a5emA2FlACLqiT/lDVtS1W+TGNwqz3sWaNyLgDJWuw==
+minimatch@^3.0.4, minimatch@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.1.2.tgz#19cd194bfd3e428f049a70817c038d89ab4be35b"
+  integrity sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==
   dependencies:
     brace-expansion "^1.1.7"
 
