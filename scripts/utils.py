@@ -4,9 +4,8 @@
 import json
 from datetime import datetime
 
-import pytz
 from stravalib.client import Client
-
+import pytz
 from generator import Generator
 
 
