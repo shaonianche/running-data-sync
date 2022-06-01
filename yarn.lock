@@ -6260,10 +6260,10 @@ gatsby-react-router-scroll@^5.7.0:
     "@babel/runtime" "^7.15.4"
     prop-types "^15.7.2"
 
-gatsby-redirect-from@^0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/gatsby-redirect-from/-/gatsby-redirect-from-0.4.3.tgz#8a7413f0bf0ce7e016e89ce9b07458c3a8951ccc"
-  integrity sha512-D51OXQ4gh4ASmoVAYo6jEgXtWvLNjwy8SjSwHU9lYitAXQgn2pJd2+4jpgHYjD0YvSf4s8VBACESJ7pJvN8vVQ==
+gatsby-redirect-from@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/gatsby-redirect-from/-/gatsby-redirect-from-0.5.0.tgz#007380b29795bd9eb89fd2db6004d6e3d169a599"
+  integrity sha512-OOGFdfDJPPdaWHgD5OA6JGanaAfCzij0wJ4XffxnemcFJsVZoOfKhLXxwFSXQ/+YW9S0NchGfpM4ycZ4Z517pw==
 
 gatsby-remark-autolink-headers@^5.6.0:
   version "5.7.0"
