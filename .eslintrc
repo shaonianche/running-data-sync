@@ -1,0 +1,11 @@
+// https://github.com/antfu/eslint-config
+{
+  "extends": "@antfu",
+  "rules": {
+    // note you must disable the base rule as it can report incorrect errors
+    "space-before-blocks": "off",
+    "@typescript-eslint/space-before-blocks": [
+      "error"
+    ]
+  }
+}

@@ -1,18 +1,18 @@
 module.exports = {
-  pathPrefix: "/",
+  pathPrefix: '/',
   siteMetadata: {
-    siteTitle: "Running",
-    siteUrl: "https://run.duangfei.org/",
-    description: "Personal site and blog",
-    logo: "https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg",
+    siteTitle: 'Running',
+    siteUrl: 'https://run.duangfei.org/',
+    description: 'Personal site and blog',
+    logo: 'https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg',
     navLinks: [
       {
-        name: "Blog",
-        url: "https://blog.duanfei.org",
+        name: 'Blog',
+        url: 'https://blog.duanfei.org',
       },
       {
-        name: "About",
-        url: "https://blog.duanfei.org/about",
+        name: 'About',
+        url: 'https://blog.duanfei.org/about',
       },
     ],
   },
@@ -89,6 +89,7 @@ module.exports = {
     'gatsby-transformer-sharp',
     'gatsby-plugin-sharp',
     'gatsby-plugin-sitemap',
+    'gatsby-plugin-postcss',
     {
       resolve: 'gatsby-plugin-robots-txt',
       options: {
@@ -96,4 +97,4 @@ module.exports = {
       },
     },
   ],
-};
+}

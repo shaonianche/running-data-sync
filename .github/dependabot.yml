@@ -1,26 +1,26 @@
 version: 2
 updates:
-  - package-ecosystem: 'npm'
-    directory: '/'
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: 'daily'
+      interval: daily
     commit-message:
       # Prefix all commit messages with "npm"
-      prefix: 'npm'
+      prefix: npm
     open-pull-requests-limit: 10
 
   - package-ecosystem: pip
-    directory: '/'
+    directory: /
     schedule:
-      interval: 'daily'
+      interval: daily
     open-pull-requests-limit: 10
 
-  - package-ecosystem: 'github-actions'
+  - package-ecosystem: github-actions
     # Workflow files stored in the
     # default location of `.github/workflows`
-    directory: '/'
+    directory: /
     schedule:
-      interval: 'daily'
+      interval: daily
     commit-message:
       # Prefix all commit messages with "npm"
-      prefix: 'github-actions'
+      prefix: github-actions
