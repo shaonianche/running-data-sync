@@ -23,7 +23,7 @@
     "ci": "yarn run check && yarn run build && yarn run test"
   },
   "dependencies": {
-    "@mapbox/mapbox-gl-language": "^0.10.1",
+    "@mapbox/mapbox-gl-language": "^1.0.0",
     "@mapbox/polyline": "^1.1.1",
     "classnames": "^2.2.6",
     "date-fns": "^2.14.0",
