@@ -19,6 +19,7 @@ module.exports = {
 
   plugins: [
     'gatsby-transformer-json',
+    'gatsby-plugin-postcss',
     {
       resolve: 'gatsby-source-filesystem',
       options: {
@@ -35,24 +36,6 @@ module.exports = {
       resolve: 'gatsby-alias-imports',
       options: {
         rootFolder: './',
-      },
-    },
-    'gatsby-plugin-react-helmet',
-    {
-      resolve: 'gatsby-transformer-remark',
-      options: {
-        plugins: [
-          'gatsby-remark-responsive-iframe',
-          'gatsby-remark-smartypants',
-          'gatsby-remark-widows',
-          'gatsby-remark-external-links',
-          {
-            resolve: 'gatsby-remark-autolink-headers',
-            options: {
-              className: 'header-link',
-            },
-          },
-        ],
       },
     },
     {
@@ -84,16 +67,6 @@ module.exports = {
         theme_color: '#e1e1e1',
         display: 'minimal-ui',
         icon: 'src/images/favicon.png', // This path is relative to the root of the site.
-      },
-    },
-    'gatsby-transformer-sharp',
-    'gatsby-plugin-sharp',
-    'gatsby-plugin-sitemap',
-    'gatsby-plugin-postcss',
-    {
-      resolve: 'gatsby-plugin-robots-txt',
-      options: {
-        policy: [{ userAgent: '*', allow: '/' }],
       },
     },
   ],
