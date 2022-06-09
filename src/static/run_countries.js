@@ -3210,6 +3210,6 @@ const chinaGeojson = {
       },
     },
   ],
-};
+}
 
-export { chinaGeojson };
+export { chinaGeojson }

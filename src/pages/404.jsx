@@ -1,9 +1,9 @@
-import React from 'react';
-import Layout from 'src/components/Layout';
-import useSiteMetadata from 'src/hooks/useSiteMetadata';
+import React from 'react'
+import Layout from 'src/components/Layout'
+import useSiteMetadata from 'src/hooks/useSiteMetadata'
 
 const NotFoundPage = () => {
-  const { siteUrl } = useSiteMetadata();
+  const { siteUrl } = useSiteMetadata()
   return (
     <Layout>
       <h1 className="f-headline">404</h1>
@@ -15,7 +15,7 @@ const NotFoundPage = () => {
         </a>
       </p>
     </Layout>
-  );
-};
+  )
+}
 
-export default NotFoundPage;
+export default NotFoundPage

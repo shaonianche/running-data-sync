@@ -1,15 +1,15 @@
-import React from 'react';
-import YearStat from 'src/components/YearStat';
-import useActivities from 'src/hooks/useActivities';
-import { INFO_MESSAGE } from 'src/utils/const';
+import React from 'react'
+import YearStat from 'src/components/YearStat'
+import useActivities from 'src/hooks/useActivities'
+import { INFO_MESSAGE } from 'src/utils/const'
 
 const YearsStat = ({ year, onClick }) => {
-  const { years } = useActivities();
+  const { years } = useActivities()
   // make sure the year click on front
-  let yearsArrayUpdate = years.slice();
-  yearsArrayUpdate.push('Total');
-  yearsArrayUpdate = yearsArrayUpdate.filter((x) => x !== year);
-  yearsArrayUpdate.unshift(year);
+  let yearsArrayUpdate = years.slice()
+  yearsArrayUpdate.push('Total')
+  yearsArrayUpdate = yearsArrayUpdate.filter(x => x !== year)
+  yearsArrayUpdate.unshift(year)
 
   // for short solution need to refactor
   return (
@@ -21,16 +21,18 @@ const YearsStat = ({ year, onClick }) => {
         </p>
       </section>
       <hr color="red" />
-      {yearsArrayUpdate.map((year) => (
+      {yearsArrayUpdate.map(year => (
         <YearStat key={year} year={year} onClick={onClick} />
       ))}
-      {yearsArrayUpdate.hasOwnProperty('Total') ? (
+      {yearsArrayUpdate.hasOwnProperty('Total')
+        ? (
         <YearStat key="Total" year="Total" onClick={onClick} />
-      ) : (
+          )
+        : (
         <div />
-      )}
+          )}
     </div>
-  );
-};
+  )
+}
 
-export default YearsStat;
+export default YearsStat

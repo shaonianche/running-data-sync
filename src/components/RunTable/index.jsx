@@ -1,50 +1,50 @@
-import React, { useState } from 'react';
-import { MAIN_COLOR } from 'src/utils/const';
-import { sortDateFunc, sortDateFuncReverse } from 'src/utils/utils';
-import RunRow from './RunRow';
-import styles from './style.module.scss';
+import React, { useState } from 'react'
+import { MAIN_COLOR } from 'src/utils/const'
+import { sortDateFunc, sortDateFuncReverse } from 'src/utils/utils'
+import RunRow from './RunRow'
+import styles from './style.module.scss'
 
 const RunTable = ({
   runs,
   locateActivity,
   setActivity,
   runIndex,
-  setRunIndex
+  setRunIndex,
 }) => {
-  const [sortFuncInfo, setSortFuncInfo] = useState('');
+  const [sortFuncInfo, setSortFuncInfo] = useState('')
   // TODO refactor?
   const sortKMFunc = (a, b) =>
-    sortFuncInfo === 'KM' ? a.distance - b.distance : b.distance - a.distance;
+    sortFuncInfo === 'KM' ? a.distance - b.distance : b.distance - a.distance
   const sortPaceFunc = (a, b) =>
     sortFuncInfo === 'Pace'
       ? a.average_speed - b.average_speed
-      : b.average_speed - a.average_speed;
+      : b.average_speed - a.average_speed
   const sortBPMFunc = (a, b) =>
     sortFuncInfo === 'BPM'
       ? a.average_heartrate - b.average_heartrate
-      : b.average_heartrate - a.average_heartrate;
-  const sortDateFuncClick =
-    sortFuncInfo === 'Date' ? sortDateFunc : sortDateFuncReverse;
+      : b.average_heartrate - a.average_heartrate
+  const sortDateFuncClick
+    = sortFuncInfo === 'Date' ? sortDateFunc : sortDateFuncReverse
   const sortFuncMap = new Map([
     ['KM', sortKMFunc],
     ['Pace', sortPaceFunc],
     ['BPM', sortBPMFunc],
-    ['Date', sortDateFuncClick]
-  ]);
+    ['Date', sortDateFuncClick],
+  ])
   const handleClick = (e) => {
-    const funcName = e.target.innerHTML;
-    if (sortFuncInfo === funcName) {
-      setSortFuncInfo('');
-    } else {
-      setSortFuncInfo(funcName);
-    }
-    const f = sortFuncMap.get(e.target.innerHTML);
+    const funcName = e.target.innerHTML
+    if (sortFuncInfo === funcName)
+      setSortFuncInfo('')
+    else
+      setSortFuncInfo(funcName)
+
+    const f = sortFuncMap.get(e.target.innerHTML)
     if (runIndex !== -1) {
-      const el = document.getElementsByClassName(styles.runRow);
-      el[runIndex].style.color = MAIN_COLOR;
+      const el = document.getElementsByClassName(styles.runRow)
+      el[runIndex].style.color = MAIN_COLOR
     }
-    setActivity(runs.sort(f));
-  };
+    setActivity(runs.sort(f))
+  }
 
   return (
     <div className={styles.tableContainer}>
@@ -52,15 +52,15 @@ const RunTable = ({
         <thead>
           <tr>
             <th />
-            {Array.from(sortFuncMap.keys()).map((k) => (
-              <th key={k} onClick={(e) => handleClick(e)}>
+            {Array.from(sortFuncMap.keys()).map(k => (
+              <th key={k} onClick={e => handleClick(e)}>
                 {k}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {runs.map((run) => (
+          {runs.map(run => (
             <RunRow
               runs={runs}
               run={run}
@@ -73,7 +73,7 @@ const RunTable = ({
         </tbody>
       </table>
     </div>
-  );
-};
+  )
+}
 
-export default RunTable;
+export default RunTable

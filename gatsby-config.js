@@ -1,24 +1,25 @@
 module.exports = {
-  pathPrefix: "/",
+  pathPrefix: '/',
   siteMetadata: {
-    siteTitle: "Running",
-    siteUrl: "https://run.duangfei.org/",
-    description: "Personal site and blog",
-    logo: "https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg",
+    siteTitle: 'Running',
+    siteUrl: 'https://run.duangfei.org/',
+    description: 'Personal site and blog',
+    logo: 'https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg',
     navLinks: [
       {
-        name: "Blog",
-        url: "https://blog.duanfei.org",
+        name: 'Blog',
+        url: 'https://blog.duanfei.org',
       },
       {
-        name: "About",
-        url: "https://blog.duanfei.org/about",
+        name: 'About',
+        url: 'https://blog.duanfei.org/about',
       },
     ],
   },
 
   plugins: [
     'gatsby-transformer-json',
+    'gatsby-plugin-postcss',
     {
       resolve: 'gatsby-source-filesystem',
       options: {
@@ -35,24 +36,6 @@ module.exports = {
       resolve: 'gatsby-alias-imports',
       options: {
         rootFolder: './',
-      },
-    },
-    'gatsby-plugin-react-helmet',
-    {
-      resolve: 'gatsby-transformer-remark',
-      options: {
-        plugins: [
-          'gatsby-remark-responsive-iframe',
-          'gatsby-remark-smartypants',
-          'gatsby-remark-widows',
-          'gatsby-remark-external-links',
-          {
-            resolve: 'gatsby-remark-autolink-headers',
-            options: {
-              className: 'header-link',
-            },
-          },
-        ],
       },
     },
     {
@@ -86,14 +69,5 @@ module.exports = {
         icon: 'src/images/favicon.png', // This path is relative to the root of the site.
       },
     },
-    'gatsby-transformer-sharp',
-    'gatsby-plugin-sharp',
-    'gatsby-plugin-sitemap',
-    {
-      resolve: 'gatsby-plugin-robots-txt',
-      options: {
-        policy: [{ userAgent: '*', allow: '/' }],
-      },
-    },
   ],
-};
+}

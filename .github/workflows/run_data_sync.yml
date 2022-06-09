@@ -22,7 +22,6 @@ env:
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: duanfei.job@gmail.com
 
-
 jobs:
   sync:
     name: Sync
@@ -91,4 +90,4 @@ jobs:
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
           dst_token: ${{ secrets.GITEE_TOKEN }}
           force_update: true
-          static_list: 'running-data-sync'
+          static_list: running-data-sync

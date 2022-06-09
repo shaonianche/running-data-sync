@@ -1,9 +1,9 @@
-import { Link } from 'gatsby';
-import React from 'react';
-import useSiteMetadata from 'src/hooks/useSiteMetadata';
+import { Link } from 'gatsby'
+import React from 'react'
+import useSiteMetadata from 'src/hooks/useSiteMetadata'
 
 const Header = ({ siteTitle }) => {
-  const { logo, siteUrl, navLinks } = useSiteMetadata();
+  const { logo, siteUrl, navLinks } = useSiteMetadata()
 
   return (
     <div>
@@ -31,7 +31,7 @@ const Header = ({ siteTitle }) => {
         </div>
       </nav>
     </div>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header
