@@ -23,7 +23,7 @@
     "ci": "yarn run check && yarn run build && yarn run test"
   },
   "dependencies": {
-    "@mapbox/mapbox-gl-language": "^0.10.1",
+    "@mapbox/mapbox-gl-language": "^1.0.0",
     "@mapbox/polyline": "^1.1.1",
     "classnames": "^2.2.6",
     "date-fns": "^2.14.0",
@@ -42,7 +42,7 @@
     "react-helmet": "^6.1.0",
     "react-map-gl": "^5.2.11",
     "sass": "^1.50.0",
-    "sass-mq": "^5.0.1",
+    "sass-mq": "^6.0.0",
     "styled-components": "^4.4.1",
     "tachyons": "^4.12.0",
     "tachyons-sass": "^4.9.5",

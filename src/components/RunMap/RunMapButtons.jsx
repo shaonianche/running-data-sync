@@ -1,43 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import useActivities from 'src/hooks/useActivities';
-import { MAIN_COLOR } from 'src/utils/const';
-import styles from './style.module.scss';
+import React, { useEffect, useState } from 'react'
+import useActivities from 'src/hooks/useActivities'
+import { MAIN_COLOR } from 'src/utils/const'
+import styles from './style.module.scss'
 
 const RunMapButtons = ({ changeYear, thisYear, mapButtonYear }) => {
-  const elements = document.getElementsByClassName(styles.button);
-  const { years } = useActivities();
-  const yearsButtons = years.slice();
-  yearsButtons.push('Total');
-  const [index, setIndex] = useState(0);
+  const elements = document.getElementsByClassName(styles.button)
+  const { years } = useActivities()
+  const yearsButtons = years.slice()
+  yearsButtons.push('Total')
+  const [index, setIndex] = useState(0)
   const handleClick = (e, year) => {
-    const elementIndex = yearsButtons.indexOf(year);
-    e.target.style.color = MAIN_COLOR;
+    const elementIndex = yearsButtons.indexOf(year)
+    e.target.style.color = MAIN_COLOR
 
-    if (index !== elementIndex) {
-      elements[index].style.color = 'white';
-    }
-    setIndex(elementIndex);
-  };
+    if (index !== elementIndex)
+      elements[index].style.color = 'white'
+
+    setIndex(elementIndex)
+  }
   useEffect(() => {
-    if (elements[index]) {
-      elements[index].style.color = 'white';
-    }
-    if (elements[yearsButtons.indexOf(mapButtonYear)]) {
-      elements[yearsButtons.indexOf(mapButtonYear)].style.color = MAIN_COLOR;
-    }
-    setIndex(yearsButtons.indexOf(mapButtonYear));
-  });
+    if (elements[index])
+      elements[index].style.color = 'white'
+
+    if (elements[yearsButtons.indexOf(mapButtonYear)])
+      elements[yearsButtons.indexOf(mapButtonYear)].style.color = MAIN_COLOR
+
+    setIndex(yearsButtons.indexOf(mapButtonYear))
+  })
   return (
     <div>
       <ul className={styles.buttons}>
-        {yearsButtons.map((year) => (
+        {yearsButtons.map(year => (
           <li
             key={`${year}button`}
             style={{ color: year === thisYear ? MAIN_COLOR : 'white' }}
             year={year}
             onClick={(e) => {
-              changeYear(year);
-              handleClick(e, year);
+              changeYear(year)
+              handleClick(e, year)
             }}
             className={styles.button}
           >
@@ -46,7 +46,7 @@ const RunMapButtons = ({ changeYear, thisYear, mapButtonYear }) => {
         ))}
       </ul>
     </div>
-  );
-};
+  )
+}
 
-export default RunMapButtons;
+export default RunMapButtons

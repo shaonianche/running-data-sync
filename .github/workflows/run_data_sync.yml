@@ -22,7 +22,6 @@ env:
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: duanfei.job@gmail.com
 
-
 jobs:
   sync:
     name: Sync
@@ -35,7 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3.1.1
+        uses: actions/setup-python@v4.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -91,4 +90,4 @@ jobs:
           dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}
           dst_token: ${{ secrets.GITEE_TOKEN }}
           force_update: true
-          static_list: 'running-data-sync'
+          static_list: running-data-sync

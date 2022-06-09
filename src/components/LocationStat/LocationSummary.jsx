@@ -1,10 +1,10 @@
-import React from 'react';
-import Stat from 'src/components/Stat';
-import useActivities from 'src/hooks/useActivities';
+import React from 'react'
+import Stat from 'src/components/Stat'
+import useActivities from 'src/hooks/useActivities'
 
 // only support China for now
 const LocationSummary = () => {
-  const { years, countries, provinces, cities } = useActivities();
+  const { years, countries, provinces, cities } = useActivities()
   return (
     <div style={{ cursor: 'pointer' }}>
       <section>
@@ -17,7 +17,7 @@ const LocationSummary = () => {
       </section>
       <hr color="red" />
     </div>
-  );
-};
+  )
+}
 
-export default LocationSummary;
+export default LocationSummary

@@ -1,8 +1,8 @@
-import React from 'react';
-import YearStat from 'src/components/YearStat';
-import CitiesStat from './CitiesStat';
-import LocationSummary from './LocationSummary';
-import PeriodStat from './PeriodStat';
+import React from 'react'
+import YearStat from 'src/components/YearStat'
+import CitiesStat from './CitiesStat'
+import LocationSummary from './LocationSummary'
+import PeriodStat from './PeriodStat'
 
 const LocationStat = ({ changeYear, changeCity, changeTitle }) => (
   <div className="fl w-100 w-30-l pb5 pr5-l">
@@ -15,6 +15,6 @@ const LocationStat = ({ changeYear, changeCity, changeTitle }) => (
     <PeriodStat onClick={changeTitle} />
     <YearStat year="Total" onClick={changeYear} />
   </div>
-);
+)
 
-export default LocationStat;
+export default LocationStat

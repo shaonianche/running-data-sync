@@ -1,18 +1,18 @@
-import MapboxLanguage from '@mapbox/mapbox-gl-language';
-import React from 'react';
-import ReactMapGL, { Layer, Source } from 'react-map-gl';
-import useActivities from 'src/hooks/useActivities';
+import MapboxLanguage from '@mapbox/mapbox-gl-language'
+import React from 'react'
+import ReactMapGL, { Layer, Source } from 'react-map-gl'
+import useActivities from 'src/hooks/useActivities'
 import {
   IS_CHINESE,
   MAIN_COLOR,
   MAPBOX_TOKEN,
-  PROVINCE_FILL_COLOR
-} from 'src/utils/const';
-import { geoJsonForMap } from 'src/utils/utils';
-import RunMarker from './RunMaker';
-import RunMapButtons from './RunMapButtons';
-import styles from './style.module.scss';
-require('mapbox-gl/dist/mapbox-gl.css');
+  PROVINCE_FILL_COLOR,
+} from 'src/utils/const'
+import { geoJsonForMap } from 'src/utils/utils'
+import RunMarker from './RunMaker'
+import RunMapButtons from './RunMapButtons'
+import styles from './style.module.scss'
+require('mapbox-gl/dist/mapbox-gl.css')
 
 const RunMap = ({
   title,
@@ -21,44 +21,43 @@ const RunMap = ({
   changeYear,
   geoData,
   thisYear,
-  mapButtonYear
+  mapButtonYear,
 }) => {
-  const { provinces } = useActivities();
+  const { provinces } = useActivities()
   const addControlHandler = (event) => {
-    const map = event && event.target;
+    const map = event && event.target
     // set lauguage to Chinese if you use English please comment it
     if (map && IS_CHINESE) {
       map.addControl(
         new MapboxLanguage({
-          defaultLanguage: 'zh'
-        })
-      );
+          defaultLanguage: 'zh',
+        }),
+      )
       map.setLayoutProperty('country-label-lg', 'text-field', [
         'get',
-        'name_zh'
-      ]);
+        'name_zh',
+      ])
     }
-  };
-  const filterProvinces = provinces.slice();
-  // for geojson format
-  filterProvinces.unshift('in', 'name');
-
-  const isBigMap = viewport.zoom <= 3;
-  if (isBigMap && IS_CHINESE) {
-    geoData = geoJsonForMap();
   }
+  const filterProvinces = provinces.slice()
+  // for geojson format
+  filterProvinces.unshift('in', 'name')
 
-  const isSingleRun =
-    geoData.features.length === 1 &&
-    geoData.features[0].geometry.coordinates.length;
-  let startLon;
-  let startLat;
-  let endLon;
-  let endLat;
+  const isBigMap = viewport.zoom <= 3
+  if (isBigMap && IS_CHINESE)
+    geoData = geoJsonForMap()
+
+  const isSingleRun
+    = geoData.features.length === 1
+    && geoData.features[0].geometry.coordinates.length
+  let startLon
+  let startLat
+  let endLon
+  let endLat
   if (isSingleRun) {
     const points = geoData.features[0].geometry.coordinates;
     [startLon, startLat] = points[0];
-    [endLon, endLat] = points[points.length - 1];
+    [endLon, endLat] = points[points.length - 1]
   }
 
   return (
@@ -79,7 +78,7 @@ const RunMap = ({
           id="prvince"
           type="fill"
           paint={{
-            'fill-color': PROVINCE_FILL_COLOR
+            'fill-color': PROVINCE_FILL_COLOR,
           }}
           filter={filterProvinces}
         />
@@ -88,11 +87,11 @@ const RunMap = ({
           type="line"
           paint={{
             'line-color': MAIN_COLOR,
-            'line-width': isBigMap ? 1 : 2
+            'line-width': isBigMap ? 1 : 2,
           }}
           layout={{
             'line-join': 'round',
-            'line-cap': 'round'
+            'line-cap': 'round',
           }}
         />
       </Source>
@@ -106,7 +105,7 @@ const RunMap = ({
       )}
       <span className={styles.runTitle}>{title}</span>
     </ReactMapGL>
-  );
-};
+  )
+}
 
-export default RunMap;
+export default RunMap

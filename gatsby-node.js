@@ -1,5 +1,5 @@
 exports.createSchemaCustomization = ({ actions }) => {
-  const { createTypes } = actions;
+  const { createTypes } = actions
   const typeDefs = `
     type ActivitiesJson implements Node @dontInfer {
       id: String
@@ -16,6 +16,6 @@ exports.createSchemaCustomization = ({ actions }) => {
       streak: Float
       summary_polyline: String
     }
-  `;
-  createTypes(typeDefs);
-};
+  `
+  createTypes(typeDefs)
+}

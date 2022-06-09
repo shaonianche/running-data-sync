@@ -1,12 +1,12 @@
-import React from 'react';
-import Stat from 'src/components/Stat';
-import useActivities from 'src/hooks/useActivities';
+import React from 'react'
+import Stat from 'src/components/Stat'
+import useActivities from 'src/hooks/useActivities'
 
 const PeriodStat = ({ onClick }) => {
-  const { runPeriod } = useActivities();
+  const { runPeriod } = useActivities()
 
-  const periodArr = Object.entries(runPeriod);
-  periodArr.sort((a, b) => b[1] - a[1]);
+  const periodArr = Object.entries(runPeriod)
+  periodArr.sort((a, b) => b[1] - a[1])
   return (
     <div style={{ cursor: 'pointer' }}>
       <section>
@@ -22,7 +22,7 @@ const PeriodStat = ({ onClick }) => {
       </section>
       <hr color="red" />
     </div>
-  );
-};
+  )
+}
 
-export default PeriodStat;
+export default PeriodStat
