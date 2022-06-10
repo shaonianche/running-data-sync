@@ -1,5 +1,6 @@
 import * as mapboxPolyline from '@mapbox/polyline'
-import { WebMercatorViewport } from 'react-map-gl'
+import { WebMercatorViewport } from 'viewport-mercator-project'
+// import { WebMercatorViewport } from 'react-map-gl'
 import { chinaGeojson } from '../static/run_countries'
 import { MUNICIPALITY_CITIES_ARR, RUN_TITLES } from './const'
 
