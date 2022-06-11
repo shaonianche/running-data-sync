@@ -20,7 +20,7 @@ import {
   titleForShow,
 } from 'src/utils/utils'
 
-export default () => {
+const Index = () => {
   const { siteTitle } = useSiteMetadata()
   const { activities, thisYear } = useActivities()
   const [year, setYear] = useState(thisYear)
@@ -81,7 +81,7 @@ export default () => {
   useEffect(() => {
     setViewport({
       width: '100%',
-      height: 400,
+      height: 500,
       ...bounds,
     })
   }, [geoData])
@@ -187,7 +187,7 @@ export default () => {
             geoData={geoData}
             setViewport={setViewport}
             changeYear={changeYear}
-            thisYear={thisYear}
+            thisYear={year}
           />
           {year === 'Total'
             ? (
@@ -208,3 +208,5 @@ export default () => {
     </Layout>
   )
 }
+
+export default Index
