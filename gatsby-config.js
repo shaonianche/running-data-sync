@@ -1,10 +1,10 @@
 module.exports = {
-  pathPrefix: '/',
+  pathPrefix: './',
   siteMetadata: {
     siteTitle: 'Running',
     siteUrl: 'https://run.duangfei.org/',
     description: 'Personal site and blog',
-    logo: 'https://raw.githubusercontent.com/shaonianche/gallery/master/running_page/running_page_logo_600*600.jpg',
+    logo: './logo.jpg',
     navLinks: [
       {
         name: 'Blog',
@@ -23,13 +23,8 @@ module.exports = {
     {
       resolve: 'gatsby-source-filesystem',
       options: {
+        name: 'static',
         path: './src/static/',
-      },
-    },
-    {
-      resolve: 'gatsby-source-filesystem',
-      options: {
-        path: './src/images/',
       },
     },
     {
@@ -53,7 +48,7 @@ module.exports = {
       resolve: 'gatsby-plugin-react-svg',
       options: {
         rule: {
-          include: /assets/,
+          include: '/assets/',
         },
       },
     },
@@ -66,7 +61,7 @@ module.exports = {
         background_color: '#1A1A1A',
         theme_color: '#1A1A1A',
         display: 'minimal-ui',
-        icon: 'src/images/favicon.png', // This path is relative to the root of the site.
+        icon: './static/favicon.png', // This path is relative to the root of the site.
       },
     },
   ],

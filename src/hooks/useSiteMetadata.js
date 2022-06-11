@@ -16,14 +16,6 @@ const useSiteMetadata = () => {
             }
           }
         }
-        allFile(filter: { sourceInstanceName: { eq: "images" } }) {
-          edges {
-            node {
-              name
-              publicURL
-            }
-          }
-        }
       }
     `,
   )
