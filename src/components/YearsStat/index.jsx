@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react'
 import YearStat from 'src/components/YearStat'
 import useActivities from 'src/hooks/useActivities'

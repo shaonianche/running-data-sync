@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react'
 import Layout from 'src/components/Layout'
 import useSiteMetadata from 'src/hooks/useSiteMetadata'

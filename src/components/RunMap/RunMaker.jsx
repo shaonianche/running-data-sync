@@ -1,3 +1,4 @@
+// @ts-nocheck
 import EndSvg from 'assets/end.svg'
 import StartSvg from 'assets/start.svg'
 import React from 'react'

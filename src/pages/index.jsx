@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useEffect, useState } from 'react'
 import Layout from 'src/components/Layout'
 import LocationStat from 'src/components/LocationStat'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState } from 'react'
 import { MAIN_COLOR } from 'src/utils/const'
 import { sortDateFunc, sortDateFuncReverse } from 'src/utils/utils'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { graphql, useStaticQuery } from 'gatsby'
 import { locationForRun, titleForRun } from 'src/utils/utils'
 

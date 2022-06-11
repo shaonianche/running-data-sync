@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { Link } from 'gatsby'
 import React from 'react'
-import useSiteMetadata from 'src/hooks/useSiteMetadata'
+import useSiteMetadata from '/src/hooks/useSiteMetadata'
 
 const Header = () => {
   const { logo, siteUrl, navLinks } = useSiteMetadata()

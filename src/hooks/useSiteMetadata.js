@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { graphql, useStaticQuery } from 'gatsby'
 
 const useSiteMetadata = () => {
