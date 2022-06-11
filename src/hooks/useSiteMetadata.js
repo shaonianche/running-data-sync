@@ -8,8 +8,8 @@ const useSiteMetadata = () => {
           siteMetadata {
             siteTitle
             siteUrl
-            description
             logo
+            description
             navLinks {
               name
               url

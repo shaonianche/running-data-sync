@@ -1,5 +1,5 @@
 module.exports = {
-  pathPrefix: './',
+  pathPrefix: '/',
   siteMetadata: {
     siteTitle: 'Running',
     siteUrl: 'https://run.duangfei.org/',
@@ -48,7 +48,7 @@ module.exports = {
       resolve: 'gatsby-plugin-react-svg',
       options: {
         rule: {
-          include: '/assets/',
+          include: /assets/,
         },
       },
     },

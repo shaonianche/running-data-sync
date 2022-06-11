@@ -38,7 +38,6 @@ const useActivities = () => {
     const location = locationForRun(run)
 
     const periodName = titleForRun(run)
-
     if (periodName) {
       runPeriod[periodName] = runPeriod[periodName]
         ? runPeriod[periodName] + 1
@@ -46,7 +45,6 @@ const useActivities = () => {
     }
 
     const { city, province, country } = location
-
     // drop only one char city
     if (city.length > 1)
       cities[city] = cities[city] ? cities[city] + run.distance : run.distance
