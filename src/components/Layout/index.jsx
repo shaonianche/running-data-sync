@@ -1,3 +1,4 @@
+
 import PropTypes from 'prop-types'
 import React from 'react'
 import { Helmet } from 'react-helmet'
@@ -13,7 +14,6 @@ const Layout = ({ children }) => {
     <div>
       <Helmet bodyAttributes={{ class: styles.body }}>
         <html lang="en" />
-        {/* <title>{title}</title> */}
         <meta name="description" content={description} />
         <meta name="keywords" content="running" />
         <meta
