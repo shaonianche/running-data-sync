@@ -15,7 +15,7 @@ const YearsStat = ({ year, onClick }) => {
   return (
     <div className="fl w-100 w-30-l pb5 pr5-l">
       <section className="pb4" style={{ paddingBottom: '0rem' }}>
-        <p>
+        <p style={{ lineHeight: 1.8 }}>
           {INFO_MESSAGE(years.length, year)}
           <br />
         </p>

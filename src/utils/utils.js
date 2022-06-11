@@ -1,14 +1,13 @@
 import * as mapboxPolyline from '@mapbox/polyline'
-import { WebMercatorViewport } from 'viewport-mercator-project'
-// import { WebMercatorViewport } from 'react-map-gl'
+import gcoord from 'gcoord'
+import { WebMercatorViewport } from 'react-map-gl'
 import { chinaGeojson } from '../static/run_countries'
-import { MUNICIPALITY_CITIES_ARR, RUN_TITLES } from './const'
+import { MUNICIPALITY_CITIES_ARR, NEED_FIX_MAP, RUN_TITLES } from './const'
 
 const titleForShow = (run) => {
   const date = run.start_date_local.slice(0, 11)
   const distance = (run.distance / 1000.0).toFixed(1)
   let name = 'Run'
-
   if (run.name.slice(0, 7) === 'Running')
     name = 'run'
 
@@ -29,6 +28,19 @@ const formatPace = (d) => {
   return `${minutes}:${seconds.toFixed(0).toString().padStart(2, '0')}`
 }
 
+const formatRunTime = (distance, pace) => {
+  if (Number.isNaN(distance) || Number.isNaN(pace))
+    return '0min'
+
+  const formatPace = (1000.0 / 60.0) * (1.0 / pace)
+  const minutes = Math.floor(formatPace * distance)
+  if (minutes === 0) {
+    const seconds = Math.floor((formatPace * distance - minutes) * 60.0)
+    return `${seconds}s`
+  }
+  return `${minutes}min`
+}
+
 // for scroll to the map
 const scrollToMap = () => {
   const el = document.querySelector('.fl.w-100.w-70-l')
@@ -40,12 +52,10 @@ const scrollToMap = () => {
 const locationForRun = (run) => {
   const location = run.location_country
   let [city, province, country] = ['', '', '']
-
   if (location) {
     // Only for Chinese now
     const cityMatch = location.match(/[\u4E00-\u9FA5]*(市|自治州)/)
     const provinceMatch = location.match(/[\u4E00-\u9FA5]*(省|自治区)/)
-
     if (cityMatch)
       [city] = cityMatch
 
@@ -57,28 +67,31 @@ const locationForRun = (run) => {
     let countryMatch = l[l.length - 1].match(
       /[\u4E00-\u9FA5].*[\u4E00-\u9FA5]/,
     )
-
     if (!countryMatch && l.length >= 3)
       countryMatch = l[2].match(/[\u4E00-\u9FA5].*[\u4E00-\u9FA5]/)
 
     if (countryMatch)
       [country] = countryMatch
   }
-
   if (MUNICIPALITY_CITIES_ARR.includes(city))
     province = city
 
   return { country, province, city }
 }
 
-const intComma = (x = '') => x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+const intComma = (x = '') => {
+  if (x.toString().length <= 5)
+    return x
+
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
 
 const pathForRun = (run) => {
   try {
     const c = mapboxPolyline.decode(run.summary_polyline)
     // reverse lat long for mapbox
     c.forEach((arr) => {
-      [arr[0], arr[1]] = [arr[1], arr[0]]
+      [arr[0], arr[1]] = !NEED_FIX_MAP ? [arr[1], arr[0]] : gcoord.transform([arr[1], arr[0]], gcoord.GCJ02, gcoord.WGS84)
     })
     return c
   }
@@ -91,7 +104,6 @@ const geoJsonForRuns = runs => ({
   type: 'FeatureCollection',
   features: runs.map((run) => {
     const points = pathForRun(run)
-
     if (!points)
       return null
 
@@ -110,20 +122,19 @@ const geoJsonForMap = () => chinaGeojson
 const titleForRun = (run) => {
   const runDistance = run.distance / 1000
   const runHour = +run.start_date_local.slice(11, 13)
-
   if (runDistance > 20 && runDistance < 40)
     return RUN_TITLES.HALF_MARATHON_RUN_TITLE
 
   if (runDistance >= 40)
     return RUN_TITLES.FULL_MARATHON_RUN_TITLE
 
-  if (runHour >= 0 && runHour <= 8)
+  if (runHour >= 0 && runHour <= 10)
     return RUN_TITLES.MORNING_RUN_TITLE
 
-  if (runHour > 8 && runHour <= 12)
-    return RUN_TITLES.LUNCH_RUN_TITLE
+  if (runHour > 10 && runHour <= 14)
+    return RUN_TITLES.MIDDAY_RUN_TITLE
 
-  if (runHour > 12 && runHour <= 18)
+  if (runHour > 14 && runHour <= 18)
     return RUN_TITLES.AFTERNOON_RUN_TITLE
 
   if (runHour > 18 && runHour <= 21)
@@ -133,11 +144,9 @@ const titleForRun = (run) => {
 }
 
 const applyToArray = (func, array) => func.apply(Math, array)
-
 const getBoundsForGeoData = (geoData) => {
   const { features } = geoData
   let points
-
   // find first have data
   for (const f of features) {
     if (f.geometry.coordinates.length) {
@@ -145,7 +154,6 @@ const getBoundsForGeoData = (geoData) => {
       break
     }
   }
-
   if (!points)
     return {}
 
@@ -161,7 +169,6 @@ const getBoundsForGeoData = (geoData) => {
     height: 600,
   }).fitBounds(cornersLongLat, { padding: 200 })
   let { longitude, latitude, zoom } = viewport
-
   if (features.length > 1)
     zoom = 11.5
 
@@ -181,12 +188,10 @@ const filterCityRuns = (run, city) => {
 
   return false
 }
-
 const filterTitleRuns = (run, title) => titleForRun(run) === title
 
 const filterAndSortRuns = (activities, item, filterFunc, sortFunc) => {
   let s = activities
-
   if (item !== 'Total')
     s = activities.filter(run => filterFunc(run, item))
 
@@ -215,4 +220,5 @@ export {
   sortDateFunc,
   sortDateFuncReverse,
   getBoundsForGeoData,
+  formatRunTime,
 }

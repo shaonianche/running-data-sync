@@ -29,11 +29,13 @@ const YearStat = ({ year, onClick }) => {
     sumDistance += run.distance || 0
     if (run.average_speed)
       pace += run.average_speed
+
     else
       paceNullCount++
 
     if (run.average_heartrate)
       heartRate += run.average_heartrate
+
     else
       heartRateNullCount++
 

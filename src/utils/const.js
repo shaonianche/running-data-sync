@@ -12,44 +12,62 @@ const MUNICIPALITY_CITIES_ARR = [
   '澳门特别行政区',
 ]
 
+// styling: set to `true` if you want dash-line route
+const USE_DASH_LINE = true
+// styling: route line opacity: [0, 1]
+const LINE_OPACITY = 0.4
+
 // IF you outside China please make sure IS_CHINESE = false
 const IS_CHINESE = true
 const USE_ANIMATION_FOR_GRID = false
-
-const CHINESE_INFO_MESSAGE = (yearLength, year) =>
-  `我用 App 记录自己跑步 ${yearLength} 年了，下面列表展示的是 ${year} 的数据`
-
+const CHINESE_INFO_MESSAGE = (yearLength, year) => {
+  const yearStr = year === 'Total' ? '所有' : ` ${year} `
+  return `我用 App 记录自己跑步 ${yearLength} 年了，下面列表展示的是${yearStr}的数据`
+}
 const ENGLISH_INFO_MESSAGE = (yearLength, year) =>
   `Running Journey with ${yearLength} Years, the table shows year ${year} data`
 
-const INFO_MESSAGE = IS_CHINESE ? ENGLISH_INFO_MESSAGE : ENGLISH_INFO_MESSAGE
+// not support English for now
+const CHINESE_LOCATION_INFO_MESSAGE_FIRST
+  = '我跑过了一些地方，希望随着时间推移，地图点亮的地方越来越多'
+const CHINESE_LOCATION_INFO_MESSAGE_SECOND = '不要停下来，不要停下奔跑的脚步'
 
-const FULL_MARATHON_RUN_TITLE = IS_CHINESE ? 'Full Marathon' : 'Full Marathon'
-const HALF_MARATHON_RUN_TITLE = IS_CHINESE ? 'Half Marathon' : 'Half Marathon'
-const MORNING_RUN_TITLE = IS_CHINESE ? 'Morning Run' : 'Morning Run'
-const LUNCH_RUN_TITLE = IS_CHINESE ? 'Lunch Run' : 'Lunch Run'
-const AFTERNOON_RUN_TITLE = IS_CHINESE ? 'Afternoon Run' : 'Afternoon Run'
-const EVENING_RUN_TITLE = IS_CHINESE ? 'Evening Run' : 'Evening Run'
-const NIGHT_RUN_TITLE = IS_CHINESE ? 'Night Run' : 'Night Run'
+const INFO_MESSAGE = IS_CHINESE ? CHINESE_INFO_MESSAGE : ENGLISH_INFO_MESSAGE
+const FULL_MARATHON_RUN_TITLE = IS_CHINESE ? '全程马拉松' : 'Full Marathon'
+const HALF_MARATHON_RUN_TITLE = IS_CHINESE ? '半程马拉松' : 'Half Marathon'
+const MORNING_RUN_TITLE = IS_CHINESE ? '清晨跑步' : 'Morning Run'
+const MIDDAY_RUN_TITLE = IS_CHINESE ? '午间跑步' : 'Midday Run'
+const AFTERNOON_RUN_TITLE = IS_CHINESE ? '午后跑步' : 'Afternoon Run'
+const EVENING_RUN_TITLE = IS_CHINESE ? '傍晚跑步' : 'Evening Run'
+const NIGHT_RUN_TITLE = IS_CHINESE ? '夜晚跑步' : 'Night Run'
 
 const RUN_TITLES = {
   FULL_MARATHON_RUN_TITLE,
   HALF_MARATHON_RUN_TITLE,
   MORNING_RUN_TITLE,
-  LUNCH_RUN_TITLE,
+  MIDDAY_RUN_TITLE,
   AFTERNOON_RUN_TITLE,
   EVENING_RUN_TITLE,
   NIGHT_RUN_TITLE,
 }
 
 export {
+  CHINESE_LOCATION_INFO_MESSAGE_FIRST,
+  CHINESE_LOCATION_INFO_MESSAGE_SECOND,
   MAPBOX_TOKEN,
   MUNICIPALITY_CITIES_ARR,
   IS_CHINESE,
   INFO_MESSAGE,
   RUN_TITLES,
+  USE_ANIMATION_FOR_GRID,
+  USE_DASH_LINE,
+  LINE_OPACITY,
 }
 
-const nike = 'rgb(224,237,94)'
+const nike = 'rgb(224,237,94)' // if you want change the main color change here src/styles/variables.scss
+
+// If your map has an offset please change this line
+// issues #92 and #198
+export const NEED_FIX_MAP = false
 export const MAIN_COLOR = nike
 export const PROVINCE_FILL_COLOR = '#47b8e0'
