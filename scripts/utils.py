@@ -3,7 +3,6 @@
 
 import json
 from datetime import datetime
-
 from stravalib.client import Client
 import pytz
 from generator import Generator
