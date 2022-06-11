@@ -1,7 +1,7 @@
 // const
 // https://account.mapbox.com/access-tokens
 const MAPBOX_TOKEN
-  = 'pk.eyJ1IjoiY215a2ZlaSIsImEiOiJja2d0NWpmbHQwdTU3MnltZnoxdXRuZGhkIn0.xWYvjezVwGkzWJ3NbUYRLQ'
+  = 'pk.eyJ1IjoiY215a2ZlaSIsImEiOiJjbDQ5NTZ6aDAwMHkwM2psa3FiemNqMmw1In0.OfV3cpXB1TK6wHOaoWOiIQ'
 
 const MUNICIPALITY_CITIES_ARR = [
   '北京市',
