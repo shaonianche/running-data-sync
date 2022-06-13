@@ -8151,6 +8151,11 @@ mitt@^1.2.0:
   resolved "https://registry.yarnpkg.com/mitt/-/mitt-1.2.0.tgz#cb24e6569c806e31bd4e3995787fe38a04fdf90d"
   integrity sha512-r6lj77KlwqLhIUku9UWYes7KJtsczvolZkzp8hbaDPPaE24OmWl5s539Mytlj22siEQKosZ26qCBgda2PKwoJw==
 
+mitt@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.npmmirror.com/mitt/-/mitt-3.0.0.tgz#69ef9bd5c80ff6f57473e8d89326d01c414be0bd"
+  integrity sha512-7dX2/10ITVyqh4aOSVI9gdape+t9l2/8QxHrFmUXu4EEUpdlxl6RudZUPZoc+zuY2hk1j7XxVroIVIan/pD/SQ==
+
 mjolnir.js@^2.5.0:
   version "2.7.0"
   resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.7.0.tgz#8aeec755644d8e9de4f247a5fd0718e39795fe6e"
@@ -11087,11 +11092,6 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==
-
-typescritp@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/typescritp/-/typescritp-1.0.0.tgz#7923ebbd3ec74f780633c8be2e8aa1d2ecac2b8f"
-  integrity sha512-88hSOM0JRNE+lY8LQvwebA6WCf54+FoDUQuNCuoBvHxu+tj76LteTUymKzwuS6VVAuBLfI5xcZyv88sj4yxDaw==
 
 ua-parser-js@^0.7.30:
   version "0.7.31"
