@@ -20,6 +20,7 @@ module.exports = {
   plugins: [
     'gatsby-transformer-json',
     'gatsby-plugin-postcss',
+    'gatsby-plugin-react-helmet',
     {
       resolve: 'gatsby-source-filesystem',
       options: {
@@ -57,7 +58,7 @@ module.exports = {
       options: {
         name: 'gatsby-starter-default',
         short_name: 'starter',
-        start_url: '/',
+        start_url: './',
         background_color: '#1A1A1A',
         theme_color: '#1A1A1A',
         display: 'minimal-ui',
