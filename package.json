@@ -19,8 +19,7 @@
     "dev": "gatsby develop",
     "serve": "gatsby serve",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "ci": "yarn run check && yarn run build"
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@antfu/eslint-config-react": "^0.25.1",
@@ -70,6 +69,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.1",
+    "@typescript-eslint/eslint-plugin": "^5.29.0",
     "eslint": "^8.17.0"
   }
 }

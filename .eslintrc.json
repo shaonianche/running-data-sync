@@ -3,6 +3,7 @@
   "extends": "@antfu",
   "rules": {
     // Ignore TypeScript-ESLint Rules
+    "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": "off"
   }
 }
