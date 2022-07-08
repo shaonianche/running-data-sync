@@ -4,8 +4,9 @@
 *.pyc
 node_modules
 yarn-error.log
-
+pnpm-lock.yaml
 /public
+
 # Build directory
 /build
 .DS_Store
@@ -16,4 +17,3 @@ db.csv
 danpalmer.sql
 
 .mypy_cache
-
