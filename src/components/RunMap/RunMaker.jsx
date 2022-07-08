@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import EndSvg from 'assets/end.svg'
 import StartSvg from 'assets/start.svg'

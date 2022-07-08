@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
 import React from 'react'

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import React from 'react'
 import { MAIN_COLOR } from 'src/utils/const'
 import { formatPace, formatRunTime, titleForRun } from 'src/utils/utils'
@@ -15,10 +17,10 @@ const RunRow = ({ runs, run, locateActivity, runIndex, setRunIndex }) => {
 
   // change click color
   const handleClick = (e, runs, run) => {
-    const elements = document.getElementsByClassName(styles.runRow);
-    for(let i = 0; i < elements.length; i += 1) {
+    const elements = document.getElementsByClassName(styles.runRow)
+    for (let i = 0; i < elements.length; i += 1)
       elements[i].style.color = MAIN_COLOR
-    }
+
     const elementIndex = runs.indexOf(run)
     e.target.parentElement.style.color = 'red'
 
