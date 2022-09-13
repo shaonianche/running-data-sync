@@ -3,9 +3,10 @@
 
 import json
 from datetime import datetime
-from stravalib.client import Client
+
 import pytz
 from generator import Generator
+from stravalib.client import Client
 
 
 def adjust_time(time, tz_name):
