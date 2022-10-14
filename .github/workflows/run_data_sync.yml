@@ -45,7 +45,7 @@ jobs:
           echo "::set-output name=PIP_CACHE::$(pip cache dir)"
 
       - name: Cache PIP
-        uses: actions/cache@v2
+        uses: actions/cache@v3.0.11
         with:
           path: ${{ steps.set_variables.outputs.PIP_CACHE }}
           key: Ubuntu-pip-${{ steps.set_variables.outputs.PY }}
