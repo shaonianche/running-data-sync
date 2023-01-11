@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useEffect, useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import Layout from 'src/components/Layout'
 import LocationStat from 'src/components/LocationStat'
 import RunMap from 'src/components/RunMap'
@@ -207,6 +208,7 @@ const Index = () => {
               )}
         </div>
       </div>
+      <Analytics />
     </Layout>
   )
 }
