@@ -30,6 +30,13 @@ module.exports = {
       },
     },
     {
+      resolve: "gatsby-plugin-vercel",
+      options: {
+        // (optional) Prints metrics in the console when true
+        debug: false,
+      },
+    },
+    {
       resolve: 'gatsby-alias-imports',
       options: {
         rootFolder: './',
