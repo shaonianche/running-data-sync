@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.11"]
 
     steps:
       - name: Checkout
@@ -56,7 +56,7 @@ jobs:
         if: steps.pip-cache.outputs.cache-hit != 'true'
 
       - name: Run sync Strava script
-        if: env.RUN_TYPE == 'strava'&& ${{ matrix.python-version == '3.8'}}
+        if: env.RUN_TYPE == 'strava'&& ${{ matrix.python-version == '3.11'}}
         run: |
           python scripts/strava_sync.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
 
@@ -81,7 +81,7 @@ jobs:
           git push || echo "nothing to push"
 
       - name: Gitee Sync
-        if: ${{ matrix.python-version == '3.8'}}
+        if: ${{ matrix.python-version == '3.11'}}
         uses: Yikun/hub-mirror-action@master
         with:
           src: github/shaonianche
