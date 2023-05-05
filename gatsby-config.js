@@ -8,11 +8,11 @@ module.exports = {
     navLinks: [
       {
         name: 'Blog',
-        url: 'https://blog.duanfei.org',
+        url: 'https://blog.duanfei.org/#/all-journals',
       },
       {
         name: 'About',
-        url: 'https://blog.duanfei.org/about',
+        url: 'https://blog.duanfei.org/#/page/contents',
       },
     ],
   },
