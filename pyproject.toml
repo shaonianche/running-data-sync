@@ -5,7 +5,7 @@ description = ""
 authors = [
 {name = "duanfei", email = "duanfei.job@gmail.com"},
 ]
-dependencies = ["httpx==0.24.0", "gpxpy==1.4.2", "stravalib", "appdirs>=1.4.0", "svgwrite>=1.1.9", "colour", "s2sphere", "arrow", "geopy", "polyline", "sqlalchemy", "timezonefinder", "pyyaml", "aiofiles", "cloudscraper==1.2.58"]
+dependencies = ["httpx==0.24.1", "gpxpy==1.4.2", "stravalib", "appdirs>=1.4.0", "svgwrite>=1.1.9", "colour", "s2sphere", "arrow", "geopy", "polyline", "sqlalchemy", "timezonefinder", "pyyaml", "aiofiles", "cloudscraper==1.2.58"]
 requires-python = ">=3.10"
 license = {text = "MIT"}
 
