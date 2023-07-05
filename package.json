@@ -22,7 +22,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@antfu/eslint-config-react": "^0.38.5",
+    "@antfu/eslint-config-react": "^0.39.7",
     "@mapbox/mapbox-gl-language": "^1.0.0",
     "@mapbox/polyline": "^1.1.1",
     "@vercel/analytics": "^0.1.6",
