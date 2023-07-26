@@ -8,7 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: raeperd/raeperd/google-drive-download-action@v1.0
+      - name: google-drive-download-action
+        uses: raeperd/google-drive-download-action@v1
         with:
           clientId: ${{ secrets.CLIENT_ID }}
           clientSecret: ${{ secrets.CLIENT_SECRET }}
