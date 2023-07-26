@@ -10,7 +10,7 @@
     "url": "https://github.com/yihong0618/running_page"
   },
   "engines": {
-    "node": ">=14.15.0"
+    "node": ">=18.17.0"
   },
   "scripts": {
     "data:clean": "rm scripts/data.db GPX_OUT/* activities/* src/static/activities.json",
