@@ -8,21 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: raeperd/raeperd/google-drive-download-action@v1.0
         with:
-          node-version: lts/gallium
-          cache: npm
-      - run: npm ci
-      - run: npm run all
-  get_fit: # make sure the action works on a clean machine without building
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: ./
-        with:
-          clientSecret: ${{ secrets.CLIENTSECRET }}
-          clientId: ${{ secrets.CLIENTID }}
-          redirectUri: ${{ secrets.REDIRECTURI }}
-          credential_json: ${{ secrets.CREDENTIALJSON }}
+          clientId: ${{ secrets.CLIENT_ID }}
+          clientSecret: ${{ secrets.CLIENT_SECRET }}
+          redirectUri: ${{ secrets.REDIRECT_URI }}
+          credential_json: ${{ secrets.CREDENTIAL_JSON }}
           q: "'1iWtlOyGYrmytsBogzuvh9W6IV2IqTolX' in parents"
-          path: "./FIT"
+          path: "./FIT_OUT"
