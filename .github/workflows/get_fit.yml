@@ -14,6 +14,6 @@ jobs:
           clientId: ${{ secrets.CLIENTID }}
           clientSecret: ${{ secrets.CLIENTSECRET }}
           redirectUri: ${{ secrets.REDIRECTURI }}
-          credential_json: ${{ secrets.CREDENTIALJSON }}
+          credential_json: ${{ secrets.CREDENTIAL_JSON }}
           q: "'1iWtlOyGYrmytsBogzuvh9W6IV2IqTolX' in parents"
           path: "./FIT_OUT"
