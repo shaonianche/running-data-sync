@@ -18,8 +18,8 @@ env:
   TITLE: Running Data
   MIN_GRID_DISTANCE: 10 # change min distance here
   TITLE_GRID: Over 5km Runs
-  GITHUB_NAME: ${{ env.GITHUB_EMAIL }}
-  GITHUB_EMAIL: ${{ env.GITHUB_NAME }}
+  GITHUB_NAME: shaonianche
+  GITHUB_EMAIL: github@duanfei.org
 
 jobs:
   sync:
