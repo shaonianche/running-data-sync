@@ -3,14 +3,26 @@ name: get fit
 on:
   workflow_dispatch:
 
-  runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v2
-        - uses: raeperd/raeperd/google-drive-download-action@v1.0
-          with:
-            clientId: ${{ secrets.CLIENT_ID }}
-            clientSecret: ${{ secrets.CLIENT_SECRET }}
-            redirectUri: ${{ secrets.REDIRECT_URI }}
-            credential_json: ${{ secrets.CREDENTIAL_JSON }}
-            q: "'1U-2NgagKTnqkIZrML52A2SsD9HDDeDN7' in parents"
-            path: "./"
+jobs:
+  build: # make sure build/ci work properly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: lts/gallium
+          cache: npm
+      - run: npm ci
+      - run: npm run all
+  get_fit: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          clientSecret: ${{ secrets.CLIENTSECRET }}
+          clientId: ${{ secrets.CLIENTID }}
+          redirectUri: ${{ secrets.REDIRECTURI }}
+          credential_json: ${{ secrets.CREDENTIALJSON }}
+          q: "'1iWtlOyGYrmytsBogzuvh9W6IV2IqTolX' in parents"
+          path: "./FIT"
