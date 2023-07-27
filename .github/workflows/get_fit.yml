@@ -3,6 +3,10 @@ name: Get FIT File
 on:
   workflow_dispatch:
 
+env:
+  GITHUB_NAME: shaonianche
+  GITHUB_EMAIL: github@duanfei.org
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,7 +18,7 @@ jobs:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
     - run: |
         rclone sync "google drive:/HealthFit" ./FIT_OUT --update
-    - name: Push new runs
+    - name: Push fit file
       run: |
         git config --local user.email '${{ env.GITHUB_EMAIL }}'
         git config --local user.name '${{ env.GITHUB_NAME }}'
