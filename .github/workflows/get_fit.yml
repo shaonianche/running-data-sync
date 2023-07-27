@@ -13,4 +13,4 @@ jobs:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
     - run: |
         rclone ls "google drive":/HealthFit
-        rclone copy "google drive":HealthFit ./FIT_OUT
+        rclone copy "google drive":/HealthFit ./FIT_OUT
