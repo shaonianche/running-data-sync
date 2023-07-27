@@ -13,16 +13,16 @@ import sys
 import time
 import traceback
 import zipfile
+from io import BytesIO
 
 import aiofiles
 import cloudscraper
 import httpx
-from config import JSON_FILE, SQL_FILE, FOLDER_DICT, config
-from io import BytesIO
+from config import FOLDER_DICT, JSON_FILE, SQL_FILE, config
+from garmin_device_adaptor import wrap_device_info
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from utils import make_activities_file
-from garmin_device_adaptor import wrap_device_info
 
 # logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ on:
     branches:
       - main
     paths:
-      - 'src/static/activities.json'
+      - 'src/static/*.json'
 env:
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org
