@@ -21,7 +21,7 @@ jobs:
       with:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
     - run: |
-        rclone sync "google drive:/HealthFit" ./FIT_OUT --update
+        rclone sync "google drive:/HealthFit" ./FIT_OUT --drive-formats '{"^(\d{4}-\d{2}-\d{2}-\d{6})\.fit": "{1}"}'
     - name: Push fit file
       run: |
         git config --local user.email '${{ env.GITHUB_EMAIL }}'
