@@ -7,5 +7,5 @@ jobs:
   build:
     runs-on: self-hosted
     steps:
-    - run: rclone ls "google drive":/HealthFit
+    - run: sudo rclone ls "google drive":/HealthFit
 
