@@ -29,7 +29,3 @@ jobs:
         git add .
         git commit -a -m 'update fit file' || echo 'nothing to commit'
         git push || echo 'nothing to push'
-    - name: peloton2garmin
-      uses: jdowning/p2g-action@1.0.2
-      with:
-         upload_to_garmin: './FIT_OUT'
