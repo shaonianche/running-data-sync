@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - 'src/static/activities.json'
 env:
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org
@@ -13,8 +14,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - if: contains(env.COMMIT_MESSAGES, 'update new runs')
-      run: echo "Commit message contains update new runs",
     - uses: actions/checkout@v3
     - name: Setup Rclone action
       uses: AnimMouse/setup-rclone@v1
