@@ -25,27 +25,23 @@ jobs:
   sync:
     name: Sync
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10"]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4.7.0
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.10'
 
-      # from pdm
+      # from pdm and install dep
       - name: Set Variables
         id: set_variables
         run: |
+          sudo apt-get install libxml2-dev libxslt-dev python3-dev
           echo "PY=$(python -c 'import hashlib, sys;print(hashlib.sha256(sys.version.encode()+sys.executable.encode()).hexdigest())')" >> $GITHUB_OUTPUT
-          echo "PIP_CACHE=$(pip cache dir)" >> $GITHUB_OUTPUT
-
+          echo 'PIP_CACHE=$(pip cache dir)'' >> $GITHUB_OUTPUT
       - name: Cache PIP
-        uses: actions/cache@v3.3.1
+        uses: actions/cache@v2
         with:
           path: ${{ steps.set_variables.outputs.PIP_CACHE }}
           key: Ubuntu-pip-${{ steps.set_variables.outputs.PY }}
@@ -56,7 +52,7 @@ jobs:
         if: steps.pip-cache.outputs.cache-hit != 'true'
 
       - name: Run sync Strava script
-        if: env.RUN_TYPE == 'strava'&& ${{ matrix.python-version == '3.10'}}
+        if: env.RUN_TYPE == 'strava'
         run: |
           python scripts/strava_sync.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
 
@@ -81,7 +77,6 @@ jobs:
           git push || echo 'nothing to push'
 
       - name: Gitee Sync
-        if: ${{ matrix.python-version == '3.10'}}
         uses: Yikun/hub-mirror-action@master
         with:
           src: github/shaonianche

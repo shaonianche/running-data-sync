@@ -2,6 +2,10 @@ name: Get FIT File
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    if: contains(join(toJson(github.event.commits.*.message)), 'run')
 
 env:
   GITHUB_NAME: shaonianche
