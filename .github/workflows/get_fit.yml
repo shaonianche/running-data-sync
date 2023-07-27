@@ -5,7 +5,12 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-    - run: sudo rclone ls "google drive":/HealthFit
+    - name: Setup Rclone action
+      uses: AnimMouse/setup-rclone@v1
+      with:
+        rclone_config: ${{ secrets.RCLONE_CONFIG }}
+
+    - run: 'rclone ls "google drive":/HealthFit'
 
