@@ -1,106 +1,140 @@
-import json
-import time
-from datetime import datetime
+"""Assorted utility methods for use in creating posters."""
+# Copyright 2016-2019 Florian Pigorsch & Contributors. All rights reserved.
+#
+# Use of this source code is governed by a MIT-style
+# license that can be found in the LICENSE file.
 
+import locale
+import math
+from datetime import datetime
+from typing import List, Optional, Tuple
+
+import colour
 import pytz
+import s2sphere as s2
 
 try:
-    from rich import print
+    from tzfpy import get_tz
+
+    tf = None
 except:
-    pass
-from generator import Generator
-from stravalib.client import Client
-from stravalib.exc import RateLimitExceeded
+    from timezonefinder import TimezoneFinder
+
+    tf = TimezoneFinder()
 
 
-def adjust_time(time, tz_name):
-    tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
-    return time + tc_offset
+from .value_range import ValueRange
+from .xy import XY
 
 
-def adjust_time_to_utc(time, tz_name):
-    tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
-    return time - tc_offset
+# mercator projection
+def latlng2xy(latlng: s2.LatLng) -> XY:
+    return XY(lng2x(latlng.lng().degrees), lat2y(latlng.lat().degrees))
 
 
-def adjust_timestamp_to_utc(timestamp, tz_name):
-    tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
-    delta = int(tc_offset.total_seconds())
-    return int(timestamp) - delta
+def lng2x(lng_deg: float) -> float:
+    return lng_deg / 180 + 1
 
 
-def to_date(ts):
-    # TODO use https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat
-    # once we decide to move on to python v3.7+
-    ts_fmts = ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f"]
-
-    for ts_fmt in ts_fmts:
-        try:
-            # performance with using exceptions
-            # shouldn't be an issue since it's an offline cmdline tool
-            return datetime.strptime(ts, ts_fmt)
-        except ValueError:
-            print("Error: Can not execute strptime")
-            pass
-
-    raise ValueError(f"cannot parse timestamp {ts} into date with fmts: {ts_fmts}")
+def lat2y(lat_deg: float) -> float:
+    return 0.5 - math.log(math.tan(math.pi / 4 * (1 + lat_deg / 90))) / math.pi
 
 
-def make_activities_file(sql_file, data_dir, json_file, file_suffix="gpx"):
-    generator = Generator(sql_file)
-    generator.sync_from_data_dir(data_dir, file_suffix=file_suffix)
-    activities_list = generator.load()
-    with open(json_file, "w") as f:
-        json.dump(activities_list, f)
+def project(
+    bbox: s2.LatLngRect, size: XY, offset: XY, latlnglines: List[List[s2.LatLng]]
+) -> List[List[Tuple[float, float]]]:
+    min_x = lng2x(bbox.lng_lo().degrees)
+    d_x = lng2x(bbox.lng_hi().degrees) - min_x
+    while d_x >= 2:
+        d_x -= 2
+    while d_x < 0:
+        d_x += 2
+    min_y = lat2y(bbox.lat_lo().degrees)
+    max_y = lat2y(bbox.lat_hi().degrees)
+    d_y = abs(max_y - min_y)
+    # the distance maybe zero
+    if d_x == 0 or d_y == 0:
+        return []
+    scale = size.x / d_x if size.x / size.y <= d_x / d_y else size.y / d_y
+    offset = offset + 0.5 * (size - scale * XY(d_x, -d_y)) - scale * XY(min_x, min_y)
+    lines = []
+    for latlngline in latlnglines:
+        line = []
+        for latlng in latlngline:
+            if bbox.contains(latlng):
+                line.append((offset + scale * latlng2xy(latlng)).tuple())
+            else:
+                if len(line) > 0:
+                    lines.append(line)
+                    line = []
+        if len(line) > 0:
+            lines.append(line)
+    return lines
 
 
-def make_strava_client(client_id, client_secret, refresh_token):
-    client = Client()
+def compute_bounds_xy(lines: List[List[XY]]) -> Tuple[ValueRange, ValueRange]:
+    range_x = ValueRange()
+    range_y = ValueRange()
+    for line in lines:
+        for xy in line:
+            range_x.extend(xy.x)
+            range_y.extend(xy.y)
+    return range_x, range_y
 
-    refresh_response = client.refresh_access_token(
-        client_id=client_id, client_secret=client_secret, refresh_token=refresh_token
+
+def compute_grid(
+    count: int, dimensions: XY
+) -> Tuple[Optional[float], Optional[Tuple[int, int]]]:
+    # this is somehow suboptimal O(count^2). I guess it's possible in O(count)
+    min_waste = -1.0
+    best_size = None
+    best_counts = None
+    for count_x in range(1, count + 1):
+        size_x = dimensions.x / count_x
+        for count_y in range(1, count + 1):
+            if count_x * count_y >= count:
+                size_y = dimensions.y / count_y
+                size = min(size_x, size_y)
+                waste = dimensions.x * dimensions.y - count * size * size
+                if waste < 0:
+                    continue
+                elif best_size is None or waste < min_waste:
+                    best_size = size
+                    best_counts = count_x, count_y
+                    min_waste = waste
+    return best_size, best_counts
+
+
+def interpolate_color(color1: str, color2: str, ratio: float) -> str:
+    if ratio < 0:
+        ratio = 0
+    elif ratio > 1:
+        ratio = 1
+    c1 = colour.Color(color1)
+    c2 = colour.Color(color2)
+    c3 = colour.Color(
+        hue=((1 - ratio) * c1.hue + ratio * c2.hue),
+        saturation=((1 - ratio) * c1.saturation + ratio * c2.saturation),
+        luminance=((1 - ratio) * c1.luminance + ratio * c2.luminance),
     )
-    client.access_token = refresh_response["access_token"]
-    return client
+    return c3.hex_l
 
 
-def get_strava_last_time(client, is_milliseconds=True):
-    """
-    if there is no activities cause exception return 0
-    """
+def format_float(f):
+    return locale.format_string("%.1f", f)
+
+
+def parse_datetime_to_local(start_time, end_time, point):
+    # just parse the start time, because start/end maybe different
+    offset = start_time.utcoffset()
+    if offset:
+        return start_time + offset, end_time + offset
+    lat, lng = point
     try:
-        activity = None
-        activities = client.get_activities(limit=10)
-        activities = list(activities)
-        activities.sort(key=lambda x: x.start_date, reverse=True)
-        # for else in python if you don't know please google it.
-        for a in activities:
-            if a.type == "Run":
-                activity = a
-                break
-        else:
-            return 0
-        end_date = activity.start_date + activity.elapsed_time
-        last_time = int(datetime.timestamp(end_date))
-        if is_milliseconds:
-            last_time = last_time * 1000
-        return last_time
-    except Exception as e:
-        print(f"Something wrong to get last time err: {str(e)}")
-        return 0
-
-
-def upload_file_to_strava(client, file_name, data_type):
-    with open(file_name, "rb") as f:
-        try:
-            r = client.upload_activity(activity_file=f, data_type=data_type)
-        except RateLimitExceeded as e:
-            timeout = e.timeout
-            print()
-            print(f"Strava API Rate Limit Exceeded. Retry after {timeout} seconds")
-            print()
-            time.sleep(timeout)
-            r = client.upload_activity(activity_file=f, data_type=data_type)
-        print(
-            f"Uploading {data_type} file: {file_name} to strava, upload_id: {r.upload_id}."
-        )
+        timezone = get_tz(lng=lng, lat=lat)
+    except:
+        # just a little trick when tzfpy support windows will delete this
+        lat, lng = point
+        timezone = tf.timezone_at(lng=lng, lat=lat)
+    tc_offset = datetime.now(pytz.timezone(timezone)).utcoffset()
+    return start_time + tc_offset, end_time + tc_offset

@@ -108,7 +108,7 @@ class Poster:
         height = self.height
         width = self.width
         if self.drawer_type == "plain":
-            height = height - 50
+            height = height - 100
             self.colors["background"] = "#1a1a1a"
             self.colors["track"] = "red"
             self.colors["special"] = "yellow"
@@ -145,14 +145,14 @@ class Poster:
 
     def __draw_header(self, d):
         text_color = self.colors["text"]
-        title_style = "font-size:10px;"
+        title_style = "font-size:12px; font-family:Arial; font-weight:bold;"
         d.add(d.text(self.title, insert=(10, 20), fill=text_color, style=title_style))
 
     def __draw_footer(self, d):
         text_color = self.colors["text"]
-        header_style = "font-size:4px;"
-        value_style = "font-size:8px;"
-        small_value_style = "font-size:3px;"
+        header_style = "font-size:4px; font-family:Arial"
+        value_style = "font-size:9px; font-family:Arial"
+        small_value_style = "font-size:3px; font-family:Arial"
 
         (
             total_length,
