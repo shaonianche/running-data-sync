@@ -11,7 +11,7 @@ jobs:
       - name: Interact with Google Drive
         uses: satackey/action-google-drive@v1.2.1
         with:
-          google-client-id:: ${{ secrets.CLIENTID }}
+          google-client-id: ${{ secrets.CLIENTID }}
           google-client-secret: ${{ secrets.CLIENTSECRET }}
           skicka-tokencache-json: ${{ secrets.CREDENTIAL_JSON }}
           download-from: "HealthFit"
