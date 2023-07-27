@@ -47,6 +47,7 @@ TIME_OUT = httpx.Timeout(240.0, connect=360.0)
 
 rids = []
 
+
 # utils
 def try_to_parse_time(from_time):
     # if not a format timestamp return 0
@@ -292,7 +293,6 @@ async def run(email, password, from_time, output=GPX_FILE_DIR):
 
 
 def main():
-
     # cli args
     ap = argparse.ArgumentParser(description="Get your runtastic GPX data")
     ap.add_argument("-e", "--email", help="Your runtastic email or user name")
