@@ -7,10 +7,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Setup Rclone action
       uses: AnimMouse/setup-rclone@v1
       with:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
     - run: |
-        rclone ls "google drive":/HealthFit
-        rclone copy "google drive":/HealthFit ./FIT_OUT
+        rclone sync "google drive:/HealthFit" ./FIT_OUT --update
+    - name: Push new runs
+      run: |
+        git config --local user.email '${{ env.GITHUB_EMAIL }}'
+        git config --local user.name '${{ env.GITHUB_NAME }}'
+        git commit -a -m 'update fit file' || echo 'nothing to commit'
+        git push || echo 'nothing to push'
