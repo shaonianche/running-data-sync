@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+    paths:
       - 'src/static/activities.json'
 env:
   GITHUB_NAME: shaonianche
