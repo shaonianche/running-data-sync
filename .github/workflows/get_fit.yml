@@ -1,19 +1,18 @@
-name: get fit
+name: Get FIT File
 
 on:
   workflow_dispatch:
 
 jobs:
-  build: # make sure build/ci work properly
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: google-drive-download-action
-        uses: raeperd/google-drive-download-action@v1
+      - name: Interact with Google Drive
+        uses: satackey/action-google-drive@v1.2.1
         with:
-          clientId: ${{ secrets.CLIENTID }}
-          clientSecret: ${{ secrets.CLIENTSECRET }}
-          redirectUri: ${{ secrets.REDIRECTURI }}
-          credential_json: ${{ secrets.CREDENTIAL_JSON }}
-          q: "'1iWtlOyGYrmytsBogzuvh9W6IV2IqTolX' in parents"
-          path: "./FIT_OUT"
+          google-client-id:: ${{ secrets.CLIENTID }}
+          google-client-secret: ${{ secrets.CLIENTSECRET }}
+          skicka-tokencache-json: ${{ secrets.CREDENTIAL_JSON }}
+          download-from: "HealthFit"
+          download-to: "./FIT_OUT"
