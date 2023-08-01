@@ -1,44 +1,54 @@
 import argparse
 import asyncio
+import os
+from collections import namedtuple
 from datetime import datetime, timedelta
+from pprint import pprint
 
+from config import FIT_FOLDER
+from garmin_fit_sdk import Decoder, Stream
 from garmin_sync import Garmin
-from garmin_fit_sdk import Decoder, Stream, Profile
-import json
 
-async def upload_to_activities(
-    garmin_client, use_fake_garmin_device
-):
-    print("garmin login")
+
+async def upload_fit(garmin_client):
     last_activity = await garmin_client.get_activities(0, 1)
     if not last_activity:
         print("no garmin activity")
         filters = {}
     else:
+        # is this startTimeGMT must have ?
         after_datetime_str = last_activity[0]["startTimeGMT"]
         after_datetime = datetime.strptime(after_datetime_str, "%Y-%m-%d %H:%M:%S")
         print("garmin last activity date: ", after_datetime)
+        filters = {"after": after_datetime}
 
-if __name__ == "__main__":
-    garmin_email = "home@duanfei.org"
-    garmin_password = "FSkM3Ss4oqX*RFew*tNBo3&o^"
-    garmin_auth_domain = "CN"
-    garmin_client = Garmin(garmin_email, garmin_password, garmin_auth_domain)
+    files_list = ["/root/workspace/running-data-sync/FIT_OUT/2023-07-25-183153.fit"]
 
-    use_fake_garmin_device = True
+    # await garmin_client.upload_activities_fit(files_list)
 
-    stream = Stream.from_file("../FIT_OUT/2023-07-27-182544.fit")
+
+def fit():
+    stream = Stream.from_file(
+        "/root/workspace/running-data-sync/FIT_OUT/2023-07-25-183153.fit"
+    )
     decoder = Decoder(stream)
     messages, errors = decoder.read()
-    record_fields = set()
-    def mesg_listener(mesg_num, message):
-        if mesg_num == Profile['mesg_num']['RECORD']:
-            for field in message:
-                record_fields.add(field)
+    print(errors)
 
-    messages, errors = decoder.read(mesg_listener=mesg_listener)
+    for key in messages
+        print(key)
 
-    if len(errors) > 0:
-        print(f"Something went wrong decoding the file: {errors}")
 
-    print(record_fields)
+# if after_datetime == formatted_date_time:
+#     print("The times are equal.")
+# else:
+#     print("The times are not equal.")
+
+
+if __name__ == "__main__":
+    email = ("home@duanfei.org",)
+    password = ("FSkM4Ss4oqX*RFew*tNBo3&o^",)
+    auth_domain = ("CN",)
+    garmin_client = Garmin(email, password, auth_domain)
+    # asyncio.run(upload_fit(garmin_client))
+    fit()
