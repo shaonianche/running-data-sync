@@ -261,33 +261,6 @@ class Garmin:
                 print("garmin upload failed: ", e)
         await self.req.aclose()
 
-    async def upload_activities_fit(self, fit_file_paths):
-        print("start upload fit file to garmin!!!")
-        if not self.is_login:
-            self.login()
-
-        for fit_file_path in fit_file_paths:
-            with open(fit_file_path, "rb") as f:
-                file_body = f.read()
-            files = {"data": (fit_file_path, file_body)}
-
-            try:
-                res = await self.req.post(
-                    self.upload_url, files=files, headers={"nk": "NT"}
-                )
-                f.close()
-            except Exception as e:
-                print(str(e))
-                continue
-
-            try:
-                resp = res.json()["detailedImportResult"]
-                print("garmin upload success: ", resp)
-            except Exception as e:
-                print("garmin upload failed: ", e)
-
-        await self.req.aclose()
-
 
 class GarminConnectHttpError(Exception):
     def __init__(self, status):
