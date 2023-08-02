@@ -70,7 +70,7 @@
     "pnpm": "8.6.10"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^0.39.8",
+    "@antfu/eslint-config": "^0.40.0",
     "eslint": "^8.19.0",
     "gatsby-plugin-pnpm": "^1.2.10",
     "typescript": "^5.0.4"
