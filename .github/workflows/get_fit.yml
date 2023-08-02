@@ -2,6 +2,8 @@ name: Get FIT File
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 */2 * * *'
   push:
     branches:
       - main
@@ -20,7 +22,7 @@ jobs:
       with:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
     - run: |
-        rclone sync "google drive:/HealthFit" ./FIT_OUT
+        rclone sync "google drive:/HealthFit" ./FIT_OUT --update
         
     - name: Rename file
       run: |
