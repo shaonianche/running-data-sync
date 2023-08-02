@@ -3,7 +3,7 @@ import asyncio
 import os
 from datetime import datetime
 
-from config import FIT_FOLDER
+from config import FIT_FOLDER, config
 from garmin_fit_sdk import Decoder, Stream
 from garmin_sync import Garmin
 
@@ -79,11 +79,32 @@ async def main(email, password, auth_domain):
             file_id_mesgs_time_created = datetime.strptime(
                 file_id_mesgs_time_created_str, "%Y-%m-%d %H:%M:%S"
             )
-            upload_file_path.append(file_path)
             if after_datetime == file_id_mesgs_time_created:
                 break
+            else:
+                upload_file_path.append(file_path)
         await garmin_client.upload_activities_fit(upload_file_path)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("email", nargs="?", help="email of garmin")
+    parser.add_argument("password", nargs="?", help="password of garmin")
+    parser.add_argument(
+        "--is-cn",
+        dest="is_cn",
+        action="store_true",
+        help="if garmin accout is cn",
+    )
+    options = parser.parse_args()
+    email = options.email or config("sync", "garmin", "email")
+    password = options.password or config("sync", "garmin", "password")
+    auth_domain = (
+        "CN" if options.is_cn else config("sync", "garmin", "authentication_domain")
+    )
+    if email == None or password == None:
+        print("Missing argument nor valid configuration file")
+        sys.exit(1)
+    loop = asyncio.get_event_loop()
+    future = asyncio.ensure_future(main(email, password, auth_domain))
+    loop.run_until_complete(future)

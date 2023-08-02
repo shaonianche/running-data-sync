@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - src/static/**
+      
 env:
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org

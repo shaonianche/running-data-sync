@@ -11,6 +11,8 @@ on:
       - scripts/strava_sync.py
       - scripts/gen_svg.py
       - scripts/gpx_sync.py
+      - scripts/garmin_sync.py
+      - scripts/fit_to_garmin_sync.py
       - requirements.txt
 
 env:
@@ -69,6 +71,16 @@ jobs:
         if: env.RUN_TYPE == 'strava'
         run: |
           python scripts/strava_sync.py ${{ secrets.S_CLIENT_ID }} ${{ secrets.S_CLIENT_SECRET }} ${{ secrets.S_REFRESH_TOKEN }}
+
+      - name: Fit to garmin sync
+        if: env.RUN_TYPE == 'strava'
+        run: |
+          python scripts/fit_to_garmin_sync.py ${{ secrets.GRAMIN_EMAIL }} ${{ secrets.GARMIN_PASSWORD }}
+
+      - name: Fit to garmin sync
+        if: env.RUN_TYPE == 'strava'
+        run: |
+          python scripts/fit_to_garmin_sync.py ${{ secrets.GRAMIN_EMAIL }} ${{ secrets.GARMIN_PASSWORD }} --is-cn
 
       - name: Run sync Only GPX script
         if: env.RUN_TYPE == 'only_gpx'
