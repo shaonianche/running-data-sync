@@ -1,15 +1,16 @@
-![Run Data Sync](https://github.com/shaonianche/running-data-sync/workflows/Run%20Data%20Sync/badge.svg?branch=master)
-
 ### Nike Run Club / Runtastic Running Data Visualization
 
-这是一个来自 [@yihong0618](https://github.com/yihong0618/blog) 的项目，它可以帮助您做以下事情：
+This is a project from @yihong0618 that helps you do the following:
+
+- Import Nike Run Club/Runtastic workout data and generate GPX files
+- Sync workout data to Strava
+- Visualize workout data as SVG charts
+
+这是一个来自 [@yihong0618](https://github.com/yihong0618/running_page#note1-clone-or-fork-before-vercel-404-need-to-pull-the-latest-code) 的项目，它可以帮助您做以下事情：
 
 - 获取 Nike Run Club/Runtastic 的运动数据，生成 GPX 文件
 - 同步运动数据至 Strava
 - 可视化为 SVG 展示
-
-[@yihong0618](https://github.com/yihong0618/blog) 关于项目最终效果的展示：[点击查看](https://yihong.run/running)
-[@yihong0618](https://github.com/yihong0618/blog) 关于项目的操作描述：[点击查看](https://yihong.run/2020-08-24-runpage/)
 
 ### Resources
 
