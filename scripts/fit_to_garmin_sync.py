@@ -9,8 +9,8 @@ from garmin_sync import Garmin
 
 
 class FitToGarmin(Garmin):
-    def __init__(self, email, password, auth_domain):
-        super().__init__(email, password, auth_domain)
+    def __init__(self, secret_string, auth_domain):
+        super().__init__(secret_string, auth_domain)
 
     async def upload_activities_fit(self, files):
         print("start upload fit file to garmin ...")
@@ -88,8 +88,9 @@ async def main(email, password, auth_domain):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("email", nargs="?", help="email of garmin")
-    parser.add_argument("password", nargs="?", help="password of garmin")
+    parser.add_argument(
+        "secret_string", nargs="?", help="secret_string fro get_garmin_secret.py"
+    )
     parser.add_argument(
         "--is-cn",
         dest="is_cn",
@@ -97,14 +98,11 @@ if __name__ == "__main__":
         help="if garmin accout is cn",
     )
     options = parser.parse_args()
-    email = options.email or config("sync", "garmin", "email")
-    password = options.password or config("sync", "garmin", "password")
-    auth_domain = (
-        "CN" if options.is_cn else config("sync", "garmin", "authentication_domain")
-    )
-    if email == None or password == None:
+    secret_string = options.secret_string or config("sync", "garmin", "secret_string")
+    garmin_auth_domain = "CN" if options.is_cn else ""
+    if secret_string is None:
         print("Missing argument nor valid configuration file")
         sys.exit(1)
     loop = asyncio.get_event_loop()
-    future = asyncio.ensure_future(main(email, password, auth_domain))
+    future = asyncio.ensure_future(main(secret_string, garmin_auth_domain))
     loop.run_until_complete(future)
