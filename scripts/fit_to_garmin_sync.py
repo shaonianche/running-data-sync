@@ -14,10 +14,6 @@ class FitToGarmin(Garmin):
 
     async def upload_activities_fit(self, files):
         print("start upload fit file to garmin ...")
-        if not self.is_login:
-            self.login()
-            print("login success ...")
-
         for fit_file_path in files:
             with open(fit_file_path, "rb") as f:
                 file_body = f.read()
