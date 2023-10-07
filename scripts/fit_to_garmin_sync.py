@@ -9,8 +9,8 @@ from garmin_sync import Garmin
 
 
 class FitToGarmin(Garmin):
-    def __init__(self, secret_string, auth_domain):
-        super().__init__(secret_string, auth_domain)
+    def __init__(self, secret_string, garmin_auth_domain):
+        super().__init__(secret_string, garmin_auth_domain)
 
     async def upload_activities_fit(self, files):
         print("start upload fit file to garmin ...")
@@ -63,8 +63,8 @@ def get_fit_files():
     return files
 
 
-async def main(email, password, auth_domain):
-    garmin_client = FitToGarmin(email, password, auth_domain)
+async def main(secret_string, garmin_auth_domain):
+    garmin_client = FitToGarmin(secret_string, garmin_auth_domain)
     last_activity = await garmin_client.get_activities(0, 1)
     all_fit_files = get_fit_files()
     upload_file_path = []
