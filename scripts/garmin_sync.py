@@ -139,7 +139,7 @@ class Garmin:
                 file_body = wrap_device_info(f)
             else:
                 file_body = BytesIO(f.read())
-            files = {"file": (data.filename, file_body)}
+            files = {"file": (data.filename, f)}
 
             try:
                 res = await self.req.post(self.upload_url, files=files)
