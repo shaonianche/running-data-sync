@@ -34,7 +34,7 @@ GARMIN_COM_URL_DICT = {
     "MODERN_URL": "https://connectapi.garmin.com",
     "SIGNIN_URL": "https://sso.garmin.com/sso/signin",
     "CSS_URL": "https://static.garmincdn.com/com.garmin.connect/ui/css/gauth-custom-v1.2-min.css",
-    "UPLOAD_URL": "https://connectapi.garmin.com/upload-service/upload",
+    "UPLOAD_URL": "https://connectapi.garmin.com/upload-service/upload/",
     "ACTIVITY_URL": "https://connectapi.garmin.com/activity-service/activity/{activity_id}",
 }
 
@@ -45,7 +45,7 @@ GARMIN_CN_URL_DICT = {
     "MODERN_URL": "https://connectapi.garmin.cn",
     "SIGNIN_URL": "https://sso.garmin.cn/sso/signin",
     "CSS_URL": "https://static.garmincdn.cn/cn.garmin.connect/ui/css/gauth-custom-v1.2-min.css",
-    "UPLOAD_URL": "https://connectapi.garmin.cn/upload-service/upload",
+    "UPLOAD_URL": "https://connectapi.garmin.cn/upload-service/upload/",
     "ACTIVITY_URL": "https://connectapi.garmin.cn/activity-service/activity/{activity_id}",
 }
 
@@ -139,10 +139,12 @@ class Garmin:
                 file_body = wrap_device_info(f)
             else:
                 file_body = BytesIO(f.read())
-            files = {"file": (data.filename, f)}
+            files = {"file": (data.filename, file_body)}
 
             try:
-                res = await self.req.post(self.upload_url, files=files)
+                res = await self.req.post(
+                    self.upload_url, files=files, headers=self.headers
+                )
                 os.remove(data.filename)
                 f.close()
             except Exception as e:
@@ -150,7 +152,6 @@ class Garmin:
                 # just pass for now
                 continue
             try:
-                print(res.json())
                 resp = res.json()["detailedImportResult"]
                 print("garmin upload success: ", resp)
             except Exception as e:
