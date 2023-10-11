@@ -21,7 +21,7 @@ class FitToGarmin(Garmin):
 
             try:
                 res = await self.req.post(
-                    self.upload_url, files=files, headers={"nk": "NT"}
+                    self.upload_url, files=files, headers=self.headers
                 )
                 f.close()
             except Exception as e:
