@@ -34,7 +34,7 @@ GARMIN_COM_URL_DICT = {
     "MODERN_URL": "https://connectapi.garmin.com",
     "SIGNIN_URL": "https://sso.garmin.com/sso/signin",
     "CSS_URL": "https://static.garmincdn.com/com.garmin.connect/ui/css/gauth-custom-v1.2-min.css",
-    "UPLOAD_URL": "https://connectapi.garmin.com/upload-service/upload/",
+    "UPLOAD_URL": "https://connectapi.garmin.com/upload-service/upload",
     "ACTIVITY_URL": "https://connectapi.garmin.com/activity-service/activity/{activity_id}",
 }
 
@@ -45,7 +45,7 @@ GARMIN_CN_URL_DICT = {
     "MODERN_URL": "https://connectapi.garmin.cn",
     "SIGNIN_URL": "https://sso.garmin.cn/sso/signin",
     "CSS_URL": "https://static.garmincdn.cn/cn.garmin.connect/ui/css/gauth-custom-v1.2-min.css",
-    "UPLOAD_URL": "https://connectapi.garmin.cn/upload-service/upload/",
+    "UPLOAD_URL": "https://connectapi.garmin.cn/upload-service/upload",
     "ACTIVITY_URL": "https://connectapi.garmin.cn/activity-service/activity/{activity_id}",
 }
 
