@@ -142,9 +142,7 @@ class Garmin:
             files = {"file": (data.filename, file_body)}
 
             try:
-                res = await self.req.post(
-                    self.upload_url, files=files, headers={"nk": "NT"}
-                )
+                res = await self.req.post(self.upload_url, files=files)
                 os.remove(data.filename)
                 f.close()
             except Exception as e:
