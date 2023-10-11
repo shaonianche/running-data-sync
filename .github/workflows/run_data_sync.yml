@@ -76,7 +76,7 @@ jobs:
       - name: Run strava_to_garmin_sync script
         if: env.RUN_TYPE == 'strava'
         run: |
-          python scripts/strava_to_garmin_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'  '${{ secrets.GARMIN_SECRET_CN }}'  '${{ secrets.STRAVA_EMAIL }}'  ' ${{ secrets.STRAVA_PASSWORD }}' --is-cn
+          python scripts/strava_to_garmin_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'  '${{ secrets.GARMIN_SECRET_CN }}'  '${{ secrets.STRAVA_EMAIL }}'  '${{ secrets.STRAVA_PASSWORD }}' --is-cn
 
       # - name: Fit to garmin cn sync
       #   if: env.RUN_TYPE == 'strava'
