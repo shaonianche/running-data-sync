@@ -17,7 +17,7 @@ class FitToGarmin(Garmin):
         for fit_file_path in files:
             with open(fit_file_path, "rb") as f:
                 file_body = f.read()
-            files = {"data": (fit_file_path, file_body)}
+            files = {"file": (fit_file_path, file_body)}
 
             try:
                 res = await self.req.post(
