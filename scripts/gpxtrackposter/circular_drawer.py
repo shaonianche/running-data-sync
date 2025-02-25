@@ -1,4 +1,5 @@
 """Draw a circular Poster."""
+
 # Copyright 2016-2019 Florian Pigorsch & Contributors. All rights reserved.
 #
 # Use of this source code is governed by a MIT-style
@@ -101,8 +102,8 @@ class CircularDrawer(TracksDrawer):
         if self._rings:
             self._draw_rings(dr, center, radius_range)
 
-        year_style = f"dominant-baseline: central; font-size:{min_size * 4.0 / 100.0}px; "
-        month_style = f"font-size:{min_size * 3.0 / 100.0}px;"
+        year_style = f"dominant-baseline: central; font-size:{min_size * 4.0 / 80.0}px; font-family:Arial;"
+        month_style = f"font-size:{min_size * 3.0 / 80.0}px; font-family:Arial;"
 
         dr.add(
             dr.text(

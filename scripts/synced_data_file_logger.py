@@ -1,7 +1,7 @@
 import json
 import os
 
-from config import SYNCED_FILE
+from config import SYNCED_ACTIVITY_FILE, SYNCED_FILE
 
 
 def save_synced_data_file_list(file_list: list):

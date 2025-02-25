@@ -1,9 +1,6 @@
 {
   "python.formatting.provider": "none",
   "prettier.enable": false,
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
-  },
   "cSpell.words": [
     "antfu",
     "appws",
@@ -22,16 +19,29 @@
     "httpx",
     "iframe",
     "iife",
+    "mesgs",
     "mktime",
     "Oqnxvg",
     "Pigorsch",
+    "Rclone",
     "runtastic",
     "shaonianche",
     "yihong",
     "Yikun"
   ],
-  "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
+  "python.analysis.typeCheckingMode": "basic",
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
-  "python.analysis.typeCheckingMode": "basic"
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    },
+  },
+  "isort.args": [
+    "--profile",
+    "black"
+  ],
 }

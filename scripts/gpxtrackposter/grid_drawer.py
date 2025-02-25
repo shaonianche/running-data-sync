@@ -1,4 +1,5 @@
 """Draw a grid poster."""
+
 # Copyright 2016-2019 Florian Pigorsch & Contributors. All rights reserved.
 #
 # Use of this source code is governed by a MIT-style
@@ -74,5 +75,5 @@ class GridDrawer(TracksDrawer):
                 stroke_linejoin="round",
                 stroke_linecap="round",
             )
-            polyline.set_desc(title=date_title)
+            polyline.set_desc(title=date_title, desc=tr.run_id)
             dr.add(polyline)

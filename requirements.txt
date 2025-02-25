@@ -1,6 +1,6 @@
-httpx>=0.15.0,<=0.25.0
+httpx>=0.15.0,<=0.15.5
 gpxpy==1.4.2
-stravalib
+stravalib==0.10.4
 appdirs>=1.4.0
 svgwrite>=1.1.9
 colour>=0.1.5
@@ -13,16 +13,18 @@ tzfpy; platform_system != "Windows"
 timezonefinder; platform_system == "Windows"
 pyyaml
 aiofiles
-cloudscraper==1.2.71
-git+https://github.com/alenrajsp/tcxreader.git
+cloudscraper==1.2.58
+tcxreader
 rich
-lxml
+lxml==4.9.4
 eviltransform
 stravaweblib
 tenacity
 numpy
 tzlocal
 fit-tool
+garmin-fit-sdk
 haversine==2.8.0
-garmin-fit-sdk>=21.115.0
 garth
+pycryptodome
+duckdb
