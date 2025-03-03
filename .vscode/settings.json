@@ -44,4 +44,8 @@
     "--profile",
     "black"
   ],
+  "files.autoSave": "onWindowChange",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "diffEditor.experimental.showMoves": true,
 }
