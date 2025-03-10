@@ -6,7 +6,13 @@ import useHover from '@/hooks/useHover';
 import { yearStats } from '@assets/index';
 import { loadSvgComponent } from '@/utils/svgUtils';
 
-const YearStat = ({ year, onClick }: { year: string, onClick: (_year: string) => void }) => {
+const YearStat = ({
+  year,
+  onClick,
+}: {
+  year: string;
+  onClick: (_year: string) => void;
+}) => {
   let { activities: runs, years } = useActivities();
   // for hover
   const [hovered, eventHandlers] = useHover();

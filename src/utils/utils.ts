@@ -4,7 +4,14 @@ import { WebMercatorViewport } from 'viewport-mercator-project';
 import { chinaGeojson, RPGeometry } from '@/static/run_countries';
 import worldGeoJson from '@surbowl/world-geo-json-zh/world.zh.json';
 import { chinaCities } from '@/static/city';
-import { MAIN_COLOR, MUNICIPALITY_CITIES_ARR, NEED_FIX_MAP, RUN_TITLES, ACTIVITY_TYPES, RICH_TITLE } from './const';
+import {
+  MAIN_COLOR,
+  MUNICIPALITY_CITIES_ARR,
+  NEED_FIX_MAP,
+  RUN_TITLES,
+  ACTIVITY_TYPES,
+  RICH_TITLE,
+} from './const';
 import { FeatureCollection, LineString } from 'geojson';
 
 export type Coordinate = [number, number];
@@ -37,8 +44,9 @@ const titleForShow = (run: Activity): string => {
   if (run.name) {
     name = run.name;
   }
-  return `${name} ${date} ${distance} KM ${!run.summary_polyline ? '(No map data for this run)' : ''
-    }`;
+  return `${name} ${date} ${distance} KM ${
+    !run.summary_polyline ? '(No map data for this run)' : ''
+  }`;
 };
 
 const formatPace = (d: number): string => {
@@ -101,7 +109,7 @@ const extractDistricts = (str: string): string[] => {
   }
 
   return locations;
-}
+};
 
 const extractCoordinate = (str: string): [number, number] | null => {
   const pattern = /'latitude': ([-]?\d+\.\d+).*?'longitude': ([-]?\d+\.\d+)/;
@@ -231,7 +239,7 @@ const geoJsonForRuns = (runs: Activity[]): FeatureCollection<LineString> => ({
 const geoJsonForMap = (): FeatureCollection<RPGeometry> => ({
   type: 'FeatureCollection',
   features: worldGeoJson.features.concat(chinaGeojson.features),
-})
+});
 
 const getActivitySport = (act: Activity): string => {
   if (act.type === 'Run') {
@@ -243,26 +251,23 @@ const getActivitySport = (act: Activity): string => {
         return RUN_TITLES.FULL_MARATHON_RUN_TITLE;
       }
       return ACTIVITY_TYPES.RUN_GENERIC_TITLE;
-    }
-    else if (act.subtype === 'trail') return ACTIVITY_TYPES.RUN_TRAIL_TITLE;
-    else if (act.subtype === 'treadmill') return ACTIVITY_TYPES.RUN_TREADMILL_TITLE;
+    } else if (act.subtype === 'trail') return ACTIVITY_TYPES.RUN_TRAIL_TITLE;
+    else if (act.subtype === 'treadmill')
+      return ACTIVITY_TYPES.RUN_TREADMILL_TITLE;
     else return ACTIVITY_TYPES.RUN_GENERIC_TITLE;
-  }
-  else if (act.type === 'hiking') {
+  } else if (act.type === 'hiking') {
     return ACTIVITY_TYPES.HIKING_TITLE;
-  }
-  else if (act.type === 'cycling') {
+  } else if (act.type === 'cycling') {
     return ACTIVITY_TYPES.CYCLING_TITLE;
-  }
-  else if (act.type === 'walking') {
+  } else if (act.type === 'walking') {
     return ACTIVITY_TYPES.WALKING_TITLE;
   }
   // if act.type contains 'skiing'
   else if (act.type.includes('skiing')) {
     return ACTIVITY_TYPES.SKIING_TITLE;
   }
-  return "";
-}
+  return '';
+};
 
 const titleForRun = (run: Activity): string => {
   if (RICH_TITLE) {
@@ -271,7 +276,7 @@ const titleForRun = (run: Activity): string => {
       return run.name;
     }
     // 2. try to use location+type if the location is available, eg. 'Shanghai Run'
-    const { city, province } = locationForRun(run);
+    const { city } = locationForRun(run);
     const activity_sport = getActivitySport(run);
     if (city && city.length > 0 && activity_sport.length > 0) {
       return `${city} ${activity_sport}`;

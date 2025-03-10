@@ -43,7 +43,7 @@ const ROAD_LABEL_DISPLAY = true;
 const PRIVACY_MODE = false;
 // update for now 2024/11/17 the lights on default is false
 //set to `false` if you want to make light off as default, only effect when `PRIVACY_MODE` = false
-const LIGHTS_ON =false;
+const LIGHTS_ON = false;
 // richer title for the activity types (like garmin style)
 const RICH_TITLE = false;
 
@@ -86,7 +86,7 @@ const ACTIVITY_TYPES = {
   CYCLING_TITLE,
   SKIING_TITLE,
   WALKING_TITLE,
-}
+};
 
 const RUN_TITLES = {
   FULL_MARATHON_RUN_TITLE,

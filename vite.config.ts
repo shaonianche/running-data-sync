@@ -37,7 +37,7 @@ export default defineConfig({
   ],
   base: process.env.PATH_PREFIX || '/',
   define: {
-    "import.meta.env.VERCEL": JSON.stringify(process.env.VERCEL),
+    'import.meta.env.VERCEL': JSON.stringify(process.env.VERCEL),
   },
   build: {
     manifest: true,

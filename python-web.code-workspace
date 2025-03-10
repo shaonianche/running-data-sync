@@ -6,6 +6,7 @@
   ],
   "settings": {
     "files.autoSave": "onWindowChange",
-    "diffEditor.experimental.showMoves": true
+    "diffEditor.experimental.showMoves": true,
+    "python.languageServer": "Pylance"
   }
 }
