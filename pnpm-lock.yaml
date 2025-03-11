@@ -60,8 +60,8 @@ dependencies:
     specifier: ^4.3.9
     version: 4.5.9(@types/node@20.17.24)
   vite-plugin-svgr:
-    specifier: ^3.2.0
-    version: 3.3.0(typescript@5.8.2)(vite@4.5.9)
+    specifier: ^4.3.0
+    version: 4.3.0(typescript@5.8.2)(vite@4.5.9)
   vite-tsconfig-paths:
     specifier: ^4.2.0
     version: 4.3.2(typescript@5.8.2)(vite@4.5.9)
@@ -4123,10 +4123,10 @@ packages:
       '@math.gl/web-mercator': 3.6.3
     dev: false
 
-  /vite-plugin-svgr@3.3.0(typescript@5.8.2)(vite@4.5.9):
-    resolution: {integrity: sha512-vWZMCcGNdPqgziYFKQ3Y95XP0d0YGp28+MM3Dp9cTa/px5CKcHHrIoPl2Jw81rgVm6/ZUNONzjXbZQZ7Kw66og==}
+  /vite-plugin-svgr@4.3.0(typescript@5.8.2)(vite@4.5.9):
+    resolution: {integrity: sha512-Jy9qLB2/PyWklpYy0xk0UU3TlU0t2UMpJXZvf+hWII1lAmRHrOUKi11Uw8N3rxoNk7atZNYO3pR3vI1f7oi+6w==}
     peerDependencies:
-      vite: ^2.6.0 || 3 || 4
+      vite: '>=2.6.0'
     dependencies:
       '@rollup/pluginutils': 5.1.4
       '@svgr/core': 8.1.0(typescript@5.8.2)
