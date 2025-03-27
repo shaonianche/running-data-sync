@@ -18,8 +18,8 @@ on:
 
 env:
   RUN_TYPE: strava
-  ATHLETE: DuanFei
-  TITLE: Running Data
+  ATHLETE: FRIENDSA
+  TITLE: Running
   MIN_GRID_DISTANCE: 10 # change min distance here
   TITLE_GRID: Over 5km Runs
   GITHUB_NAME: shaonianche
