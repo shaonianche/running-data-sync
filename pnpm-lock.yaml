@@ -101,8 +101,8 @@ devDependencies:
     specifier: ^5.2.5
     version: 5.2.5(eslint-config-prettier@8.10.0)(eslint@9.23.0)(prettier@3.5.3)
   eslint-plugin-react:
-    specifier: ^7.32.2
-    version: 7.37.4(eslint@9.23.0)
+    specifier: ^7.37.5
+    version: 7.37.5(eslint@9.23.0)
   postcss:
     specifier: ^8.4.38
     version: 8.5.3
@@ -1874,8 +1874,8 @@ packages:
       synckit: 0.10.3
     dev: true
 
-  /eslint-plugin-react@7.37.4(eslint@9.23.0):
-    resolution: {integrity: sha512-BGP0jRmfYyvOyvMoRX/uoUeW+GqNj9y16bPQzqAHf3AYII/tDs+jMN0dBVkl88/OZwNGwrVFxE7riHsXVfy/LQ==}
+  /eslint-plugin-react@7.37.5(eslint@9.23.0):
+    resolution: {integrity: sha512-Qteup0SqU15kdocexFNAJMvCJEfa2xUKNV4CC1xsVMrIIqEy3SQ/rqyxCWNzfrd3/ldy6HMlD2e0JDVpDg2qIA==}
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
@@ -1891,7 +1891,7 @@ packages:
       hasown: 2.0.2
       jsx-ast-utils: 3.3.5
       minimatch: 3.1.2
-      object.entries: 1.1.8
+      object.entries: 1.1.9
       object.fromentries: 2.0.8
       object.values: 1.2.1
       prop-types: 15.8.1
@@ -2960,11 +2960,12 @@ packages:
       object-keys: 1.1.1
     dev: true
 
-  /object.entries@1.1.8:
-    resolution: {integrity: sha512-cmopxi8VwRIAw/fkijJohSfpef5PdN0pMQJN6VC/ZKvn0LIknWD8KtgY6KlQdEc4tIjcQ3HxSMmnvtzIscdaYQ==}
+  /object.entries@1.1.9:
+    resolution: {integrity: sha512-8u/hfXFRBD1O0hPUjioLhoWFHRmt6tKA4/vZPyckBr18l1KE9uHrFaFaUi8MDRTpi4uak2goyPTSNJLXX2k2Hw==}
     engines: {node: '>= 0.4'}
     dependencies:
       call-bind: 1.0.8
+      call-bound: 1.0.4
       define-properties: 1.2.1
       es-object-atoms: 1.1.1
     dev: true
