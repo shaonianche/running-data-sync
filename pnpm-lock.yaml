@@ -16,7 +16,7 @@ dependencies:
     version: 2.1.4
   '@svgr/plugin-svgo':
     specifier: ^8.1.0
-    version: 8.1.0(@svgr/core@8.1.0)(typescript@5.8.2)
+    version: 8.1.0(@svgr/core@8.1.0)(typescript@5.8.3)
   '@vercel/analytics':
     specifier: ^0.1.6
     version: 0.1.11(react@18.3.1)
@@ -61,10 +61,10 @@ dependencies:
     version: 4.5.9(@types/node@22.13.14)
   vite-plugin-svgr:
     specifier: ^3.2.0
-    version: 3.3.0(typescript@5.8.2)(vite@4.5.9)
+    version: 3.3.0(typescript@5.8.3)(vite@4.5.9)
   vite-tsconfig-paths:
     specifier: ^5.1.4
-    version: 5.1.4(typescript@5.8.2)(vite@4.5.9)
+    version: 5.1.4(typescript@5.8.3)(vite@4.5.9)
 
 devDependencies:
   '@types/geojson':
@@ -87,7 +87,7 @@ devDependencies:
     version: 18.3.5(@types/react@18.3.18)
   '@typescript-eslint/parser':
     specifier: ^8.28.0
-    version: 8.28.0(eslint@9.23.0)(typescript@5.8.2)
+    version: 8.28.0(eslint@9.23.0)(typescript@5.8.3)
   autoprefixer:
     specifier: ^10.4.19
     version: 10.4.21(postcss@8.5.3)
@@ -116,8 +116,8 @@ devDependencies:
     specifier: ^3.4.3
     version: 3.4.17
   typescript:
-    specifier: ^5.1.6
-    version: 5.8.2
+    specifier: ^5.8.3
+    version: 5.8.3
 
 packages:
 
@@ -862,14 +862,14 @@ packages:
       '@svgr/babel-plugin-transform-svg-component': 8.0.0(@babel/core@7.26.9)
     dev: false
 
-  /@svgr/core@8.1.0(typescript@5.8.2):
+  /@svgr/core@8.1.0(typescript@5.8.3):
     resolution: {integrity: sha512-8QqtOQT5ACVlmsvKOJNEaWmRPmcojMOzCz4Hs2BGG/toAp/K38LcsMRyLp349glq5AzJbCEeimEoxaX6v/fLrA==}
     engines: {node: '>=14'}
     dependencies:
       '@babel/core': 7.26.9
       '@svgr/babel-preset': 8.1.0(@babel/core@7.26.9)
       camelcase: 6.3.0
-      cosmiconfig: 8.3.6(typescript@5.8.2)
+      cosmiconfig: 8.3.6(typescript@5.8.3)
       snake-case: 3.0.4
     transitivePeerDependencies:
       - supports-color
@@ -892,21 +892,21 @@ packages:
     dependencies:
       '@babel/core': 7.26.9
       '@svgr/babel-preset': 8.1.0(@babel/core@7.26.9)
-      '@svgr/core': 8.1.0(typescript@5.8.2)
+      '@svgr/core': 8.1.0(typescript@5.8.3)
       '@svgr/hast-util-to-babel-ast': 8.0.0
       svg-parser: 2.0.4
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /@svgr/plugin-svgo@8.1.0(@svgr/core@8.1.0)(typescript@5.8.2):
+  /@svgr/plugin-svgo@8.1.0(@svgr/core@8.1.0)(typescript@5.8.3):
     resolution: {integrity: sha512-Ywtl837OGO9pTLIN/onoWLmDQ4zFUycI1g76vuKGEz6evR/ZTJlJuz3G/fIkb6OVBJ2g0o6CGJzaEjfmEo3AHA==}
     engines: {node: '>=14'}
     peerDependencies:
       '@svgr/core': '*'
     dependencies:
-      '@svgr/core': 8.1.0(typescript@5.8.2)
-      cosmiconfig: 8.3.6(typescript@5.8.2)
+      '@svgr/core': 8.1.0(typescript@5.8.3)
+      cosmiconfig: 8.3.6(typescript@5.8.3)
       deepmerge: 4.3.1
       svgo: 3.3.2
     transitivePeerDependencies:
@@ -1005,7 +1005,7 @@ packages:
       csstype: 3.1.3
     dev: true
 
-  /@typescript-eslint/parser@8.28.0(eslint@9.23.0)(typescript@5.8.2):
+  /@typescript-eslint/parser@8.28.0(eslint@9.23.0)(typescript@5.8.3):
     resolution: {integrity: sha512-LPcw1yHD3ToaDEoljFEfQ9j2xShY367h7FZ1sq5NJT9I3yj4LHer1Xd1yRSOdYy9BpsrxU7R+eoDokChYM53lQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
@@ -1014,11 +1014,11 @@ packages:
     dependencies:
       '@typescript-eslint/scope-manager': 8.28.0
       '@typescript-eslint/types': 8.28.0
-      '@typescript-eslint/typescript-estree': 8.28.0(typescript@5.8.2)
+      '@typescript-eslint/typescript-estree': 8.28.0(typescript@5.8.3)
       '@typescript-eslint/visitor-keys': 8.28.0
       debug: 4.4.0
       eslint: 9.23.0
-      typescript: 5.8.2
+      typescript: 5.8.3
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1036,7 +1036,7 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     dev: true
 
-  /@typescript-eslint/typescript-estree@8.28.0(typescript@5.8.2):
+  /@typescript-eslint/typescript-estree@8.28.0(typescript@5.8.3):
     resolution: {integrity: sha512-H74nHEeBGeklctAVUvmDkxB1mk+PAZ9FiOMPFncdqeRBXxk1lWSYraHw8V12b7aa6Sg9HOBNbGdSHobBPuQSuA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
@@ -1049,8 +1049,8 @@ packages:
       is-glob: 4.0.3
       minimatch: 9.0.5
       semver: 7.7.1
-      ts-api-utils: 2.1.0(typescript@5.8.2)
-      typescript: 5.8.2
+      ts-api-utils: 2.1.0(typescript@5.8.3)
+      typescript: 5.8.3
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1440,7 +1440,7 @@ packages:
     engines: {node: '>=18'}
     dev: false
 
-  /cosmiconfig@8.3.6(typescript@5.8.2):
+  /cosmiconfig@8.3.6(typescript@5.8.3):
     resolution: {integrity: sha512-kcZ6+W5QzcJ3P1Mt+83OUv/oHFqZHIx8DuxG6eZ5RGMERoLqp4BuGjhHLYGK+Kf5XVkQvqBSmAy/nGWN3qDgEA==}
     engines: {node: '>=14'}
     peerDependencies:
@@ -1453,7 +1453,7 @@ packages:
       js-yaml: 4.1.0
       parse-json: 5.2.0
       path-type: 4.0.0
-      typescript: 5.8.2
+      typescript: 5.8.3
     dev: false
 
   /cross-spawn@7.0.6:
@@ -3954,20 +3954,20 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
-  /ts-api-utils@2.1.0(typescript@5.8.2):
+  /ts-api-utils@2.1.0(typescript@5.8.3):
     resolution: {integrity: sha512-CUgTZL1irw8u29bzrOD/nH85jqyc74D6SshFgujOIA7osm2Rz7dYH77agkx7H4FBNxDq7Cjf+IjaX/8zwFW+ZQ==}
     engines: {node: '>=18.12'}
     peerDependencies:
       typescript: '>=4.8.4'
     dependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
     dev: true
 
   /ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
     dev: true
 
-  /tsconfck@3.1.5(typescript@5.8.2):
+  /tsconfck@3.1.5(typescript@5.8.3):
     resolution: {integrity: sha512-CLDfGgUp7XPswWnezWwsCRxNmgQjhYq3VXHM0/XIRxhVrKw0M1if9agzryh1QS3nxjCROvV+xWxoJO1YctzzWg==}
     engines: {node: ^18 || >=20}
     hasBin: true
@@ -3977,7 +3977,7 @@ packages:
       typescript:
         optional: true
     dependencies:
-      typescript: 5.8.2
+      typescript: 5.8.3
     dev: false
 
   /tslib@2.8.1:
@@ -4054,8 +4054,8 @@ packages:
       reflect.getprototypeof: 1.0.10
     dev: true
 
-  /typescript@5.8.2:
-    resolution: {integrity: sha512-aJn6wq13/afZp/jT9QZmwEjDqqvSGp1VT5GVg+f/t6/oVyrgXM6BY1h9BRh/O5p3PlUPAe+WuiEZOmb/49RqoQ==}
+  /typescript@5.8.3:
+    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -4126,13 +4126,13 @@ packages:
       '@math.gl/web-mercator': 3.6.3
     dev: false
 
-  /vite-plugin-svgr@3.3.0(typescript@5.8.2)(vite@4.5.9):
+  /vite-plugin-svgr@3.3.0(typescript@5.8.3)(vite@4.5.9):
     resolution: {integrity: sha512-vWZMCcGNdPqgziYFKQ3Y95XP0d0YGp28+MM3Dp9cTa/px5CKcHHrIoPl2Jw81rgVm6/ZUNONzjXbZQZ7Kw66og==}
     peerDependencies:
       vite: ^2.6.0 || 3 || 4
     dependencies:
       '@rollup/pluginutils': 5.1.4
-      '@svgr/core': 8.1.0(typescript@5.8.2)
+      '@svgr/core': 8.1.0(typescript@5.8.3)
       '@svgr/plugin-jsx': 8.1.0(@svgr/core@8.1.0)
       vite: 4.5.9(@types/node@22.13.14)
     transitivePeerDependencies:
@@ -4141,7 +4141,7 @@ packages:
       - typescript
     dev: false
 
-  /vite-tsconfig-paths@5.1.4(typescript@5.8.2)(vite@4.5.9):
+  /vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@4.5.9):
     resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
     peerDependencies:
       vite: '*'
@@ -4151,7 +4151,7 @@ packages:
     dependencies:
       debug: 4.4.0
       globrex: 0.1.2
-      tsconfck: 3.1.5(typescript@5.8.2)
+      tsconfck: 3.1.5(typescript@5.8.3)
       vite: 4.5.9(@types/node@22.13.14)
     transitivePeerDependencies:
       - supports-color
