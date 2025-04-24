@@ -1,6 +1,5 @@
 import calendar
 import datetime
-import locale
 
 import svgwrite
 
@@ -52,21 +51,18 @@ class GithubDrawer(TracksDrawer):
                 continue
             try:
                 month_names = [
-                    locale.nl_langinfo(day)[:3]  # Get only first three letters
-                    for day in [
-                        locale.MON_1,
-                        locale.MON_2,
-                        locale.MON_3,
-                        locale.MON_4,
-                        locale.MON_5,
-                        locale.MON_6,
-                        locale.MON_7,
-                        locale.MON_8,
-                        locale.MON_9,
-                        locale.MON_10,
-                        locale.MON_11,
-                        locale.MON_12,
-                    ]
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
                 ]
                 # support windows or others doesn't support locale Name, by Hard code
             except Exception as e:

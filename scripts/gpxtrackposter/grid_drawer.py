@@ -53,7 +53,7 @@ class GridDrawer(TracksDrawer):
             )
 
     def _draw_track(self, dr: svgwrite.Drawing, tr: Track, size: XY, offset: XY):
-        color = self.color(self.poster.length_range, tr.length, tr.special)
+        color = self.color(self.poster.length_range, tr.length, tr.special)  # type: ignore
 
         str_length = format_float(self.poster.m2u(tr.length))
 
@@ -62,7 +62,7 @@ class GridDrawer(TracksDrawer):
             distance1 = self.poster.special_distance["special_distance"]
             distance2 = self.poster.special_distance["special_distance2"]
             has_special = distance1 < tr.length / 1000 < distance2
-            color = self.color(self.poster.length_range_by_date, tr.length, has_special)
+            color = self.color(self.poster.length_range_by_date, tr.length, has_special)  # type: ignore
             if tr.length / 1000 >= distance2:
                 color = self.poster.colors.get("special2") or self.poster.colors.get(
                     "special"

@@ -29,7 +29,7 @@
     "yihong",
     "Yikun"
   ],
-  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.typeCheckingMode": "off",
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },
