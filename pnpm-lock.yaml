@@ -51,8 +51,8 @@ dependencies:
     specifier: ^7.1.6
     version: 7.1.9(mapbox-gl@2.15.0)(react-dom@18.3.1)(react@18.3.1)
   react-router-dom:
-    specifier: ^7.4.0
-    version: 7.4.0(react-dom@18.3.1)(react@18.3.1)
+    specifier: ^7.5.2
+    version: 7.5.2(react-dom@18.3.1)(react@18.3.1)
   viewport-mercator-project:
     specifier: ^7.0.4
     version: 7.0.4
@@ -945,10 +945,6 @@ packages:
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
     dependencies:
       '@babel/types': 7.26.9
-    dev: false
-
-  /@types/cookie@0.6.0:
-    resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
     dev: false
 
   /@types/estree@1.0.7:
@@ -3360,8 +3356,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /react-router-dom@7.4.0(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-VlksBPf3n2bijPvnA7nkTsXxMAKOj+bWp4R9c3i+bnwlSOFAGOkJkKhzy/OsRkWaBMICqcAl1JDzh9ZSOze9CA==}
+  /react-router-dom@7.5.2(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-yk1XW8Fj7gK7flpYBXF3yzd2NbX6P7Kxjvs2b5nu1M04rb5pg/Zc4fGdBNTeT4eDYL2bvzWNyKaIMJX/RKHTTg==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       react: '>=18'
@@ -3369,11 +3365,11 @@ packages:
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-router: 7.4.0(react-dom@18.3.1)(react@18.3.1)
+      react-router: 7.5.2(react-dom@18.3.1)(react@18.3.1)
     dev: false
 
-  /react-router@7.4.0(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-Y2g5ObjkvX3VFeVt+0CIPuYd9PpgqCslG7ASSIdN73LwA1nNWzcMLaoMRJfP3prZFI92svxFwbn7XkLJ+UPQ6A==}
+  /react-router@7.5.2(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-9Rw8r199klMnlGZ8VAsV/I8WrIF6IyJ90JQUdboupx1cdkgYqwnrYjH+I/nY/7cA1X5zia4mDJqH36npP7sxGQ==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       react: '>=18'
@@ -3382,7 +3378,6 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      '@types/cookie': 0.6.0
       cookie: 1.0.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
