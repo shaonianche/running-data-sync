@@ -51,8 +51,8 @@ dependencies:
     specifier: ^7.1.6
     version: 7.1.9(mapbox-gl@2.15.0)(react-dom@18.3.1)(react@18.3.1)
   react-router-dom:
-    specifier: ^7.4.0
-    version: 7.4.0(react-dom@18.3.1)(react@18.3.1)
+    specifier: ^7.6.1
+    version: 7.6.1(react-dom@18.3.1)(react@18.3.1)
   viewport-mercator-project:
     specifier: ^7.0.4
     version: 7.0.4
@@ -945,10 +945,6 @@ packages:
     resolution: {integrity: sha512-r1bzfrm0tomOI8g1SzvCaQHo6Lcv6zu0EA+W2kHrt8dyrHQxGzBBL4kdkzIS+jBMV+EYcMAEAqXqYaLJq5rOZg==}
     dependencies:
       '@babel/types': 7.26.9
-    dev: false
-
-  /@types/cookie@0.6.0:
-    resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
     dev: false
 
   /@types/estree@1.0.7:
@@ -3360,8 +3356,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /react-router-dom@7.4.0(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-VlksBPf3n2bijPvnA7nkTsXxMAKOj+bWp4R9c3i+bnwlSOFAGOkJkKhzy/OsRkWaBMICqcAl1JDzh9ZSOze9CA==}
+  /react-router-dom@7.6.1(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-vxU7ei//UfPYQ3iZvHuO1D/5fX3/JOqhNTbRR+WjSBWxf9bIvpWK+ftjmdfJHzPOuMQKe2fiEdG+dZX6E8uUpA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       react: '>=18'
@@ -3369,11 +3365,11 @@ packages:
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-router: 7.4.0(react-dom@18.3.1)(react@18.3.1)
+      react-router: 7.6.1(react-dom@18.3.1)(react@18.3.1)
     dev: false
 
-  /react-router@7.4.0(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-Y2g5ObjkvX3VFeVt+0CIPuYd9PpgqCslG7ASSIdN73LwA1nNWzcMLaoMRJfP3prZFI92svxFwbn7XkLJ+UPQ6A==}
+  /react-router@7.6.1(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-hPJXXxHJZEsPFNVbtATH7+MMX43UDeOauz+EAU4cgqTn7ojdI9qQORqS8Z0qmDlL1TclO/6jLRYUEtbWidtdHQ==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       react: '>=18'
@@ -3382,12 +3378,10 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      '@types/cookie': 0.6.0
       cookie: 1.0.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
       set-cookie-parser: 2.7.1
-      turbo-stream: 2.4.0
     dev: false
 
   /react@18.3.1:
@@ -3981,10 +3975,6 @@ packages:
 
   /tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
-
-  /turbo-stream@2.4.0:
-    resolution: {integrity: sha512-FHncC10WpBd2eOmGwpmQsWLDoK4cqsA/UT/GqNoaKOQnT8uzhtCbg3EoUDMvqpOSAI0S26mr0rkjzbOO6S3v1g==}
-    dev: false
 
   /type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
