@@ -41,19 +41,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: pip
-          cache-dependency-path: 'requirements.txt'
-
-      - name: Install dependencies
+      - name: Set outputs
+        id: set_output
         run: |
-          pip install -r requirements.txt
+          echo "SAVE_DATA_IN_GITHUB_CACHE=true" >> $GITHUB_OUTPUT
+          echo "DATA_CACHE_PREFIX=track_data" >> $GITHUB_OUTPUT
+          echo "BUILD_GH_PAGES=true" >> $GITHUB_OUTPUT
 
       - name: Cache Data Files
-        if: env.SAVE_DATA_IN_GITHUB_CACHE == 'true'
+        if: steps.set_output.outputs.SAVE_DATA_IN_GITHUB_CACHE == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -66,10 +62,21 @@ jobs:
             scripts/data.db
             src/static/activities.json
             imported.json
-          key: ${{ env.DATA_CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
+          key: ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
-            ${{ env.DATA_CACHE_PREFIX }}-${{ github.sha }}-
-            ${{ env.DATA_CACHE_PREFIX }}-
+            ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-
+            ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+          cache-dependency-path: 'requirements.txt'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
