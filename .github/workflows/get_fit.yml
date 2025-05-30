@@ -7,10 +7,9 @@ on:
   push:
     branches:
       - main
-      
-env:
-  GITHUB_NAME: shaonianche
-  GITHUB_EMAIL: github@duanfei.org
+     
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -22,7 +21,7 @@ jobs:
       with:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
     - run: |
-        rclone sync "google drive:/HealthFit" ./FIT_OUT --update
+        rclone sync "running-data-sync:/HealthFit" ./FIT_OUT --update
         
     - name: Rename file
       run: |
@@ -35,8 +34,14 @@ jobs:
 
     - name: Push fit file
       run: |
-        git config --local user.email '${{ env.GITHUB_EMAIL }}'
-        git config --local user.name '${{ env.GITHUB_NAME }}'
-        git add .
-        git commit -a -m 'update fit file' || echo 'nothing to commit'
-        git push || echo 'nothing to push'
+          if git diff --quiet; then
+              echo "No changes to commit"
+              exit 0
+          fi
+
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m 'update new runs'
+          git pull --rebase --autostash origin ${{ github.ref }}
+          git push
