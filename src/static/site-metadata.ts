@@ -17,11 +17,11 @@ const data: ISiteMetadataResult = {
   navLinks: [
     {
       name: 'Blog',
-      url: 'https://note.duanfei.org/#/page/contents',
+      url: 'https://blog.duanfei.org/',
     },
     {
       name: 'About',
-      url: 'https://note.duanfei.org/#/page/contents',
+      url: 'https://github.com/shaonianche',
     },
   ],
 };
