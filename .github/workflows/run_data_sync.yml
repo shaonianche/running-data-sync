@@ -21,7 +21,7 @@ env:
   RUN_TYPE: strava
   ATHLETE: FRIENDSA
   TITLE: Running
-  MIN_GRID_DISTANCE: 10 # change min distance here
+  MIN_GRID_DISTANCE: 10
   TITLE_GRID: Over 5km Runs
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org
@@ -69,16 +69,16 @@ jobs:
             ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-
             ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
         with:
-          python-version: '3.11'
-          cache: pip
-          cache-dependency-path: 'requirements.txt'
+          python-version: 3.11
+          cache: true
+          cache-dependency-path: ./pdm.lock
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pdm install
 
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
@@ -132,7 +132,7 @@ jobs:
           git push
 
   publish_github_pages:
-    if: needs.sync.result == 'success' && needs.sync.outputs.BUILD_GH_PAGES == 'true'
+    if: needs.sync.result == 'success'
     name: Build and publish Github Pages
     uses: ./.github/workflows/gh-pages.yml
     with:
