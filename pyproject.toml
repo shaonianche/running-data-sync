@@ -17,7 +17,7 @@ dependencies = [
     "sqlalchemy",
     "tzfpy; platform_system != \"Windows\"",
     "timezonefinder; platform_system == \"Windows\"",
-    "pyyaml>=6.0.2",
+    "pyyaml",
     "aiofiles",
     "cloudscraper==1.2.58",
     "tcxreader",
