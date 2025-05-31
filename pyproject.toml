@@ -1,8 +1,8 @@
 [project]
 name = "running-data-sync"
-version = "2.5.1"
+version = "0.1.0"
 description = "Default template for PDM package"
-authors = [{ name = "yihong0618", email = "zouzou0208@gmail.com" }]
+authors = [{ name = "shaonianche", email = "github@duanfei.org" }]
 dependencies = [
     "httpx",
     "gpxpy==1.4.2",
@@ -19,7 +19,7 @@ dependencies = [
     "timezonefinder; platform_system == \"Windows\"",
     "pyyaml",
     "aiofiles",
-    "cloudscraper",
+    "cloudscraper==1.2.58",
     "tcxreader",
     "rich",
     "lxml",
@@ -34,8 +34,6 @@ dependencies = [
     "garth",
     "pycryptodome",
     "duckdb",
-    "svglib>=1.5.1",
-    "pycairo>=1.28.0",
 ]
 requires-python = ">=3.12"
 readme = "README.md"

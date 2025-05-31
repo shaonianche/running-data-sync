@@ -92,7 +92,7 @@ if __name__ == "__main__":
         "--is-cn",
         dest="is_cn",
         action="store_true",
-        help="if garmin accout is cn",
+        help="if garmin account is cn",
     )
     options = parser.parse_args()
     secret_string = options.secret_string or config("sync", "garmin", "secret_string")
