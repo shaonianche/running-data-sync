@@ -20,8 +20,7 @@ jobs:
       uses: AnimMouse/setup-rclone@v1
       with:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
-    - run: |
-        rclone sync "running-data-sync:/HealthFit" ./FIT_OUT --update
+    - run: rclone sync "running-data-sync:/HealthFit" ./FIT_OUT --update --verbose --checksum
         
     - name: Rename file
       run: |
