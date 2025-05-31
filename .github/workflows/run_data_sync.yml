@@ -30,6 +30,9 @@ jobs:
   sync:
     name: Sync
     runs-on: ubuntu-latest
+    env:
+      VIRTUAL_ENV: ${{ github.workspace }}/.venv
+      PATH: ${{ github.workspace }}/.venv/bin:$PATH
     outputs:
       SAVE_DATA_IN_GITHUB_CACHE: ${{ steps.set_output.outputs.SAVE_DATA_IN_GITHUB_CACHE }}
       DATA_CACHE_PREFIX: ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}
@@ -75,20 +78,19 @@ jobs:
           python-version: 3.11
           cache: true
           cache-dependency-path: ./pdm.lock
-
+          
       - name: Install dependencies
         run: |
+          pdm venv create
           pdm install
-
+      
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
-        run: |
-          pdm run python scripts/strava_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'
-
+        run: python scripts/strava_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'
+      
       - name: Run strava_to_garmin_sync script
         if: env.RUN_TYPE == 'strava'
-        run: |
-          python scripts/strava_to_garmin_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'  '${{ secrets.GARMIN_SECRET_CN }}'  '${{ secrets.STRAVA_EMAIL }}'  '${{ secrets.STRAVA_PASSWORD }}' --is-cn
+        run: python scripts/strava_to_garmin_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'  '${{ secrets.GARMIN_SECRET_CN }}'  '${{ secrets.STRAVA_EMAIL }}'  '${{ secrets.STRAVA_PASSWORD }}' --is-cn
 
       # - name: Fit to garmin cn sync
       #   if: env.RUN_TYPE == 'strava'
@@ -97,13 +99,11 @@ jobs:
 
       - name: Fit to garmin sync
         if: env.RUN_TYPE == 'strava'
-        run: |
-          python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET }}'
+        run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET }}'
 
       - name: Run sync Only GPX script
         if: env.RUN_TYPE == 'only_gpx'
-        run: |
-          python scripts/gpx_sync.py
+        run: python scripts/gpx_sync.py
 
       - name: Make svg GitHub profile
         if: env.RUN_TYPE != 'pass'
