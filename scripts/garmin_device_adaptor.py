@@ -57,10 +57,10 @@ def do_wrap_device_info(origin_file):
     message.garmin_product = GARMIN_DEVICE_PRODUCT_ID
     message.software_version = GARMIN_SOFTWARE_VERSION
     message.device_index = 0
-    message.source_type = 5 
+    message.source_type = 5
     message.product = GARMIN_DEVICE_PRODUCT_ID
     builder.add(message)
 
     modified_file = builder.build()
-    print("wrap garmin device info sucess, product id:", GARMIN_DEVICE_PRODUCT_ID)
+    print("wrap garmin device info success, product id:", GARMIN_DEVICE_PRODUCT_ID)
     return modified_file.to_bytes()

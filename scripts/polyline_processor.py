@@ -1,7 +1,6 @@
-import os
 from typing import List, Tuple
-
 import polyline
+import os
 from haversine import haversine
 
 try:

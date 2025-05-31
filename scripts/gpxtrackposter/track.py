@@ -6,9 +6,9 @@
 # license that can be found in the LICENSE file.
 
 import datetime
+from datetime import timezone
 import os
 from collections import namedtuple
-from datetime import timezone
 
 import gpxpy as mod_gpxpy
 import lxml
@@ -49,6 +49,7 @@ class Track:
         self.length = 0
         self.special = False
         self.average_heartrate = None
+        self.elevation_gain = None
         self.moving_dict = {}
         self.run_id = 0
         self.start_latlng = []
@@ -102,6 +103,15 @@ class Track:
             messages, errors = decoder.read(convert_datetimes_to_dates=False)
             if errors:
                 print(f"FIT file read fail: {errors}")
+                return
+            if (
+                messages.get("session_mesgs") is None
+                or messages.get("session_mesgs")[0].get("total_distance") is None
+            ):
+                print(
+                    f"Session message or total distance is missing when loading FIT. for file {self.file_names[0]}, we just ignore this file and continue"
+                )
+                return
             self._load_fit_data(messages)
         except Exception as e:
             print(
@@ -165,9 +175,11 @@ class Track:
             # get start point
             try:
                 self.start_latlng = start_point(*polyline_container[0])
-            except:
+            except Exception as e:
+                print(f"Error getting start point: {e}")
                 pass
             self.polyline_str = polyline.encode(polyline_container)
+        self.elevation_gain = tcx.ascent
         self.moving_dict = {
             "distance": self.length,
             "moving_time": datetime.timedelta(seconds=moving_time),
@@ -194,6 +206,8 @@ class Track:
         for t in gpx.tracks:
             if self.track_name is None:
                 self.track_name = t.name
+            if hasattr(t, "type") and t.type:
+                self.type = "Run" if t.type == "running" else t.type
             for s in t.segments:
                 try:
                     extensions = [
@@ -212,7 +226,9 @@ class Track:
                         ]
                     )
                     heart_rate_list = list(filter(None, heart_rate_list))
-                except:
+                except lxml.etree.XMLSyntaxError:
+                    # Ignore XML syntax errors in extensions
+                    # This can happen if the GPX file is malformed
                     pass
                 line = [
                     s2.LatLng.from_degrees(p.latitude, p.longitude) for p in s.points
@@ -223,7 +239,8 @@ class Track:
         # get start point
         try:
             self.start_latlng = start_point(*polyline_container[0])
-        except:
+        except Exception as e:
+            print(f"Error getting start point: {e}")
             pass
         self.start_time_local, self.end_time_local = parse_datetime_to_local(
             self.start_time, self.end_time, polyline_container[0]
@@ -233,6 +250,38 @@ class Track:
             sum(heart_rate_list) / len(heart_rate_list) if heart_rate_list else None
         )
         self.moving_dict = self._get_moving_data(gpx)
+        self.elevation_gain = gpx.get_uphill_downhill().uphill
+        self._load_gpx_extensions_data(gpx)
+
+    def _load_gpx_extensions_data(self, gpx):
+        gpx_extensions = (
+            {}
+            if gpx.extensions is None
+            else {
+                lxml.etree.QName(extension).localname: extension.text
+                for extension in gpx.extensions
+            }
+        )
+        self.length = (
+            self.length
+            if gpx_extensions.get("distance") is None
+            else float(gpx_extensions.get("distance"))
+        )
+        self.average_heartrate = (
+            self.average_heartrate
+            if gpx_extensions.get("average_hr") is None
+            else float(gpx_extensions.get("average_hr"))
+        )
+        self.moving_dict["average_speed"] = (
+            self.moving_dict["average_speed"]
+            if gpx_extensions.get("average_speed") is None
+            else float(gpx_extensions.get("average_speed"))
+        )
+        self.moving_dict["distance"] = (
+            self.moving_dict["distance"]
+            if gpx_extensions.get("distance") is None
+            else float(gpx_extensions.get("distance"))
+        )
 
     def _load_fit_data(self, fit: dict):
         _polylines = []
@@ -256,6 +305,9 @@ class Track:
             self.type = message["sport"].lower()
         self.subtype = message["sub_sport"] if "sub_sport" in message else None
 
+        self.elevation_gain = (
+            message["total_ascent"] if "total_ascent" in message else None
+        )
         # moving_dict
         self.moving_dict["distance"] = message["total_distance"]
         self.moving_dict["moving_time"] = datetime.timedelta(
@@ -316,9 +368,13 @@ class Track:
             )
             self.file_names.extend(other.file_names)
             self.special = self.special or other.special
-        except:
+            self.average_heartrate = self.average_heartrate or other.average_heartrate
+            self.elevation_gain = (
+                self.elevation_gain if self.elevation_gain else 0
+            ) + (other.elevation_gain if other.elevation_gain else 0)
+        except Exception as e:
             print(
-                f"something wrong append this {self.end_time},in files {str(self.file_names)}"
+                f"something wrong append this {self.end_time},in files {str(self.file_names)}: {e}"
             )
             pass
 
@@ -352,6 +408,7 @@ class Track:
             "average_heartrate": (
                 int(self.average_heartrate) if self.average_heartrate else None
             ),
+            "elevation_gain": (int(self.elevation_gain) if self.elevation_gain else 0),
             "map": run_map(self.polyline_str),
             "start_latlng": self.start_latlng,
         }

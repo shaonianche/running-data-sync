@@ -1,5 +1,6 @@
 import calendar
 import datetime
+import locale
 
 import svgwrite
 
@@ -11,7 +12,7 @@ from .xy import XY
 
 
 class GithubDrawer(TracksDrawer):
-    """Draw a gtihub profile-like poster"""
+    """Draw a github profile-like poster"""
 
     def __init__(self, the_poster: Poster):
         super().__init__(the_poster)
@@ -22,7 +23,7 @@ class GithubDrawer(TracksDrawer):
         year_size = 200 * 4.0 / 80.0
         year_style = f"font-size:{year_size}px; font-family:Arial;"
         year_length_style = f"font-size:{110 * 3.0 / 80.0}px; font-family:Arial;"
-        month_names_style = f"font-size:2.5px; font-family:Arial"
+        month_names_style = "font-size:2.5px; font-family:Arial"
         total_length_year_dict = self.poster.total_length_year_dict
 
         is_align_monday = self.poster.github_style == "align-monday"
@@ -51,18 +52,21 @@ class GithubDrawer(TracksDrawer):
                 continue
             try:
                 month_names = [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec",
+                    locale.nl_langinfo(day)[:3]  # Get only first three letters
+                    for day in [
+                        locale.MON_1,
+                        locale.MON_2,
+                        locale.MON_3,
+                        locale.MON_4,
+                        locale.MON_5,
+                        locale.MON_6,
+                        locale.MON_7,
+                        locale.MON_8,
+                        locale.MON_9,
+                        locale.MON_10,
+                        locale.MON_11,
+                        locale.MON_12,
+                    ]
                 ]
                 # support windows or others doesn't support locale Name, by Hard code
             except Exception as e:

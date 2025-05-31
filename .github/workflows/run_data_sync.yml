@@ -14,6 +14,7 @@ on:
       - scripts/garmin_sync.py
       - scripts/fit_to_garmin_sync.py
       - scripts/strava_to_garmin_sync.py
+      - scripts/save_to_parqent.py
       - requirements.txt
 
 permissions:
@@ -70,7 +71,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
           cache: pip
           cache-dependency-path: 'requirements.txt'
 
@@ -111,6 +112,11 @@ jobs:
           python scripts/gen_svg.py --from-db --type circular --use-localtime
           python scripts/gen_svg.py --from-db --year $(date +"%Y")  --language zh_CN --title '$(date +'%Y') Running' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --output assets/github_$(date +"%Y").svg --use-localtime --min-distance 0.5
 
+      - name: Save data to parqent
+        run: |
+          pip install duckdb==1.1.0
+          python scripts/save_to_parqent.py
+
       - name: Push new runs
         run: |
           if git diff --quiet; then
@@ -123,3 +129,13 @@ jobs:
           git commit -m 'update new runs'
           git pull --rebase --autostash origin ${{ github.ref }}
           git push
+
+  publish_github_pages:
+    if: needs.sync.result == 'success' && needs.sync.outputs.BUILD_GH_PAGES == 'true'
+    name: Build and publish Github Pages
+    uses: ./.github/workflows/gh-pages.yml
+    with:
+      save_data_in_github_cache: ${{needs.sync.outputs.SAVE_DATA_IN_GITHUB_CACHE == 'true'}}
+      data_cache_prefix: ${{needs.sync.outputs.DATA_CACHE_PREFIX}}
+    needs:
+      - sync

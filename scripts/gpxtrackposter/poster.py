@@ -47,7 +47,7 @@ class Poster:
         self.length_range_by_date = None
         self.units = "metric"
         self.colors = {
-            "background": "#333333",
+            "background": "#222222",
             "text": "#FFFFFF",
             "special": "#FFFF00",
             "track": "#4DD2FF",
@@ -147,17 +147,18 @@ class Poster:
 
     def __draw_header(self, d):
         text_color = self.colors["text"]
+        title_style = "font-size:12px; font-family:Arial; font-weight:bold;"
+        d.add(d.text(self.title, insert=(10, 20), fill=text_color, style=title_style))
+
+    def __draw_footer(self, d):
+        text_color = self.colors["text"]
         header_style = "font-size:4px; font-family:Arial"
         value_style = "font-size:9px; font-family:Arial"
         small_value_style = "font-size:3px; font-family:Arial"
-        title_style = "font-size:10px; font-family:Arial; font-weight:bold;"
 
-        # 绘制标题
-        d.add(d.text(self.title, insert=(10, 15), fill=text_color, style=title_style))
-
-        # 绘制统计信息
         special_distance1 = self.special_distance["special_distance"]
         special_distance2 = self.special_distance["special_distance2"]
+
         (
             total_length,
             average_length,
@@ -166,92 +167,114 @@ class Poster:
             weeks,
         ) = self.__compute_track_statistics()
 
-        # 添加特殊轨迹说明
-        d.add(d.rect((65, 25), (2.6, 2.6), fill=self.colors["special"]))
         d.add(
             d.text(
-                f"Over {special_distance1:.1f} km",
-                insert=(70, 27.5),
-                fill=text_color,
-                style=small_value_style,
-            )
-        )
-
-        d.add(d.rect((65, 29), (2.6, 2.6), fill=self.colors["special2"]))
-        d.add(
-            d.text(
-                f"Over {special_distance2:.1f} km",
-                insert=(70, 31.5),
-                fill=text_color,
-                style=small_value_style,
-            )
-        )
-
-        d.add(
-            d.text(
-                self.trans("STATISTICS"),
-                insert=(120, 22),
+                self.trans("Runner"),
+                insert=(10, self.height - 20),
                 fill=text_color,
                 style=header_style,
             )
         )
+        d.add(
+            d.text(
+                self.athlete,
+                insert=(10, self.height - 10),
+                fill=text_color,
+                style=value_style,
+            )
+        )
+        if self.drawer_type != "monthoflife":
+            d.add(
+                d.text(
+                    self.trans("SPECIAL TRACKS"),
+                    insert=(65, self.height - 20),
+                    fill=text_color,
+                    style=header_style,
+                )
+            )
 
+            d.add(
+                d.rect((65, self.height - 17), (2.6, 2.6), fill=self.colors["special"])
+            )
+
+            d.add(
+                d.text(
+                    f"Over {special_distance1:.1f} km",
+                    insert=(70, self.height - 14.5),
+                    fill=text_color,
+                    style=small_value_style,
+                )
+            )
+
+            d.add(
+                d.rect((65, self.height - 13), (2.6, 2.6), fill=self.colors["special2"])
+            )
+
+            d.add(
+                d.text(
+                    f"Over {special_distance2:.1f} km",
+                    insert=(70, self.height - 10.5),
+                    fill=text_color,
+                    style=small_value_style,
+                )
+            )
+
+        d.add(
+            d.text(
+                self.trans("STATISTICS"),
+                insert=(120, self.height - 20),
+                fill=text_color,
+                style=header_style,
+            )
+        )
         d.add(
             d.text(
                 self.trans("Number") + f": {len(self.tracks)}",
-                insert=(120, 27),
+                insert=(120, self.height - 15),
                 fill=text_color,
                 style=small_value_style,
             )
         )
-
         d.add(
             d.text(
                 self.trans("Weekly") + ": " + format_float(len(self.tracks) / weeks),
-                insert=(120, 32),
+                insert=(120, self.height - 10),
                 fill=text_color,
                 style=small_value_style,
             )
         )
-
         d.add(
             d.text(
                 self.trans("Total") + ": " + self.format_distance(total_length),
-                insert=(141, 27),
+                insert=(141, self.height - 15),
                 fill=text_color,
                 style=small_value_style,
             )
         )
-
         d.add(
             d.text(
                 self.trans("Avg") + ": " + self.format_distance(average_length),
-                insert=(141, 32),
+                insert=(141, self.height - 10),
                 fill=text_color,
                 style=small_value_style,
             )
         )
-
         d.add(
             d.text(
                 self.trans("Min") + ": " + self.format_distance(min_length),
-                insert=(167, 27),
+                insert=(167, self.height - 15),
                 fill=text_color,
                 style=small_value_style,
             )
         )
-
         d.add(
             d.text(
                 self.trans("Max") + ": " + self.format_distance(max_length),
-                insert=(167, 32),
+                insert=(167, self.height - 10),
                 fill=text_color,
                 style=small_value_style,
             )
         )
-
-    def __draw_footer(self, d):
-        pass  # 移除所有 footer 内容
 
     def __compute_track_statistics(self):
         length_range = ValueRange()
