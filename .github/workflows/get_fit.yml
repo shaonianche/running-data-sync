@@ -32,9 +32,10 @@ jobs:
       run: |
         ls "${{ env.LOCAL_PATH }}"
         cd "${{ env.LOCAL_PATH }}"
-        for file in *.fit; do
-          new_name=$(echo "$file" | sed -E 's/^([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}).*\.fit$/\1.fit/')
-          mv "$file" "$new_name"
+        for file in *-*-*.fit; do
+            if [[ $file =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6} ]]; then
+                mv "$file" "${file:0:19}.fit"
+            fi
         done
         cd ..
 
