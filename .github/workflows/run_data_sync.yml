@@ -30,9 +30,6 @@ jobs:
   sync:
     name: Sync
     runs-on: ubuntu-latest
-    env:
-      VIRTUAL_ENV: ${{ github.workspace }}/.venv
-      PATH: ${{ github.workspace }}/.venv/bin:$PATH
     outputs:
       SAVE_DATA_IN_GITHUB_CACHE: ${{ steps.set_output.outputs.SAVE_DATA_IN_GITHUB_CACHE }}
       DATA_CACHE_PREFIX: ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}
@@ -75,15 +72,15 @@ jobs:
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
           cache: true
           cache-dependency-path: ./pdm.lock
           
       - name: Install dependencies
         run: |
-          pdm venv create
           pdm install
-      
+          echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
+                
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
         run: python scripts/strava_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'
