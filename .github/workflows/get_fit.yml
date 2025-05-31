@@ -24,7 +24,9 @@ jobs:
       uses: AnimMouse/setup-rclone@v1
       with:
         rclone_config: ${{ secrets.RCLONE_CONFIG }}
-    - run: rclone sync "${{ env.REMOTE_PATH }}" "${{ env.LOCAL_PATH }}"  --update --checksum
+    
+    - name: Rclone sync    
+      run: rclone sync "${{ env.REMOTE_PATH }}" "${{ env.LOCAL_PATH }}"  --update --checksum
         
     - name: Rename file
       run: |
@@ -32,7 +34,7 @@ jobs:
         cd "${{ env.LOCAL_PATH }}"
         for file in *.fit; do
           new_name=$(echo "$file" | sed -E 's/^([0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}).*\.fit$/\1.fit/')
-          mv -n "$file" "$new_name"
+          mv "$file" "$new_name"
         done
         cd ..
 
