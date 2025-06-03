@@ -1,9 +1,30 @@
 {
   "name": "yihong.run",
-  "description": "Yi hong",
+  "type": "module",
   "version": "1.0.0",
-  "author": "Yi Hong <zouzou0208@gmail.com>",
+  "private": true,
   "packageManager": "pnpm@8.9.0+sha256.8f5264ad1d100da11a6add6bb8a94c6f1e913f9e9261b2a551fabefad2ec0fec",
+  "description": "Yi hong",
+  "author": "Yi Hong <zouzou0208@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yihong0618/running_page"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "data:clean": "rm -f scripts/data.db {GPX,TCX,FIT}_OUT/* activities/* src/static/activities.json",
+    "data:download:garmin": "python scripts/garmin_sync.py",
+    "data:analysis:github": "python scripts/gen_svg.py --from-db --type github --output assets/github.svg",
+    "data:analysis:grid": "python scripts/gen_svg.py --from-db --type grid --output assets/grid.svg",
+    "build": "vite build",
+    "develop": "vite dev",
+    "serve": "vite serve",
+    "lint": "eslint --ext .ts,.tsx src --fix",
+    "ci": "pnpm run lint && pnpm run build"
+  },
   "dependencies": {
     "@mapbox/mapbox-gl-language": "^1.0.0",
     "@mapbox/polyline": "^1.1.1",
@@ -26,46 +47,24 @@
     "vite-plugin-svgr": "^3.2.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
-  "license": "MIT",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "data:clean": "rm -f scripts/data.db {GPX,TCX,FIT}_OUT/* activities/* src/static/activities.json",
-    "data:download:garmin": "python scripts/garmin_sync.py",
-    "data:analysis:github": "python scripts/gen_svg.py --from-db --type github --output assets/github.svg",
-    "data:analysis:grid": "python scripts/gen_svg.py --from-db --type grid --output assets/grid.svg",
-    "build": "vite build",
-    "develop": "vite dev",
-    "serve": "vite serve",
-    "lint": "eslint --ext .ts,.tsx src --fix",
-    "check": "prettier --write src/main.tsx src/**/*.{css,json,ts,tsx} *.{md,yaml,json,ts,js}",
-    "ci": "pnpm run check && pnpm run lint && pnpm run build"
-  },
   "engineStrict": true,
   "browserslist": "defaults, not ie 11",
-  "engines": {
-    "node": ">=18"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yihong0618/running_page"
-  },
   "devDependencies": {
+    "@antfu/eslint-config": "^4.13.2",
+    "@eslint-react/eslint-plugin": "^1.49.0",
     "@types/geojson": "^7946.0.14",
     "@types/mapbox__polyline": "^1.0.2",
     "@types/node": "^22.15.27",
     "@types/prop-types": "^15.7.11",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
-    "@typescript-eslint/parser": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.1",
     "autoprefixer": "^10.4.19",
     "eslint": "^9.27.0",
-    "eslint-config-prettier": "^10.1.5",
-    "eslint-plugin-prettier": "^5.4.1",
-    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-format": "^1.0.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
     "postcss": "^8.5.4",
-    "prettier": "^3.2.5",
-    "prettier-plugin-tailwindcss": "^0.5.13",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.8.3"
   }
