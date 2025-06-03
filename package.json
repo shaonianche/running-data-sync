@@ -3,7 +3,7 @@
   "type": "module",
   "version": "1.0.0",
   "private": true,
-  "packageManager": "pnpm@10.11.1+sha512.e519b9f7639869dc8d5c3c5dfef73b3f091094b0a006d7317353c72b124e80e1afd429732e28705ad6bfa1ee879c1fce46c128ccebd3192101f43dd67c667912",
+  "packageManager": "pnpm@10.11.1",
   "description": "Yi hong",
   "author": "Yi Hong <zouzou0208@gmail.com>",
   "license": "MIT",
@@ -12,7 +12,8 @@
     "url": "https://github.com/yihong0618/running_page"
   },
   "engines": {
-    "node": "v22.16.0"
+    "node": "v22.16.0",
+    "pnpm": "10.11.1"
   },
   "scripts": {
     "data:clean": "rm -f scripts/data.db {GPX,TCX,FIT}_OUT/* activities/* src/static/activities.json",
