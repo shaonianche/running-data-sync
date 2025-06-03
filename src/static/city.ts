@@ -1,8 +1,8 @@
 interface ICity {
-  code: string
-  name: string
-  province: string
-  city?: string
+  code: string;
+  name: string;
+  province: string;
+  city?: string;
 }
 
 export const chinaCities: ICity[] = [
@@ -2198,4 +2198,4 @@ export const chinaCities: ICity[] = [
     name: '澳门特别行政区',
     province: '82',
   },
-]
+];

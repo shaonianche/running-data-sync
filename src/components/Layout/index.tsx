@@ -1,12 +1,12 @@
-import PropTypes from 'prop-types'
-import React from 'react'
-import { Helmet } from 'react-helmet-async'
-import Header from '@/components/Header'
-import useSiteMetadata from '@/hooks/useSiteMetadata'
-import styles from './style.module.css'
+import PropTypes from 'prop-types';
+import React from 'react';
+import { Helmet } from 'react-helmet-async';
+import Header from '@/components/Header';
+import useSiteMetadata from '@/hooks/useSiteMetadata';
+import styles from './style.module.css';
 
-function Layout({ children }: React.PropsWithChildren) {
-  const { siteTitle, description } = useSiteMetadata()
+const Layout = ({ children }: React.PropsWithChildren) => {
+  const { siteTitle, description } = useSiteMetadata();
 
   return (
     <>
@@ -23,11 +23,11 @@ function Layout({ children }: React.PropsWithChildren) {
       <Header />
       <div className="mb-16 p-4 lg:flex lg:p-16">{children}</div>
     </>
-  )
-}
+  );
+};
 
 Layout.propTypes = {
   children: PropTypes.node.isRequired,
-}
+};
 
-export default Layout
+export default Layout;
