@@ -1,12 +1,12 @@
 interface ISiteMetadataResult {
-  siteTitle: string;
-  siteUrl: string;
-  description: string;
-  logo: string;
+  siteTitle: string
+  siteUrl: string
+  description: string
+  logo: string
   navLinks: {
-    name: string;
-    url: string;
-  }[];
+    name: string
+    url: string
+  }[]
 }
 
 const data: ISiteMetadataResult = {
@@ -24,6 +24,6 @@ const data: ISiteMetadataResult = {
       url: 'https://github.com/shaonianche',
     },
   ],
-};
+}
 
-export default data;
+export default data

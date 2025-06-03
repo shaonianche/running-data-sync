@@ -1,7 +1,7 @@
-import { FeatureCollection, LineString, Polygon, MultiPolygon } from 'geojson';
-import { MAIN_COLOR } from '@/utils/const';
+import type { FeatureCollection, LineString, MultiPolygon, Polygon } from 'geojson'
+import { MAIN_COLOR } from '@/utils/const'
 
-export type RPGeometry = LineString | Polygon | MultiPolygon;
+export type RPGeometry = LineString | Polygon | MultiPolygon
 
 export const chinaGeojson: FeatureCollection<RPGeometry> = {
   type: 'FeatureCollection',
@@ -3249,4 +3249,4 @@ export const chinaGeojson: FeatureCollection<RPGeometry> = {
       },
     },
   ],
-};
+}
