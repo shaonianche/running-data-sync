@@ -1,8 +1,8 @@
-import { Link } from 'react-router-dom';
-import useSiteMetadata from '@/hooks/useSiteMetadata';
+import { Link } from 'react-router-dom'
+import useSiteMetadata from '@/hooks/useSiteMetadata'
 
-const Header = () => {
-  const { logo, siteUrl, navLinks } = useSiteMetadata();
+function Header() {
+  const { logo, siteUrl, navLinks } = useSiteMetadata()
 
   return (
     <>
@@ -27,7 +27,7 @@ const Header = () => {
         </div>
       </nav>
     </>
-  );
-};
+  )
+}
 
-export default Header;
+export default Header

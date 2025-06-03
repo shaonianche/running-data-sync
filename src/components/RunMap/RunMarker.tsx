@@ -1,22 +1,22 @@
-import { ReactComponent as EndSvg } from '@assets/end.svg';
-import { ReactComponent as StartSvg } from '@assets/start.svg';
-import { Marker } from 'react-map-gl';
-import styles from './style.module.css';
+import { ReactComponent as EndSvg } from '@assets/end.svg'
+import { ReactComponent as StartSvg } from '@assets/start.svg'
+import { Marker } from 'react-map-gl'
+import styles from './style.module.css'
 
 interface IRunMarkerProperties {
-  startLon: number;
-  startLat: number;
-  endLon: number;
-  endLat: number;
+  startLon: number
+  startLat: number
+  endLon: number
+  endLat: number
 }
 
-const RunMarker = ({
+function RunMarker({
   startLon,
   startLat,
   endLon,
   endLat,
-}: IRunMarkerProperties) => {
-  const size = 5;
+}: IRunMarkerProperties) {
+  const size = 5
   return (
     <>
       <Marker
@@ -45,7 +45,7 @@ const RunMarker = ({
         </div>
       </Marker>
     </>
-  );
-};
+  )
+}
 
-export default RunMarker;
+export default RunMarker
