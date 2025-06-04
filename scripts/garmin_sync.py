@@ -18,7 +18,7 @@ import aiofiles
 import cloudscraper
 import garth
 import httpx
-from config import FOLDER_DICT, JSON_FILE, SQL_FILE, config
+from config import FOLDER_DICT, JSON_FILE, SQL_FILE
 from garmin_device_adaptor import wrap_device_info
 from utils import make_activities_file
 
@@ -371,7 +371,7 @@ async def download_new_activities(
             for id in to_generate_garmin_ids
         ],
     )
-    print(f"Download finished. Elapsed {time.time() - start_time} seconds")
+    print(f"Download finished. Elapsed {time.time()-start_time} seconds")
 
     await client.req.aclose()
     return to_generate_garmin_ids, to_generate_garmin_id2title
@@ -412,9 +412,7 @@ if __name__ == "__main__":
     )
     options = parser.parse_args()
     secret_string = options.secret_string
-    auth_domain = (
-        "CN" if options.is_cn else config("sync", "garmin", "authentication_domain")
-    )
+    auth_domain = "CN" if options.is_cn else "COM"  # Default to COM if not specified
     file_type = options.download_file_type
     is_only_running = options.only_run
     if secret_string is None:
