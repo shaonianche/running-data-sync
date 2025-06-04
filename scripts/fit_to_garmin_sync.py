@@ -95,8 +95,8 @@ if __name__ == "__main__":
         help="if garmin account is cn",
     )
     options = parser.parse_args()
-    secret_string = options.secret_string ("sync", "garmin", "secret_string")
-    garmin_auth_domain = "CN" if options.is_cn else ""
+    secret_string = options.secret_string
+    garmin_auth_domain = "CN" if options.is_cn else "COM"
     if secret_string is None:
         print("Missing argument nor valid configuration file")
         sys.exit(1)
