@@ -51,8 +51,8 @@ dependencies:
     specifier: ^7.1.6
     version: 7.1.9(mapbox-gl@3.12.0)(react-dom@18.3.1)(react@18.3.1)
   react-router-dom:
-    specifier: ^7.6.1
-    version: 7.6.1(react-dom@18.3.1)(react@18.3.1)
+    specifier: ^7.6.2
+    version: 7.6.2(react-dom@18.3.1)(react@18.3.1)
   viewport-mercator-project:
     specifier: ^7.0.4
     version: 7.0.4
@@ -4627,8 +4627,8 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /react-router-dom@7.6.1(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-vxU7ei//UfPYQ3iZvHuO1D/5fX3/JOqhNTbRR+WjSBWxf9bIvpWK+ftjmdfJHzPOuMQKe2fiEdG+dZX6E8uUpA==}
+  /react-router-dom@7.6.2(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-Q8zb6VlTbdYKK5JJBLQEN06oTUa/RAbG/oQS1auK1I0TbJOXktqm+QENEVJU6QvWynlXPRBXI3fiOQcSEA78rA==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       react: '>=18'
@@ -4636,11 +4636,11 @@ packages:
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-router: 7.6.1(react-dom@18.3.1)(react@18.3.1)
+      react-router: 7.6.2(react-dom@18.3.1)(react@18.3.1)
     dev: false
 
-  /react-router@7.6.1(react-dom@18.3.1)(react@18.3.1):
-    resolution: {integrity: sha512-hPJXXxHJZEsPFNVbtATH7+MMX43UDeOauz+EAU4cgqTn7ojdI9qQORqS8Z0qmDlL1TclO/6jLRYUEtbWidtdHQ==}
+  /react-router@7.6.2(react-dom@18.3.1)(react@18.3.1):
+    resolution: {integrity: sha512-U7Nv3y+bMimgWjhlT5CRdzHPu2/KVmqPwKUCChW8en5P3znxUqwlYFlbmyj8Rgp1SF6zs5X4+77kBVknkg6a0w==}
     engines: {node: '>=20.0.0'}
     peerDependencies:
       react: '>=18'
