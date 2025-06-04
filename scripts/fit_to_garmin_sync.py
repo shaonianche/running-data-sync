@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 import sys
 
-from config import FIT_FOLDER, config
+from config import FIT_FOLDER
 from garmin_fit_sdk import Decoder, Stream
 from garmin_sync import Garmin
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
         help="if garmin account is cn",
     )
     options = parser.parse_args()
-    secret_string = options.secret_string or config("sync", "garmin", "secret_string")
+    secret_string = options.secret_string ("sync", "garmin", "secret_string")
     garmin_auth_domain = "CN" if options.is_cn else ""
     if secret_string is None:
         print("Missing argument nor valid configuration file")
