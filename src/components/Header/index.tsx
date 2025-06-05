@@ -6,7 +6,7 @@ function Header() {
 
   return (
     <>
-      <nav className="mt-12 flex w-full items-center justify-between pl-6 lg:px-16">
+      <nav className="max-w-7xl mx-auto mt-12 flex w-full items-center justify-between pl-6 lg:px-16">
         <div className="w-1/4">
           <Link to={siteUrl}>
             <picture>

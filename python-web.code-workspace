@@ -5,7 +5,7 @@
     }
   ],
   "settings": {
-    "files.autoSave": "onWindowChange",
-    "diffEditor.experimental.showMoves": true,
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "dbaeumer.vscode-eslint",
   }
 }

@@ -21,7 +21,7 @@ function Layout({ children }: React.PropsWithChildren) {
         />
       </Helmet>
       <Header />
-      <div className="mb-16 p-4 lg:flex lg:p-16">{children}</div>
+      <div className="max-w-7xl mx-auto mb-16 p-4 lg:flex lg:p-16">{children}</div>
     </>
   )
 }
