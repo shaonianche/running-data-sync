@@ -10,5 +10,11 @@
       "source.fixAll.eslint": "explicit",
       "source.organizeImports": "never"
     },
+    "[toml]": {
+      "editor.defaultFormatter": "tamasfe.even-better-toml"
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "vscode.json-language-features"
+    },
   }
 }
