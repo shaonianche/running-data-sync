@@ -1,7 +1,7 @@
 import argparse
 import json
 
-from scripts.utils import load_env_config
+from utils import load_env_config
 from config import JSON_FILE, SQL_FILE
 from generator import Generator
 
