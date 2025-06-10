@@ -2,7 +2,7 @@
 name = "running-data-sync"
 version = "0.1.0"
 description = "Default template for PDM package"
-authors = [ { name = "shaonianche", email = "github@duanfei.org" } ]
+authors = [{ name = "shaonianche", email = "github@duanfei.org" }]
 dependencies = [
   "httpx",
   "gpxpy==1.4.2",
@@ -40,7 +40,7 @@ readme = "README.md"
 license = { text = "MIT" }
 
 [build-system]
-requires = [ "pdm-backend" ]
+requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [tool.pdm]

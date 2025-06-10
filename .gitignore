@@ -15,6 +15,7 @@ _site/
 db.csv
 danpalmer.sql
 
+.env*
 config.yaml
 .mypy_cache
 .pdm-python

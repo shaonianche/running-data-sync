@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 import time
 from datetime import datetime
 
@@ -13,6 +14,27 @@ from stravalib.client import Client
 from stravalib.exc import RateLimitExceeded
 
 
+def load_env_config():
+    """Load Strava API configuration from .env.local file"""
+    env_path = Path(__file__).parent.parent / ".env.local"
+    if not env_path.exists():
+        return None
+
+    config = {}
+    with open(env_path) as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#"):
+                key, value = line.split("=", 1)
+                config[key.strip()] = value.strip()
+
+    return {
+        "client_id": config.get("STRAVA_CLIENT_ID"),
+        "client_secret": config.get("STRAVA_CLIENT_SECRET"),
+        "refresh_token": config.get("STRAVA_REFRESH_TOKEN"),
+    }
+
+
 def adjust_time(time, tz_name):
     tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
     return time + tc_offset
@@ -25,6 +47,8 @@ def adjust_time_to_utc(time, tz_name):
 
 def adjust_timestamp_to_utc(timestamp, tz_name):
     tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
+    if tc_offset is None:
+        raise ValueError(f"Invalid timezone name: {tz_name}")
     delta = int(tc_offset.total_seconds())
     return int(timestamp) - delta
 
@@ -107,7 +131,7 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
                 r = client.upload_activity(activity_file=f, data_type=data_type)
 
         except RateLimitExceeded as e:
-            timeout = e.timeout
+            timeout = 60.0 if e.timeout is None else float(e.timeout)
             print()
             print(f"Strava API Rate Limit Exceeded. Retry after {timeout} seconds")
             print()

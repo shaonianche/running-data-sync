@@ -20,7 +20,7 @@ import garth
 import httpx
 from config import FOLDER_DICT, JSON_FILE, SQL_FILE
 from garmin_device_adaptor import wrap_device_info
-from utils import make_activities_file
+from scripts.utils import make_activities_file
 
 # logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -61,6 +61,13 @@ class Garmin:
             garth.configure(domain="garmin.cn")
         self.modern_url = self.URL_DICT.get("MODERN_URL")
         garth.client.loads(secret_string)
+
+        # Add null check before accessing the expired property
+        if garth.client.oauth2_token is None:
+            raise ValueError(
+                "OAuth2 token is not available. Please ensure proper authentication."
+            )
+
         if garth.client.oauth2_token.expired:
             garth.client.refresh_oauth2()
 
@@ -82,7 +89,9 @@ class Garmin:
             response = await self.req.get(url, headers=self.headers)
             if response.status_code == 429:
                 raise GarminConnectTooManyRequestsError("Too many requests")
-            logger.debug(f"fetch_data got response code {response.status_code}")
+            logger.debug(
+                f"fetch_data got response code {response.status_code}"
+            )
             response.raise_for_status()
             return response.json()
         except Exception as err:
@@ -253,7 +262,9 @@ def add_summary_info(file_data, summary_infos, fields=None):
             fields = ["distance", "average_hr", "average_speed"]
         for field in fields:
             create_element(
-                extensions_node, field, get_info_text_value(summary_infos, field)
+                extensions_node,
+                field,
+                get_info_text_value(summary_infos, field),
             )
         root.insert(0, extensions_node)
         return etree.tostring(root, encoding="utf-8", pretty_print=True)
@@ -269,9 +280,13 @@ async def download_garmin_data(
 ):
     folder = FOLDER_DICT.get(file_type, "gpx")
     try:
-        file_data = await client.download_activity(activity_id, file_type=file_type)
+        file_data = await client.download_activity(
+            activity_id, file_type=file_type
+        )
         if summary_infos is not None:
-            file_data = add_summary_info(file_data, summary_infos.get(activity_id))
+            file_data = add_summary_info(
+                file_data, summary_infos.get(activity_id)
+            )
         file_path = os.path.join(folder, f"{activity_id}.{file_type}")
         need_unzip = False
         if file_type == "fit":
@@ -322,7 +337,9 @@ async def gather_with_concurrency(n, tasks):
 
 
 def get_downloaded_ids(folder):
-    return [i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")]
+    return [
+        i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")
+    ]
 
 
 def get_garmin_summary_infos(activity_summary, activity_id):
@@ -338,7 +355,12 @@ def get_garmin_summary_infos(activity_summary, activity_id):
 
 
 async def download_new_activities(
-    secret_string, auth_domain, downloaded_ids, is_only_running, folder, file_type
+    secret_string,
+    auth_domain,
+    downloaded_ids,
+    is_only_running,
+    folder,
+    file_type,
 ):
     client = Garmin(secret_string, auth_domain, is_only_running)
     # because I don't find a para for after time, so I use garmin-id as filename
@@ -366,12 +388,15 @@ async def download_new_activities(
         10,
         [
             download_garmin_data(
-                client, id, file_type=file_type, summary_infos=garmin_summary_infos_dict
+                client,
+                id,
+                file_type=file_type,
+                summary_infos=garmin_summary_infos_dict,
             )
             for id in to_generate_garmin_ids
         ],
     )
-    print(f"Download finished. Elapsed {time.time()-start_time} seconds")
+    print(f"Download finished. Elapsed {time.time() - start_time} seconds")
 
     await client.req.aclose()
     return to_generate_garmin_ids, to_generate_garmin_id2title
@@ -380,7 +405,9 @@ async def download_new_activities(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "secret_string", nargs="?", help="secret_string fro get_garmin_secret.py"
+        "secret_string",
+        nargs="?",
+        help="secret_string fro get_garmin_secret.py",
     )
     parser.add_argument(
         "--is-cn",
@@ -412,7 +439,9 @@ if __name__ == "__main__":
     )
     options = parser.parse_args()
     secret_string = options.secret_string
-    auth_domain = "CN" if options.is_cn else "COM"  # Default to COM if not specified
+    auth_domain = (
+        "CN" if options.is_cn else "COM"
+    )  # Default to COM if not specified
     file_type = options.download_file_type
     is_only_running = options.only_run
     if secret_string is None:
@@ -455,5 +484,9 @@ if __name__ == "__main__":
             activity_title_dict=id2title,
         )
     make_activities_file(
-        SQL_FILE, folder, JSON_FILE, file_suffix=file_type, activity_title_dict=id2title
+        SQL_FILE,
+        folder,
+        JSON_FILE,
+        file_suffix=file_type,
+        activity_title_dict=id2title,
     )
