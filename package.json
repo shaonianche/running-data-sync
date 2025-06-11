@@ -51,7 +51,7 @@
   "browserslist": "defaults, not ie 11",
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.3",
-    "@eslint-react/eslint-plugin": "^1.51.1",
+    "@eslint-react/eslint-plugin": "^1.52.1",
     "@tailwindcss/postcss": "^4.1.8",
     "@types/geojson": "^7946.0.16",
     "@types/mapbox__polyline": "^1.0.5",
