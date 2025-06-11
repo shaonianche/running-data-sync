@@ -25,7 +25,7 @@ function YearsStat({
           <br />
         </p>
       </section>
-      <hr color="red" />
+      <hr />
       {yearsArrayUpdate.map(year => (
         <YearStat key={year} year={year} onClick={onClick} />
       ))}

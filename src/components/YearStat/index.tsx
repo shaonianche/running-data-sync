@@ -77,7 +77,7 @@ function YearStat({
           <YearSVG className="my-4 h-4/6 w-4/6 border-0 p-0" />
         </Suspense>
       )}
-      <hr color="red" />
+      <hr />
     </div>
   )
 }
