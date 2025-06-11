@@ -15,8 +15,8 @@ importers:
         specifier: ^1.2.1
         version: 1.2.1
       '@surbowl/world-geo-json-zh':
-        specifier: ^2.1.4
-        version: 2.1.4
+        specifier: ^2.1.5
+        version: 2.1.5
       '@svgr/plugin-svgo':
         specifier: ^8.1.0
         version: 8.1.0(@svgr/core@8.1.0(typescript@5.8.3))(typescript@5.8.3)
@@ -638,8 +638,8 @@ packages:
     peerDependencies:
       eslint: '>=9.0.0'
 
-  '@surbowl/world-geo-json-zh@2.1.4':
-    resolution: {integrity: sha512-Y8TeDqdsnQ65+l/Jy1gu45VIyFX+IeVDUrVC4qZs60ZdOCjV/WkZZMYHXaztpdCmLhuQ7u32seuNKVVFEHklHA==}
+  '@surbowl/world-geo-json-zh@2.1.5':
+    resolution: {integrity: sha512-w9Cf4uE+1RkD9gaFzHrlxL4zlTXnFaGJ9fZYsee8jr0lp2++yIBc1PMRJEvrALKFxk2LARNDssoYQdso2aEFIA==}
 
   '@svgr/babel-plugin-add-jsx-attribute@8.0.0':
     resolution: {integrity: sha512-b9MIk7yhdS1pMCZM8VeNfUlSKVRhsHZNMl5O9SfaX0l0t5wjdgu4IDzGB8bpnGBBOjGST3rRFVsaaEtI4W6f7g==}
@@ -3399,7 +3399,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@surbowl/world-geo-json-zh@2.1.4': {}
+  '@surbowl/world-geo-json-zh@2.1.5': {}
 
   '@svgr/babel-plugin-add-jsx-attribute@8.0.0(@babel/core@7.27.4)':
     dependencies:
