@@ -52,10 +52,10 @@ function RunTable({
     = sortFuncInfo === 'Date' ? sortDateFunc : sortDateFuncReverse
   const sortFuncMap = new Map([
     ['KM', sortKMFunc],
-    ['Pace', sortPaceFunc],
+    ['PACE', sortPaceFunc],
     ['BPM', sortBPMFunc],
-    ['Time', sortRunTimeFunc],
-    ['Date', sortDateFuncClick],
+    ['TIME', sortRunTimeFunc],
+    ['DATE', sortDateFuncClick],
   ])
 
   const handleClick: React.MouseEventHandler<HTMLElement> = (e) => {
@@ -72,7 +72,7 @@ function RunTable({
       <table className={styles.runTable} cellSpacing="0" cellPadding="0">
         <thead>
           <tr>
-            <th />
+            <th>ACTIVITY</th>
             {Array.from(sortFuncMap.keys()).map(k => (
               <th key={k} onClick={handleClick}>
                 {k}

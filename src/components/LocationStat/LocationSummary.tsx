@@ -28,7 +28,7 @@ function LocationSummary() {
             )
           : null}
       </section>
-      <hr color="red" />
+      <hr />
     </div>
   )
 }
