@@ -88,6 +88,8 @@ def update_or_create_activity(session, run_activity):
         activity = (
             session.query(Activity).filter_by(run_id=int(run_activity.id)).first()
         )
+        gain = getattr(run_activity, 'total_elevation_gain', getattr(run_activity, 'elevation_gain', 0.0))
+        elevation_gain_value = float(gain or 0.0)
         if not activity:
             start_point = run_activity.start_latlng
             location_country = getattr(run_activity, "location_country", "")
@@ -124,7 +126,7 @@ def update_or_create_activity(session, run_activity):
                 location_country=location_country,
                 average_heartrate=run_activity.average_heartrate,
                 average_speed=float(run_activity.average_speed),
-                elevation_gain=float(getattr(run_activity, "elevation_gain", 0.0) or 0.0),
+                elevation_gain=elevation_gain_value,
                 summary_polyline=(
                     run_activity.map and run_activity.map.summary_polyline or ""
                 ),
@@ -140,7 +142,7 @@ def update_or_create_activity(session, run_activity):
             activity.subtype = run_activity.subtype
             activity.average_heartrate = run_activity.average_heartrate
             activity.average_speed = float(run_activity.average_speed)
-            elevation_gain=float(getattr(run_activity, "elevation_gain", 0.0) or 0.0),
+            activity.elevation_gain = elevation_gain_value
             activity.summary_polyline = (
                 run_activity.map and run_activity.map.summary_polyline or ""
             )
