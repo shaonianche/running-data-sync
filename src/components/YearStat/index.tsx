@@ -9,9 +9,11 @@ import { formatPace } from '@/utils/utils'
 function YearStat({
   year,
   onClick,
+  disableClick = false,
 }: {
   year: string
-  onClick: (_year: string) => void
+  onClick?: (_year: string) => void
+  disableClick?: boolean
 }) {
   let { activities: runs, years } = useActivities()
   // for hover
@@ -24,8 +26,6 @@ function YearStat({
   }
   let sumDistance = 0
   let streak = 0
-  let pace = 0
-  let paceNullCount = 0
   let heartRate = 0
   let heartRateNullCount = 0
   let totalMetersAvail = 0
@@ -33,12 +33,8 @@ function YearStat({
   runs.forEach((run) => {
     sumDistance += run.distance || 0
     if (run.average_speed) {
-      pace += run.average_speed
       totalMetersAvail += run.distance || 0
       totalSecondsAvail += (run.distance || 0) / run.average_speed
-    }
-    else {
-      paceNullCount++
     }
     if (run.average_heartrate) {
       heartRate += run.average_heartrate
@@ -58,8 +54,8 @@ function YearStat({
   )
   return (
     <div
-      className="cursor-pointer"
-      onClick={() => onClick(year)}
+      className={`cursor-pointer${disableClick ? ' cursor-not-allowed opacity-80' : ''}`}
+      {...(!disableClick && onClick ? { onClick: () => onClick(year) } : {})}
       {...eventHandlers}
     >
       <section>
@@ -72,7 +68,7 @@ function YearStat({
           <Stat value={avgHeartRate} description=" Avg Heart Rate" />
         )}
       </section>
-      {year !== 'Total' && hovered && (
+      {year !== 'Total' && hovered && !disableClick && (
         <Suspense fallback="loading...">
           <YearSVG className="my-4 h-4/6 w-4/6 border-0 p-0" />
         </Suspense>

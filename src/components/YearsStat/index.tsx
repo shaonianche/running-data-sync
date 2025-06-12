@@ -27,13 +27,13 @@ function YearsStat({
       </section>
       <hr />
       {yearsArrayUpdate.map(year => (
-        <YearStat key={year} year={year} onClick={onClick} />
+        <YearStat key={year} year={year} disableClick />
       ))}
       {
         // eslint-disable-next-line no-prototype-builtins
         yearsArrayUpdate.hasOwnProperty('Total')
           ? (
-              <YearStat key="Total" year="Total" onClick={onClick} />
+              <YearStat key="Total" year="Total" disableClick />
             )
           : (
               <div />
