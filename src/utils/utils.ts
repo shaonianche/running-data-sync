@@ -1,4 +1,4 @@
-import type { FeatureCollection, LineString } from 'geojson'
+import type { Feature, FeatureCollection, GeoJsonProperties, LineString } from 'geojson'
 import type { RPGeometry } from '@/static/run_countries'
 import * as mapboxPolyline from '@mapbox/polyline'
 import worldGeoJson from '@surbowl/world-geo-json-zh/world.zh.json'
@@ -65,7 +65,7 @@ function convertMovingTime2Sec(moving_time: string): number {
   }
   // moving_time : '2 days, 12:34:56' or '12:34:56';
   const splits = moving_time.split(', ')
-  const days = splits.length == 2 ? Number.parseInt(splits[0]) : 0
+  const days = splits.length === 2 ? Number.parseInt(splits[0]) : 0
   const time = splits.splice(-1)[0]
   const [hours, minutes, seconds] = time.split(':').map(Number)
   const totalSeconds = ((days * 24 + hours) * 60 + minutes) * 60 + seconds
@@ -94,7 +94,8 @@ function scrollToMap() {
 function extractCities(str: string): string[] {
   const locations = []
   let match
-  const pattern = /([\u4E00-\u9FA5]{2,}(市|自治州|特别行政区|盟|地区))/g
+  const pattern = /[\u4E00-\u9FA5]{2,}(?:市|自治州|特别行政区|盟|地区)/g
+  // eslint-disable-next-line no-cond-assign
   while ((match = pattern.exec(str)) !== null) {
     locations.push(match[0])
   }
@@ -105,7 +106,12 @@ function extractCities(str: string): string[] {
 function extractDistricts(str: string): string[] {
   const locations = []
   let match
+  // The existing eslint-disable might be for a different rule or can be combined if needed
+  // eslint-disable-next-line regexp/no-unused-capturing-group
   const pattern = /([\u4E00-\u9FA5]{2,}(区|县))/g
+  // OR, if you only want to disable no-cond-assign for the while loop:
+  // const pattern = /([\u4E00-\u9FA5]{2,}(区 | 县))/g
+  // eslint-disable-next-line no-cond-assign
   while ((match = pattern.exec(str)) !== null) {
     locations.push(match[0])
   }
@@ -114,6 +120,7 @@ function extractDistricts(str: string): string[] {
 }
 
 function extractCoordinate(str: string): [number, number] | null {
+  // eslint-disable-next-line regexp/no-super-linear-backtracking
   const pattern = /'latitude': (-?\d+\.\d+).*?'longitude': (-?\d+\.\d+)/
   const match = str.match(pattern)
 
@@ -214,7 +221,7 @@ function pathForRun(run: Activity): Coordinate[] {
     }
     return c
   }
-  catch (err) {
+  catch {
     return []
   }
 }
@@ -240,9 +247,12 @@ function geoJsonForRuns(runs: Activity[]): FeatureCollection<LineString> {
 }
 
 function geoJsonForMap(): FeatureCollection<RPGeometry> {
+  const combinedFeatures = (worldGeoJson.features as Feature<RPGeometry, GeoJsonProperties>[]).concat(
+    chinaGeojson.features as Feature<RPGeometry, GeoJsonProperties>[],
+  )
   return {
     type: 'FeatureCollection',
-    features: worldGeoJson.features.concat(chinaGeojson.features),
+    features: combinedFeatures as Feature<RPGeometry, GeoJsonProperties>[],
   }
 }
 
@@ -287,7 +297,7 @@ function getActivitySport(act: Activity): string {
 function titleForRun(run: Activity): string {
   if (RICH_TITLE) {
     // 1. try to use user defined name
-    if (run.name != '') {
+    if (run.name !== '') {
       return run.name
     }
     // 2. try to use location+type if the location is available, eg. 'Shanghai Run'

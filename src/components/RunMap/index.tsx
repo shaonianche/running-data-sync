@@ -6,7 +6,7 @@ import type { MapInstance } from 'react-map-gl/src/types/lib'
 import type { RPGeometry } from '@/static/run_countries'
 import type { Coordinate, IViewState } from '@/utils/utils'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, {
   FullscreenControl,
   Layer,
@@ -14,7 +14,7 @@ import Map, {
   Source,
 } from 'react-map-gl'
 import LightsControl from '@/components/RunMap/LightsControl'
-import useActivities from '@/hooks/useActivities'
+import getActivities from '@/hooks/useActivities'
 import {
   COUNTRY_FILL_COLOR,
   IS_CHINESE,
@@ -51,10 +51,13 @@ function RunMap({
   geoData,
   thisYear,
 }: IRunMapProps) {
-  const { countries, provinces } = useActivities()
-  const mapRef = useRef<MapRef>(null)
+  const { countries, provinces } = getActivities()
+  const mapRef = useRef<MapRef | null>(null)
   const [lights, setLights] = useState(PRIVACY_MODE ? false : LIGHTS_ON)
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const theme = document.documentElement.getAttribute('data-theme')
+    return theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
 
   useEffect(() => {
     const updateTheme = () => {
@@ -65,7 +68,6 @@ function RunMap({
     mq.addEventListener('change', updateTheme)
     const observer = new MutationObserver(updateTheme)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    updateTheme()
     return () => {
       mq.removeEventListener('change', updateTheme)
       observer.disconnect()
@@ -79,8 +81,8 @@ function RunMap({
     }
   }, [isDarkMode])
 
-  const keepWhenLightsOff = ['runs2']
-  function switchLayerVisibility(map: MapInstance, lights: boolean) {
+  const keepWhenLightsOff = useMemo(() => ['runs2'], [])
+  const switchLayerVisibility = useCallback((map: MapInstance, lights: boolean) => {
     const styleJson = map.getStyle()
     styleJson.layers.forEach((it: { id: string }) => {
       if (!keepWhenLightsOff.includes(it.id)) {
@@ -89,14 +91,14 @@ function RunMap({
         else map.setLayoutProperty(it.id, 'visibility', 'none')
       }
     })
-  }
+  }, [keepWhenLightsOff])
 
   const mapRefCallback = useCallback(
     (ref: MapRef) => {
       if (ref !== null) {
-        const map = ref.getMap()
+        const map = ref.getMap() as MapInstance
         if (map && IS_CHINESE) {
-          map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }))
+          map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }) as any)
         }
         map.on('style.load', () => {
           if (!ROAD_LABEL_DISPLAY) {
@@ -109,11 +111,11 @@ function RunMap({
         })
       }
       if (mapRef.current) {
-        const map = mapRef.current.getMap()
+        const map = mapRef.current.getMap() as MapInstance
         switchLayerVisibility(map, lights)
       }
     },
-    [mapRef, lights],
+    [mapRef, lights, switchLayerVisibility],
   )
 
   const filterProvinces = provinces.slice()
@@ -148,7 +150,7 @@ function RunMap({
     ({ viewState }: { viewState: IViewState }) => {
       setViewState(viewState)
     },
-    [],
+    [setViewState],
   )
   const style: React.CSSProperties = {
     width: '100%',

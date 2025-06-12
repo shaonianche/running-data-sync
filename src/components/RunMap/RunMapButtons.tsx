@@ -1,4 +1,4 @@
-import useActivities from '@/hooks/useActivities'
+import getActivities from '@/hooks/useActivities'
 import styles from './style.module.css'
 
 function RunMapButtons({
@@ -8,7 +8,7 @@ function RunMapButtons({
   changeYear: (_year: string) => void
   thisYear: string
 }) {
-  const { years } = useActivities()
+  const { years } = getActivities()
   const yearsButtons = years.slice()
   yearsButtons.push('Total')
 

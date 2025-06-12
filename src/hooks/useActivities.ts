@@ -1,7 +1,7 @@
 import activities from '@/static/activities.json'
 import { locationForRun, titleForRun } from '@/utils/utils'
 
-function useActivities() {
+function getActivities() {
   const cities: Record<string, number> = {}
   const runPeriod: Record<string, number> = {}
   const provinces: Set<string> = new Set()
@@ -47,4 +47,4 @@ function useActivities() {
   }
 }
 
-export default useActivities
+export default getActivities

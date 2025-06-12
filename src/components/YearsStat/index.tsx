@@ -1,15 +1,13 @@
 import YearStat from '@/components/YearStat'
-import useActivities from '@/hooks/useActivities'
+import getActivities from '@/hooks/useActivities'
 import { INFO_MESSAGE } from '@/utils/const'
 
 function YearsStat({
   year,
-  onClick,
 }: {
   year: string
-  onClick: (_year: string) => void
 }) {
-  const { years } = useActivities()
+  const { years } = getActivities()
   // make sure the year click on front
   let yearsArrayUpdate = years.slice()
   yearsArrayUpdate.push('Total')

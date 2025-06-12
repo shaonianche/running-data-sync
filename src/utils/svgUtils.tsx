@@ -4,8 +4,6 @@ interface SvgComponent {
   default: ComponentType<any>
 }
 
-const FailedLoadSvg = () => <div>Failed to load SVG</div>
-
 export async function loadSvgComponent(stats: Record<string, () => Promise<unknown>>, path: string): Promise<SvgComponent> {
   try {
     const module = await stats[path]()
@@ -13,6 +11,6 @@ export async function loadSvgComponent(stats: Record<string, () => Promise<unkno
   }
   catch (error) {
     console.error(error)
-    return { default: FailedLoadSvg }
+    return { default: () => <div>Failed to load SVG</div> }
   }
 }

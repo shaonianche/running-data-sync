@@ -4,14 +4,14 @@ import type {
   RunIds,
 } from '@/utils/utils'
 import { Analytics } from '@vercel/analytics/react'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Layout from '@/components/Layout'
 import LocationStat from '@/components/LocationStat'
 import RunMap from '@/components/RunMap'
 import RunTable from '@/components/RunTable'
 import SVGStat from '@/components/SVGStat'
 import YearsStat from '@/components/YearsStat'
-import useActivities from '@/hooks/useActivities'
+import getActivities from '@/hooks/useActivities'
 import { IS_CHINESE } from '@/utils/const'
 import {
   filterAndSortRuns,
@@ -26,17 +26,16 @@ import {
 } from '@/utils/utils'
 
 function Index() {
-  const { activities, thisYear } = useActivities()
+  const { activities, thisYear } = getActivities()
   const [year, setYear] = useState(thisYear)
   const [runIndex, setRunIndex] = useState(-1)
-  const [runs, setActivity] = useState(
+  const [runs, setActivity] = useState(() =>
     filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc),
   )
   const [title, setTitle] = useState('')
-  const [geoData, setGeoData] = useState(geoJsonForRuns(runs))
-  // for auto zoom
-  const bounds = getBoundsForGeoData(geoData)
-  const [intervalId, setIntervalId] = useState<number>()
+  const [geoData, setGeoData] = useState(() => geoJsonForRuns(runs))
+  const bounds = useMemo(() => getBoundsForGeoData(geoData), [geoData])
+  const intervalIdRef = useRef<number | undefined>()
 
   const [viewState, setViewState] = useState<IViewState>({
     ...bounds,
@@ -48,10 +47,10 @@ function Index() {
     func: (_run: Activity, _value: string) => boolean,
   ) => {
     scrollToMap()
-    if (name != 'Year') {
+    if (name !== 'Year') {
       setYear(thisYear)
     }
-    setActivity(filterAndSortRuns(activities, item, func, sortDateFunc))
+    setActivity(() => filterAndSortRuns(activities, item, func, sortDateFunc))
     setRunIndex(-1)
     setTitle(`${item} ${name} Running Heatmap`)
   }
@@ -67,7 +66,9 @@ function Index() {
     }
 
     changeByItem(y, 'Year', filterYearRuns)
-    clearInterval(intervalId)
+    if (intervalIdRef.current !== undefined) {
+      clearInterval(intervalIdRef.current)
+    }
   }
 
   const changeCity = (city: string) => {
@@ -78,7 +79,7 @@ function Index() {
     changeByItem(title, 'Title', filterTitleRuns)
   }
 
-  const locateActivity = (runIds: RunIds) => {
+  const locateActivity = useCallback((runIds: RunIds) => {
     const ids = new Set(runIds)
 
     const selectedRuns = !runIds.length
@@ -94,34 +95,43 @@ function Index() {
     if (!lastRun) {
       return
     }
-    setGeoData(geoJsonForRuns(selectedRuns))
+    setGeoData(() => geoJsonForRuns(selectedRuns))
     setTitle(titleForShow(lastRun))
-    clearInterval(intervalId)
+    if (intervalIdRef.current !== undefined) {
+      clearInterval(intervalIdRef.current)
+    }
     scrollToMap()
-  }
+  }, [runs, setGeoData, setTitle])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
     setViewState({
       ...bounds,
     })
-  }, [geoData])
+  }, [bounds])
 
   useEffect(() => {
     const runsNum = runs.length
-    // maybe change 20 ?
-    const sliceNume = runsNum >= 20 ? runsNum / 20 : 1
-    let i = sliceNume
+    const sliceNum = runsNum >= 20 ? runsNum / 20 : 1
+    let i = sliceNum
+
     const id = setInterval(() => {
       if (i >= runsNum) {
         clearInterval(id)
       }
-
-      const tempRuns = runs.slice(0, i)
-      setGeoData(geoJsonForRuns(tempRuns))
-      i += sliceNume
+      else {
+        const tempRuns = runs.slice(0, i)
+        setGeoData(() => geoJsonForRuns(tempRuns))
+        i += sliceNum
+      }
     }, 100)
-    setIntervalId(id)
-  }, [runs])
+
+    intervalIdRef.current = id
+
+    return () => {
+      clearInterval(id)
+    }
+  }, [runs, setGeoData])
 
   useEffect(() => {
     if (year !== 'Total') {
@@ -168,7 +178,7 @@ function Index() {
     return () => {
       svgStat && svgStat.removeEventListener('click', handleClick)
     }
-  }, [year])
+  }, [year, locateActivity, runs, thisYear])
 
   return (
     <Layout>
@@ -182,7 +192,7 @@ function Index() {
               />
             )
           : (
-              <YearsStat year={year} onClick={changeYear} />
+              <YearsStat year={year} />
             )}
       </div>
       <div className="w-full lg:w-2/3">

@@ -14,7 +14,7 @@ interface IRunRowProperties {
   locateActivity: (_runIds: RunIds) => void
   run: Activity
   runIndex: number
-  setRunIndex: (_ndex: number) => void
+  setRunIndex: (_index: number) => void
 }
 
 function RunRow({
