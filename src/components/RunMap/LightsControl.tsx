@@ -9,6 +9,7 @@ function LightsControl({ setLights, lights }: ILightsProps) {
   return (
     <div className={`mapboxgl-ctrl mapboxgl-ctrl-group  ${styles.lights}`}>
       <button
+        type="button"
         className={`${lights ? styles.lightsOn : styles.lightsOff}`}
         onClick={() => setLights(!lights)}
       >

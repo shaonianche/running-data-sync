@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import ThemeToggle from '@/components/ThemeToggle'
 import useSiteMetadata from '@/hooks/useSiteMetadata'
 
 function Header() {
@@ -17,16 +18,19 @@ function Header() {
             </h1>
           </Link>
         </div>
-        <div className="text-right">
-          {navLinks.map((n, i) => (
-            <a
-              key={i}
-              href={n.url}
-              className="mr-3 text-lg lg:mr-4 lg:text-base"
-            >
-              {n.name}
-            </a>
-          ))}
+        <div className="flex items-center gap-6">
+          <div className="text-right">
+            {navLinks.map((n, i) => (
+              <a
+                key={i}
+                href={n.url}
+                className="mr-3 text-lg lg:mr-4 lg:text-base"
+              >
+                {n.name}
+              </a>
+            ))}
+          </div>
+          <ThemeToggle />
         </div>
       </nav>
     </>

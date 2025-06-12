@@ -10,7 +10,7 @@ function Layout({ children }: React.PropsWithChildren) {
   return (
     <>
       <Helmet>
-        <html lang="en" data-theme="dark" />
+        <html lang="en" />
         <title>{siteTitle}</title>
         <meta name="description" content={description} />
         <meta name="keywords" content="running" />

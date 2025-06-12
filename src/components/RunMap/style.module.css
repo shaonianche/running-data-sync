@@ -19,14 +19,17 @@
   display: inline-block;
   position: relative;
   cursor: pointer;
-  padding: 0 0.5rem 0.5rem 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
   font-size: 1rem;
   text-align: center;
-  color: white;
+  color: var(--color-run-date);
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
 }
 
 .selected {
   color: var(--color-selected);
+  background-color: var(--color-run-row-hover-background);
 }
 
 .runTitle {

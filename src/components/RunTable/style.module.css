@@ -57,6 +57,10 @@
   font-family: var(--font-mono);
 }
 
+.selected {
+  background-color: var(--color-run-row-hover-background);
+}
+
 .selected td:not(:last-child) {
   color: var(--color-selected);
 }

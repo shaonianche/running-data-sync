@@ -52,8 +52,33 @@ function RunMap({
   thisYear,
 }: IRunMapProps) {
   const { countries, provinces } = useActivities()
-  const mapRef = useRef<MapRef>()
+  const mapRef = useRef<MapRef>(null)
   const [lights, setLights] = useState(PRIVACY_MODE ? false : LIGHTS_ON)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+
+  useEffect(() => {
+    const updateTheme = () => {
+      const theme = document.documentElement.getAttribute('data-theme')
+      setIsDarkMode(theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches)
+    }
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    mq.addEventListener('change', updateTheme)
+    const observer = new MutationObserver(updateTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    updateTheme()
+    return () => {
+      mq.removeEventListener('change', updateTheme)
+      observer.disconnect()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (mapRef.current) {
+      const map = mapRef.current.getMap()
+      map.setStyle(isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10')
+    }
+  }, [isDarkMode])
+
   const keepWhenLightsOff = ['runs2']
   function switchLayerVisibility(map: MapInstance, lights: boolean) {
     const styleJson = map.getStyle()
@@ -65,6 +90,7 @@ function RunMap({
       }
     })
   }
+
   const mapRefCallback = useCallback(
     (ref: MapRef) => {
       if (ref !== null) {
@@ -72,8 +98,6 @@ function RunMap({
         if (map && IS_CHINESE) {
           map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }))
         }
-        // all style resources have been downloaded
-        // and the first visually complete rendering of the base style has occurred.
         map.on('style.load', () => {
           if (!ROAD_LABEL_DISPLAY) {
             MAP_LAYER_LIST.forEach((layerId) => {
@@ -91,16 +115,15 @@ function RunMap({
     },
     [mapRef, lights],
   )
+
   const filterProvinces = provinces.slice()
   const filterCountries = countries.slice()
-  // for geojson format
   filterProvinces.unshift('in', 'name')
   filterCountries.unshift('in', 'name')
 
   const initGeoDataLength = geoData.features.length
   const isBigMap = (viewState.zoom ?? 0) <= 3
   if (isBigMap && IS_CHINESE) {
-    // Show boundary and line together, combine geoData(only when not combine yet)
     if (geoData.features.length === initGeoDataLength) {
       geoData = {
         type: 'FeatureCollection',
@@ -110,8 +133,7 @@ function RunMap({
   }
 
   const isSingleRun
-    = geoData.features.length === 1
-      && geoData.features[0].geometry.coordinates.length
+    = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length
   let startLon = 0
   let startLat = 0
   let endLon = 0
@@ -158,7 +180,7 @@ function RunMap({
         {...viewState}
         onMove={onMove}
         style={style}
-        mapStyle="mapbox://styles/mapbox/dark-v10"
+        mapStyle={isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10'}
         ref={mapRefCallback}
         mapboxAccessToken={MAPBOX_TOKEN}
       >
@@ -176,7 +198,6 @@ function RunMap({
             type="fill"
             paint={{
               'fill-color': COUNTRY_FILL_COLOR,
-              // in China, fill a bit lighter while already filled provinces
               'fill-opacity': ['case', ['==', ['get', 'name'], '中国'], 0.1, 0.5],
             }}
             filter={filterCountries}
