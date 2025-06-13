@@ -34,9 +34,13 @@ def run_strava_sync(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("client_id", help="strava client id")
-    parser.add_argument("client_secret", help="strava client secret")
-    parser.add_argument("refresh_token", help="strava refresh token")
+    parser.add_argument("--client-id", dest="client_id", help="strava client id")
+    parser.add_argument(
+        "--client-secret", dest="client_secret", help="strava client secret"
+    )
+    parser.add_argument(
+        "--refresh-token", dest="refresh_token", help="strava refresh token"
+    )
     parser.add_argument(
         "--only-run",
         dest="only_run",

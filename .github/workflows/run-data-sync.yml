@@ -83,7 +83,7 @@ jobs:
                 
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
-        run: python scripts/strava_sync.py '${{ secrets.S_CLIENT_ID }}'  '${{ secrets.S_CLIENT_SECRET }}'  '${{ secrets.S_REFRESH_TOKEN }}'
+        run: python scripts/strava_sync.py --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
       
       # - name: Run strava_to_garmin_sync script
       #   if: env.RUN_TYPE == 'strava'
