@@ -348,7 +348,11 @@ function getBoundsForGeoData(geoData: FeatureCollection<LineString>): IViewState
     }
   }
   if (points.length === 0) {
-    return { longitude: 20, latitude: 20, zoom: 3 }
+    return {
+      longitude: 100,
+      latitude: 40,
+      zoom: 3,
+    }
   }
   if (points.length === 2 && String(points[0]) === String(points[1])) {
     return { longitude: points[0][0], latitude: points[0][1], zoom: 9 }
