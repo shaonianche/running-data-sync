@@ -37,7 +37,7 @@
     --color-selected: #024a70;
     --color-run-date: #262626;
     --color-run-table-thead: #9f9f9f;
-    --color-run-row-hover-background: #d4d4d8;
+    --color-run-row-hover-background: #e5e5e5;
   }
 }
 
@@ -60,7 +60,7 @@
   --color-selected: #024a70;
   --color-run-date: #262626;
   --color-run-table-thead: #9f9f9f;
-  --color-run-row-hover-background: #d4d4d8;
+  --color-run-row-hover-background: #e5e5e5;
 }
 
 @layer base {

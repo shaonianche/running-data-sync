@@ -58,6 +58,7 @@ function RunMap({
     const theme = document.documentElement.getAttribute('data-theme')
     return theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
   })
+  const [isMapVisible, setIsMapVisible] = useState(false)
 
   useEffect(() => {
     const updateTheme = () => {
@@ -84,6 +85,8 @@ function RunMap({
   const keepWhenLightsOff = useMemo(() => ['runs2'], [])
   const switchLayerVisibility = useCallback((map: MapInstance, lights: boolean) => {
     const styleJson = map.getStyle()
+    if (!styleJson || !Array.isArray(styleJson.layers))
+      return
     styleJson.layers.forEach((it: { id: string }) => {
       if (!keepWhenLightsOff.includes(it.id)) {
         if (lights)
@@ -177,67 +180,76 @@ function RunMap({
 
   return (
     <div>
-      <RunMapButtons changeYear={changeYear} thisYear={thisYear} />
-      <Map
-        {...viewState}
-        onMove={onMove}
-        style={style}
-        mapStyle={isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10'}
-        ref={mapRefCallback}
-        mapboxAccessToken={MAPBOX_TOKEN}
-      >
-        <Source id="data" type="geojson" data={geoData}>
-          <Layer
-            id="province"
-            type="fill"
-            paint={{
-              'fill-color': PROVINCE_FILL_COLOR,
-            }}
-            filter={filterProvinces}
-          />
-          <Layer
-            id="countries"
-            type="fill"
-            paint={{
-              'fill-color': COUNTRY_FILL_COLOR,
-              'fill-opacity': ['case', ['==', ['get', 'name'], '中国'], 0.1, 0.5],
-            }}
-            filter={filterCountries}
-          />
-          <Layer
-            id="runs2"
-            type="line"
-            paint={{
-              'line-color': ['get', 'color'],
-              'line-width': isBigMap && lights ? 1 : 2,
-              'line-dasharray': dash,
-              'line-opacity':
-                isSingleRun || isBigMap || !lights ? 1 : LINE_OPACITY,
-              'line-blur': 1,
-            }}
-            layout={{
-              'line-join': 'round',
-              'line-cap': 'round',
-            }}
-          />
-        </Source>
-        {isSingleRun && (
-          <RunMarker
-            startLat={startLat}
-            startLon={startLon}
-            endLat={endLat}
-            endLon={endLon}
-          />
-        )}
-        <span className={styles.runTitle}>{title}</span>
-        <FullscreenControl style={fullscreenButton} />
-        {!PRIVACY_MODE && <LightsControl setLights={setLights} lights={lights} />}
-        <NavigationControl
-          showCompass={false}
-          position="bottom-right"
-          style={{ opacity: 0.3 }}
-        />
-      </Map>
+      <RunMapButtons
+        changeYear={changeYear}
+        thisYear={thisYear}
+        isMapVisible={isMapVisible}
+        onToggleMapVisible={() => setIsMapVisible(v => !v)}
+      />
+      {isMapVisible && (
+        <div style={{ position: 'relative' }}>
+          <Map
+            {...viewState}
+            onMove={onMove}
+            style={style}
+            mapStyle={isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10'}
+            ref={mapRefCallback}
+            mapboxAccessToken={MAPBOX_TOKEN}
+          >
+            <Source id="data" type="geojson" data={geoData}>
+              <Layer
+                id="province"
+                type="fill"
+                paint={{
+                  'fill-color': PROVINCE_FILL_COLOR,
+                }}
+                filter={filterProvinces}
+              />
+              <Layer
+                id="countries"
+                type="fill"
+                paint={{
+                  'fill-color': COUNTRY_FILL_COLOR,
+                  'fill-opacity': ['case', ['==', ['get', 'name'], '中国'], 0.1, 0.5],
+                }}
+                filter={filterCountries}
+              />
+              <Layer
+                id="runs2"
+                type="line"
+                paint={{
+                  'line-color': ['get', 'color'],
+                  'line-width': isBigMap && lights ? 1 : 2,
+                  'line-dasharray': dash,
+                  'line-opacity':
+                    isSingleRun || isBigMap || !lights ? 1 : LINE_OPACITY,
+                  'line-blur': 1,
+                }}
+                layout={{
+                  'line-join': 'round',
+                  'line-cap': 'round',
+                }}
+              />
+            </Source>
+            {isSingleRun && (
+              <RunMarker
+                startLat={startLat}
+                startLon={startLon}
+                endLat={endLat}
+                endLon={endLon}
+              />
+            )}
+            <span className={styles.runTitle}>{title}</span>
+            <FullscreenControl style={fullscreenButton} />
+            {!PRIVACY_MODE && <LightsControl setLights={setLights} lights={lights} />}
+            <NavigationControl
+              showCompass={false}
+              position="bottom-right"
+              style={{ opacity: 0.3 }}
+            />
+          </Map>
+        </div>
+      )}
     </div>
   )
 }

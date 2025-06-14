@@ -73,3 +73,61 @@
 :global(.mapboxgl-ctrl-fullscreen) {
   display: none !important;
 }
+
+.mapVisibleBar {
+  width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 0;
+  cursor: pointer;
+  user-select: none;
+  background: var(--color-bg);
+  border-radius: 5px;
+  border: none;
+  margin: 6px 0 3px 0;
+  transition:
+    background 0.18s,
+    transform 0.15s,
+    box-shadow 0.18s;
+  outline: none;
+}
+
+.mapVisibleBar:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-selected);
+}
+
+.mapVisibleBar:hover {
+  background: var(--color-run-row-hover-background);
+  transform: scale(1.02);
+}
+
+.mapVisibleBar:active {
+  transform: scale(0.98);
+}
+
+.mapVisibleArrow {
+  display: inline-block;
+  margin-right: 6px;
+  font-size: 1.1rem;
+  color: var(--color-selected);
+  transition:
+    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.15s;
+  will-change: transform;
+}
+
+.mapVisibleArrow.open {
+  transform: rotate(180deg) scale(1.1);
+}
+
+.mapVisibleBar:hover .mapVisibleArrow {
+  color: var(--color-selected);
+}
+
+.mapVisibleText {
+  font-size: 0.97rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}

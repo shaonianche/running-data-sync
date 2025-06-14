@@ -1,33 +1,66 @@
 import getActivities from '@/hooks/useActivities'
 import styles from './style.module.css'
 
+interface RunMapButtonsProps {
+  changeYear: (_year: string) => void
+  thisYear: string
+  isMapVisible: boolean
+  onToggleMapVisible: () => void
+}
+
 function RunMapButtons({
   changeYear,
   thisYear,
-}: {
-  changeYear: (_year: string) => void
-  thisYear: string
-}) {
+  isMapVisible,
+  onToggleMapVisible,
+}: RunMapButtonsProps) {
   const { years } = getActivities()
   const yearsButtons = years.slice()
   yearsButtons.push('Total')
 
   return (
-    <ul className={styles.buttons}>
-      {yearsButtons.map(year => (
-        <li
-          key={`${year}button`}
+    <>
+      <ul className={styles.buttons}>
+        {yearsButtons.map(year => (
+          <li
+            key={`${year}button`}
+            className={
+              `${styles.button} ${year === thisYear ? styles.selected : ''}`
+            }
+            onClick={() => {
+              changeYear(year)
+            }}
+          >
+            {year}
+          </li>
+        ))}
+      </ul>
+      <div
+        className={styles.mapVisibleBar}
+        tabIndex={0}
+        role="button"
+        aria-label={isMapVisible ? '收起地图' : '展开地图'}
+        onClick={onToggleMapVisible}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ')
+            onToggleMapVisible()
+        }}
+      >
+        <span
           className={
-            `${styles.button} ${year === thisYear ? styles.selected : ''}`
+            styles.mapVisibleArrow + (isMapVisible ? ` ${styles.open}` : '')
           }
-          onClick={() => {
-            changeYear(year)
-          }}
+          aria-hidden="true"
         >
-          {year}
-        </li>
-      ))}
-    </ul>
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M4 7l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </span>
+        <span className={styles.mapVisibleText}>
+          {isMapVisible ? '收起地图' : '展开地图'}
+        </span>
+      </div>
+    </>
   )
 }
 
