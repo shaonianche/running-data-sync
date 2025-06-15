@@ -5,7 +5,7 @@ import svgr from 'vite-plugin-svgr'
 import viteTsconfigPaths from 'vite-tsconfig-paths'
 
 // The following are known larger packages or packages that can be loaded asynchronously.
-const individuallyPackages = ['activities', 'github.svg', 'grid.svg']
+const individuallyPackages = ['activities', 'github.svg', 'github-light.svg', 'grid.svg', 'grid-light.svg']
 
 // https://vitejs.dev/config/
 export default defineConfig({

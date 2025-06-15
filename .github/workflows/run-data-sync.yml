@@ -21,7 +21,7 @@ env:
   RUN_TYPE: strava
   ATHLETE: FRIENDSA
   TITLE: Running
-  MIN_GRID_DISTANCE: 10
+  MIN_GRID_DISTANCE: 5
   TITLE_GRID: Over 5km Runs
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org
@@ -106,9 +106,9 @@ jobs:
         if: env.RUN_TYPE != 'pass'
         run: |
           python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --output assets/github.svg --use-localtime --min-distance 0.5
-          python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}'  --special-color yellow --special-color2 red --special-distance 20 --special-distance2 40 --use-localtime
-          python scripts/gen_svg.py --from-db --type circular --use-localtime
-          python scripts/gen_svg.py --from-db --year $(date +"%Y")  --language zh_CN --title '$(date +'%Y') Running' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --output assets/github_$(date +"%Y").svg --use-localtime --min-distance 0.5
+          python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}'  --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime
+          python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color #e5e5e5 --no-activity #d4d4d4 --text-color #262626 --track-color #525252 --special-color #024a70 --special-color2 #ff8904  --output assets/github-light.svg --use-localtime --min-distance 0.5
+          python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid-light.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color #e5e5e5 --text-color #262626 --track-color #262626 --special-color #024a70 --special-color2 #ff8904 --special-distance 10 --special-distance2 20 --use-localtime
 
       - name: Push new runs
         run: |

@@ -140,9 +140,14 @@ def main():
         help='Distance units; "metric", "imperial" (default: "metric").',
     )
     args_parser.add_argument(
-        "--verbose", dest="verbose", action="store_true", help="Verbose logging."
+        "--verbose",
+        dest="verbose",
+        action="store_true",
+        help="Verbose logging.",
     )
-    args_parser.add_argument("--logfile", dest="logfile", metavar="FILE", type=str)
+    args_parser.add_argument(
+        "--logfile", dest="logfile", metavar="FILE", type=str
+    )
     args_parser.add_argument(
         "--special-distance",
         dest="special_distance",
@@ -188,6 +193,15 @@ def main():
         type=str,
         default="align-firstday",
         help='github svg style; "align-firstday", "align-monday" (default: "align-firstday").',
+    )
+
+    args_parser.add_argument(
+        "--no-activity-color",
+        dest="no_activity_color",
+        metavar="COLOR",
+        type=str,
+        default="#444444",
+        help='Color for days without activity (default: "#444444").',
     )
 
     for _, drawer in drawers.items():
@@ -248,6 +262,7 @@ def main():
         "special": args.special_color,
         "special2": args.special_color2 or args.special_color,
         "text": args.text_color,
+        "no_activity": args.no_activity_color,
     }
     p.units = args.units
     p.set_tracks(tracks)
@@ -265,7 +280,10 @@ def main():
             p.years.from_year, p.years.to_year = y, y
             # may be refactor
             p.set_tracks(tracks)
-            p.draw(drawers[args.type], os.path.join("assets", f"year_{str(y)}.svg"))
+            p.draw(
+                drawers[args.type],
+                os.path.join("assets", f"year_{str(y)}.svg"),
+            )
     else:
         p.draw(drawers[args.type], args.output)
 

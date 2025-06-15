@@ -22,14 +22,16 @@ class GithubDrawer(TracksDrawer):
             raise PosterError("No tracks to draw")
         year_size = 200 * 4.0 / 80.0
         year_style = f"font-size:{year_size}px; font-family:Arial;"
-        year_length_style = f"font-size:{110 * 3.0 / 80.0}px; font-family:Arial;"
+        year_length_style = (
+            f"font-size:{110 * 3.0 / 80.0}px; font-family:Arial;"
+        )
         month_names_style = "font-size:2.5px; font-family:Arial"
         total_length_year_dict = self.poster.total_length_year_dict
 
         is_align_monday = self.poster.github_style == "align-monday"
-        for year in range(self.poster.years.from_year, self.poster.years.to_year + 1)[
-            ::-1
-        ]:
+        for year in range(
+            self.poster.years.from_year, self.poster.years.to_year + 1
+        )[::-1]:
             start_date_weekday, _ = calendar.monthrange(year, 1)
             github_rect_first_day = datetime.date(year, 1, 1)
 
@@ -112,7 +114,10 @@ class GithubDrawer(TracksDrawer):
                 dr.add(
                     dr.text(
                         f"{name}",
-                        insert=(offset.tuple()[0] + 15.5 * num, offset.tuple()[1] + 14),
+                        insert=(
+                            offset.tuple()[0] + 15.5 * num,
+                            offset.tuple()[1] + 14,
+                        ),
                         fill=self.poster.colors["text"],
                         style=month_names_style,
                     )
@@ -136,16 +141,22 @@ class GithubDrawer(TracksDrawer):
                     if int(github_rect_day.year) > year:
                         break
                     rect_y += 3.5
-                    color = "#444444"
+                    color = self.poster.colors.get("no_activity", "#444444")
                     date_title = str(github_rect_day)
                     if date_title in self.poster.tracks_by_date:
                         tracks = self.poster.tracks_by_date[date_title]
                         length = sum([t.length for t in tracks])
-                        distance1 = self.poster.special_distance["special_distance"]
-                        distance2 = self.poster.special_distance["special_distance2"]
+                        distance1 = self.poster.special_distance[
+                            "special_distance"
+                        ]
+                        distance2 = self.poster.special_distance[
+                            "special_distance2"
+                        ]
                         has_special = distance1 < length / 1000 < distance2
                         color = self.color(
-                            self.poster.length_range_by_date, length, has_special
+                            self.poster.length_range_by_date,
+                            length,
+                            has_special,
                         )
                         if length / 1000 >= distance2:
                             color = self.poster.colors.get(
