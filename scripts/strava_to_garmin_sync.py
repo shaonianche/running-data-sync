@@ -23,13 +23,11 @@ def generate_strava_run_points(start_time, strava_streams):
     latlng_list = strava_streams["latlng"].data
 
     for i, j in zip(time_list, latlng_list):
-        points_dict_list.append(
-            {
-                "latitude": j[0],
-                "longitude": j[1],
-                "time": i,
-            }
-        )
+        points_dict_list.append({
+            "latitude": j[0],
+            "longitude": j[1],
+            "time": i,
+        })
     # add heart rate
     if strava_streams.get("heartrate"):
         heartrate_list = strava_streams.get("heartrate").data
@@ -45,7 +43,9 @@ def generate_strava_run_points(start_time, strava_streams):
 
 def make_gpx_from_points(title, points_dict_list):
     gpx = gpxpy.gpx.GPX()
-    gpx.nsmap["gpxtpx"] = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+    gpx.nsmap["gpxtpx"] = (
+        "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+    )
     gpx_track = gpxpy.gpx.GPXTrack()
     gpx_track.name = title
     gpx_track.type = "Run"
@@ -72,7 +72,11 @@ def make_gpx_from_points(title, points_dict_list):
 
 
 async def upload_to_activities(
-    garmin_client, strava_client, strava_web_client, format, use_fake_garmin_device
+    garmin_client,
+    strava_client,
+    strava_web_client,
+    format,
+    use_fake_garmin_device,
 ):
     last_activity = await garmin_client.get_activities(0, 1)
     if not last_activity:
@@ -81,7 +85,9 @@ async def upload_to_activities(
     else:
         # is this startTimeGMT must have ?
         after_datetime_str = last_activity[0]["startTimeGMT"]
-        after_datetime = datetime.strptime(after_datetime_str, "%Y-%m-%d %H:%M:%S")
+        after_datetime = datetime.strptime(
+            after_datetime_str, "%Y-%m-%d %H:%M:%S"
+        )
         print("garmin last activity date: ", after_datetime)
         filters = {"after": after_datetime}
     strava_activities = list(strava_client.get_activities(**filters))
@@ -110,10 +116,15 @@ if __name__ == "__main__":
     parser.add_argument("strava_client_secret", help="strava client secret")
     parser.add_argument("strava_refresh_token", help="strava refresh token")
     parser.add_argument(
-        "secret_string", nargs="?", help="secret_string fro get_garmin_secret.py"
+        "secret_string",
+        nargs="?",
+        help="secret_string fro get_garmin_secret.py",
     )
     parser.add_argument("strava_email", nargs="?", help="email of strava")
-    parser.add_argument("strava_password", nargs="?", help="password of strava")
+    parser.add_argument(
+        "strava_password", nargs="?", help="password of strava"
+    )
+    parser.add_argument("strava_jwt", nargs="?", help="jwt token of strava")
     parser.add_argument(
         "--is-cn",
         dest="is_cn",
@@ -132,11 +143,18 @@ if __name__ == "__main__":
         options.strava_client_secret,
         options.strava_refresh_token,
     )
-    strava_web_client = WebClient(
-        access_token=strava_client.access_token,
-        email=options.strava_email,
-        password=options.strava_password,
-    )
+    if options.strava_jwt:
+        strava_web_client = WebClient(
+            access_token=strava_client.access_token,
+            jwt=options.strava_jwt,
+        )
+    elif options.strava_email and options.strava_password:
+        strava_web_client = WebClient(
+            access_token=strava_client.access_token,
+            email=options.strava_email,
+            password=options.strava_password,
+        )
+
     garmin_auth_domain = "CN" if options.is_cn else ""
 
     try:
