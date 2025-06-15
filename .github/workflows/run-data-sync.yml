@@ -26,6 +26,13 @@ env:
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org
 
+  BACKGROUND_COLOR_LIGHT: '#e5e5e5'
+  NO_ACTIVITY_COLOR_LIGHT: '#d4d4d4'
+  TEXT_COLOR_LIGHT: '#262626'
+  TRACK_COLOR_LIGHT: '#525252'
+  SPECIAL_COLOR_LIGHT: '#024a70'
+  SPECIAL_COLOR2_LIGHT: '#ff8904'
+
 jobs:
   sync:
     name: Sync
@@ -107,8 +114,8 @@ jobs:
         run: |
           python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --output assets/github.svg --use-localtime --min-distance 0.5
           python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}'  --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime
-          python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color #e5e5e5 --no-activity #d4d4d4 --text-color #262626 --track-color #525252 --special-color #024a70 --special-color2 #ff8904  --output assets/github-light.svg --use-localtime --min-distance 0.5
-          python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid-light.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color #e5e5e5 --text-color #262626 --track-color #262626 --special-color #024a70 --special-color2 #ff8904 --special-distance 10 --special-distance2 20 --use-localtime
+          python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}'  --output assets/github-light.svg --use-localtime --min-distance 0.5
+          python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid-light.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime
 
       - name: Push new runs
         run: |
