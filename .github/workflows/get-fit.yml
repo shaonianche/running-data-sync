@@ -41,14 +41,16 @@ jobs:
 
     - name: Push fit file
       run: |
-          if git diff --quiet; then
+          git add -A
+          git status
+
+          if [ -z "$(git status --porcelain)" ]; then
               echo "No changes to commit"
               exit 0
           fi
 
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
           git commit -m "chore: sync and normalize FIT files $(date +'%Y-%m-%d %H:%M:%S')"
           git pull --rebase --autostash origin ${{ github.ref }}
           git push
