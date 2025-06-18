@@ -1,9 +1,10 @@
 import argparse
 import json
 
-from utils import load_env_config
 from config import JSON_FILE, SQL_FILE
 from generator import Generator
+
+from utils import load_env_config
 
 
 # for only run type, we use the same logic as garmin_sync
@@ -19,7 +20,8 @@ def run_strava_sync(
             refresh_token = env_config["refresh_token"]
         else:
             raise ValueError(
-                "Missing Strava credentials. Please provide them as arguments or in .env.local file"
+                "Missing Strava credentials. "
+                "Please provide them as arguments or in .env.local file"
             )
 
     generator = Generator(SQL_FILE)
@@ -34,7 +36,9 @@ def run_strava_sync(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--client-id", dest="client_id", help="strava client id")
+    parser.add_argument(
+        "--client-id", dest="client_id", help="strava client id"
+    )
     parser.add_argument(
         "--client-secret", dest="client_secret", help="strava client secret"
     )
