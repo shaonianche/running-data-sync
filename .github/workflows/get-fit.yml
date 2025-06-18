@@ -9,7 +9,7 @@ on:
       - main
      
 env:
-  REMOTE_PATH: "running-data-sync:/HealthFit"
+  REMOTE_PATH: "running-data-sync:/Activities"
   LOCAL_PATH: "./FIT_OUT"
 
 jobs:
@@ -25,19 +25,19 @@ jobs:
     - name: Rclone sync    
       run: rclone sync "${{ env.REMOTE_PATH }}" "${{ env.LOCAL_PATH }}"  --update --checksum
         
-    - name: Rename file
-      run: |
-        cd "${{ env.LOCAL_PATH }}"
-        for file in *-*-*.fit; do
-            if [[ $file =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6} ]]; then
-                if mv -n "$file" "${file:0:17}.fit"; then
-                    echo "Successfully renamed: $file -> ${file:0:17}.fit"
-                else
-                    echo "Failed to rename: $file"
-                    exit 1
-                fi
-            fi
-        done
+    # - name: Rename file
+    #   run: |
+    #     cd "${{ env.LOCAL_PATH }}"
+    #     for file in *-*-*.fit; do
+    #         if [[ $file =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6} ]]; then
+    #             if mv -n "$file" "${file:0:17}.fit"; then
+    #                 echo "Successfully renamed: $file -> ${file:0:17}.fit"
+    #             else
+    #                 echo "Failed to rename: $file"
+    #                 exit 1
+    #             fi
+    #         fi
+    #     done
 
     - name: Push fit file
       run: |
