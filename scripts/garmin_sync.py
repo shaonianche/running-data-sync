@@ -99,13 +99,13 @@ class Garmin:
             print(err)
             if retrying:
                 logger.debug(
-                    "Exception occurred during data retrieval, relogin without effect: %s"
+                    "Exception occurred during data retrieval, relogin without effect: %s"  # noqa: E501
                     % err
                 )
                 raise GarminConnectConnectionError("Error connecting") from err
             else:
                 logger.debug(
-                    "Exception occurred during data retrieval - perhaps session expired - trying relogin: %s"
+                    "Exception occurred during data retrieval - perhaps session expired - trying relogin: %s"  # noqa: E501
                     % err
                 )
                 await self.fetch_data(url, retrying=True)
@@ -114,7 +114,7 @@ class Garmin:
         """
         Fetch available activities
         """
-        url = f"{self.modern_url}/activitylist-service/activities/search/activities?start={start}&limit={limit}"
+        url = f"{self.modern_url}/activitylist-service/activities/search/activities?start={start}&limit={limit}"  # noqa: E501
         if self.is_only_running:
             url = url + "&activityType=running"
         return await self.fetch_data(url)
@@ -127,9 +127,9 @@ class Garmin:
         return await self.fetch_data(url)
 
     async def download_activity(self, activity_id, file_type="gpx"):
-        url = f"{self.modern_url}/download-service/export/{file_type}/activity/{activity_id}"
+        url = f"{self.modern_url}/download-service/export/{file_type}/activity/{activity_id}"  # noqa: E501
         if file_type == "fit":
-            url = f"{self.modern_url}/download-service/files/activity/{activity_id}"
+            url = f"{self.modern_url}/download-service/files/activity/{activity_id}"  # noqa: E501
         logger.info(f"Download activity from {url}")
         response = await self.req.get(url, headers=self.headers)
         response.raise_for_status()

@@ -5,7 +5,7 @@ with duckdb.connect() as conn:
     conn.load_extension("sqlite")
     conn.sql("ATTACH 'scripts/data.db' (TYPE SQLITE);USE data;")
     conn.sql(
-        "COPY (SELECT * FROM activities) TO 'scripts/data.parquet' (FORMAT PARQUET);"
+        "COPY (SELECT * FROM activities) TO 'scripts/data.parquet' (FORMAT PARQUET);"  # noqa: E501
     )
 
 """
@@ -98,4 +98,4 @@ duckdb.sql("SELECT concat(try_cast(distance/1000 as integer)::varchar,' km') as 
 ├─────────────┴──────────────┤
 │ 26 rows          2 columns │
 └────────────────────────────┘
-"""
+"""  # noqa: E501
