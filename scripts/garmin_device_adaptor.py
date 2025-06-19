@@ -1,9 +1,9 @@
 import traceback
+from io import BytesIO
 
 from fit_tool.fit_file import FitFile
 from fit_tool.fit_file_builder import FitFileBuilder
 from fit_tool.profile.messages.device_info_message import DeviceInfoMessage
-from io import BytesIO
 
 # the device manufacturer and product info can be found in github,
 # https://github.com/garmin/fit-python-sdk/blob/main/garmin_fit_sdk/profile.py
@@ -62,5 +62,8 @@ def do_wrap_device_info(origin_file):
     builder.add(message)
 
     modified_file = builder.build()
-    print("wrap garmin device info success, product id:", GARMIN_DEVICE_PRODUCT_ID)
+    print(
+        "wrap garmin device info success, product id:",
+        GARMIN_DEVICE_PRODUCT_ID,
+    )
     return modified_file.to_bytes()

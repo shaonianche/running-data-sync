@@ -12,7 +12,6 @@ import time
 import traceback
 import zipfile
 from io import BytesIO
-from lxml import etree
 
 import aiofiles
 import cloudscraper
@@ -20,7 +19,9 @@ import garth
 import httpx
 from config import FOLDER_DICT, JSON_FILE, SQL_FILE
 from garmin_device_adaptor import wrap_device_info
-from utils import make_activities_file
+from lxml import etree
+
+from utils import load_env_config, make_activities_file
 
 # logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -65,14 +66,14 @@ class Garmin:
         # Add null check before accessing the expired property
         if garth.client.oauth2_token is None:
             raise ValueError(
-                "OAuth2 token is not available. Please ensure proper authentication."
+                "OAuth2 token is not available. Please ensure proper authentication."  # noqa: E501
             )
 
         if garth.client.oauth2_token.expired:
             garth.client.refresh_oauth2()
 
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",  # noqa: E501
             "origin": self.URL_DICT.get("SSO_URL_ORIGIN"),
             "nk": "NT",
             "Authorization": str(garth.client.oauth2_token),
@@ -89,7 +90,9 @@ class Garmin:
             response = await self.req.get(url, headers=self.headers)
             if response.status_code == 429:
                 raise GarminConnectTooManyRequestsError("Too many requests")
-            logger.debug(f"fetch_data got response code {response.status_code}")
+            logger.debug(
+                f"fetch_data got response code {response.status_code}"
+            )
             response.raise_for_status()
             return response.json()
         except Exception as err:
@@ -278,9 +281,13 @@ async def download_garmin_data(
 ):
     folder = FOLDER_DICT.get(file_type, "gpx")
     try:
-        file_data = await client.download_activity(activity_id, file_type=file_type)
+        file_data = await client.download_activity(
+            activity_id, file_type=file_type
+        )
         if summary_infos is not None:
-            file_data = add_summary_info(file_data, summary_infos.get(activity_id))
+            file_data = add_summary_info(
+                file_data, summary_infos.get(activity_id)
+            )
         file_path = os.path.join(folder, f"{activity_id}.{file_type}")
         need_unzip = False
         if file_type == "fit":
@@ -331,7 +338,9 @@ async def gather_with_concurrency(n, tasks):
 
 
 def get_downloaded_ids(folder):
-    return [i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")]
+    return [
+        i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")
+    ]
 
 
 def get_garmin_summary_infos(activity_summary, activity_id):
@@ -399,7 +408,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "secret_string",
         nargs="?",
-        help="secret_string fro get_garmin_secret.py",
+        help="secret_string from get_garmin_secret.py or .env.local",
     )
     parser.add_argument(
         "--is-cn",
@@ -431,12 +440,25 @@ if __name__ == "__main__":
     )
     options = parser.parse_args()
     secret_string = options.secret_string
-    auth_domain = "CN" if options.is_cn else "COM"  # Default to COM if not specified
+
+    # if secret_string is not provided, try to load from .env.local
+    if secret_string is None:
+        env_config = load_env_config()
+        if env_config and env_config.get("garmin_secret"):
+            secret_string = env_config["garmin_secret"]
+        else:
+            print(
+                "Missing Garmin secret string. Please provide it as an "
+                "argument or set GARMIN_SECRET in .env.local"
+            )
+            sys.exit(1)
+
+    auth_domain = (
+        "CN" if options.is_cn else "COM"
+    )  # Default to COM if not specified
     file_type = options.download_file_type
     is_only_running = options.only_run
-    if secret_string is None:
-        print("Missing argument nor valid configuration file")
-        sys.exit(1)
+
     folder = FOLDER_DICT.get(file_type, "gpx")
     # make gpx or tcx dir
     if not os.path.exists(folder):

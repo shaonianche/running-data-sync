@@ -1,7 +1,7 @@
 import json
-from pathlib import Path
 import time
 from datetime import datetime
+from pathlib import Path
 
 import pytz
 
@@ -15,7 +15,6 @@ from stravalib.exc import RateLimitExceeded
 
 
 def load_env_config():
-    """Load Strava API configuration from .env.local file"""
     env_path = Path(__file__).parent.parent / ".env.local"
     if not env_path.exists():
         return None
@@ -32,6 +31,10 @@ def load_env_config():
         "client_id": config.get("STRAVA_CLIENT_ID"),
         "client_secret": config.get("STRAVA_CLIENT_SECRET"),
         "refresh_token": config.get("STRAVA_REFRESH_TOKEN"),
+        "garmin_email": config.get("GARMIN_EMAIL"),
+        "garmin_password": config.get("GARMIN_PASSWORD"),
+        "garmin_is_cn": config.get("GARMIN_IS_CN"),
+        "garmin_secret": config.get("GARMIN_SECRET"),
     }
 
 
@@ -69,7 +72,9 @@ def to_date(ts):
             )
             pass
 
-    raise ValueError(f"cannot parse timestamp {ts} into date with fmts: {ts_fmts}")
+    raise ValueError(
+        f"cannot parse timestamp {ts} into date with fmts: {ts_fmts}"
+    )
 
 
 def make_activities_file(
@@ -77,7 +82,9 @@ def make_activities_file(
 ):
     generator = Generator(sql_file)
     generator.sync_from_data_dir(
-        data_dir, file_suffix=file_suffix, activity_title_dict=activity_title_dict
+        data_dir,
+        file_suffix=file_suffix,
+        activity_title_dict=activity_title_dict,
     )
     activities_list = generator.load()
     with open(json_file, "w") as f:
@@ -88,7 +95,9 @@ def make_strava_client(client_id, client_secret, refresh_token):
     client = Client()
 
     refresh_response = client.refresh_access_token(
-        client_id=client_id, client_secret=client_secret, refresh_token=refresh_token
+        client_id=client_id,
+        client_secret=client_secret,
+        refresh_token=refresh_token,
     )
     client.access_token = refresh_response["access_token"]
     return client
@@ -128,12 +137,16 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
                     activity_file=f, data_type=data_type, activity_type="run"
                 )
             else:
-                r = client.upload_activity(activity_file=f, data_type=data_type)
+                r = client.upload_activity(
+                    activity_file=f, data_type=data_type
+                )
 
         except RateLimitExceeded as e:
             timeout = 60.0 if e.timeout is None else float(e.timeout)
             print()
-            print(f"Strava API Rate Limit Exceeded. Retry after {timeout} seconds")
+            print(
+                f"Strava API Rate Limit Exceeded. Retry after {timeout} seconds"
+            )
             print()
             time.sleep(timeout)
             if force_to_run:
@@ -141,7 +154,9 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
                     activity_file=f, data_type=data_type, activity_type="run"
                 )
             else:
-                r = client.upload_activity(activity_file=f, data_type=data_type)
+                r = client.upload_activity(
+                    activity_file=f, data_type=data_type
+                )
         print(
             f"Uploading {data_type} file: {file_name} to strava, upload_id: {r.upload_id}."
         )
