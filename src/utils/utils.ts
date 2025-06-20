@@ -1,9 +1,9 @@
 import type { Feature, FeatureCollection, GeoJsonProperties, LineString } from 'geojson'
 import type { RPGeometry } from '@/static/run_countries'
 import * as mapboxPolyline from '@mapbox/polyline'
+import { WebMercatorViewport } from '@math.gl/web-mercator'
 import worldGeoJson from '@surbowl/world-geo-json-zh/world.zh.json'
 import gcoord from 'gcoord'
-import { WebMercatorViewport } from 'viewport-mercator-project'
 import { chinaCities } from '@/static/city'
 import { chinaGeojson } from '@/static/run_countries'
 import {
