@@ -15,6 +15,12 @@
     "node": "22.x"
   },
   "scripts": {
+    "data:clean": "rm -f scripts/data.db {GPX,TCX,FIT}_OUT/* activities/* src/static/activities.json",
+    "data:download:garmin": "python scripts/garmin_sync.py",
+    "data:analysis:github": "python scripts/gen_svg.py --from-db --type github --output assets/github.svg",
+    "data:analysis:grid": "python scripts/gen_svg.py --from-db --type grid --output assets/grid.svg",
+    "data:analysis:grid-light": "python scripts/gen_svg.py --from-db --type grid --background-color #e5e5e5 --text-color #262626 --track-color #262626 --special-color #024a70 --special-color2 #ff8904 --output assets/grid-light.svg",
+    "data:analysis:github-light": "python scripts/gen_svg.py --from-db --type github --background-color #e5e5e5 --no-activity #d4d4d4 --text-color #262626 --track-color #525252 --special-color #024a70 --special-color2 #ff8904 --output assets/github-light.svg",
     "build": "vite build",
     "develop": "vite dev",
     "serve": "vite serve",
