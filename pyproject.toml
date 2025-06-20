@@ -1,8 +1,11 @@
 [project]
 name = "running-data-sync"
-version = "0.1.0"
 description = "Default template for PDM package"
 authors = [{ name = "shaonianche", email = "github@duanfei.org" }]
+version = "0.1.0"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "MIT" }
 dependencies = [
   "httpx",
   "gpxpy==1.4.2",
@@ -35,9 +38,6 @@ dependencies = [
   "pycryptodome",
   "duckdb",
 ]
-requires-python = ">=3.12"
-readme = "README.md"
-license = { text = "MIT" }
 
 [build-system]
 requires = ["pdm-backend"]
