@@ -1,4 +1,5 @@
 import process from 'node:process'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
@@ -11,6 +12,7 @@ const individuallyPackages = ['activities', 'github.svg', 'github-light.svg', 'g
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     viteTsconfigPaths(),
     svgr({
       include: ['**/*.svg'],
