@@ -86,19 +86,30 @@ def update_or_create_activity(session, run_activity):
     created = False
     try:
         activity = (
-            session.query(Activity).filter_by(run_id=int(run_activity.id)).first()
+            session.query(Activity)
+            .filter_by(run_id=int(run_activity.id))
+            .first()
         )
-        gain = getattr(run_activity, 'total_elevation_gain', getattr(run_activity, 'elevation_gain', 0.0))
+        gain = getattr(
+            run_activity,
+            "total_elevation_gain",
+            getattr(run_activity, "elevation_gain", 0.0),
+        )
         elevation_gain_value = float(gain or 0.0)
         if not activity:
             start_point = run_activity.start_latlng
             location_country = getattr(run_activity, "location_country", "")
             # or China for #176 to fix
-            if not location_country and start_point or location_country == "China":
+            if (
+                not location_country
+                and start_point
+                or location_country == "China"
+            ):
                 try:
                     location_country = str(
                         g.reverse(
-                            f"{start_point.lat}, {start_point.lon}", language="zh-CN"
+                            f"{start_point.lat}, {start_point.lon}",
+                            language="zh-CN",
                         )
                     )
                 # limit (only for the first time)
@@ -128,7 +139,9 @@ def update_or_create_activity(session, run_activity):
                 average_speed=float(run_activity.average_speed),
                 elevation_gain=elevation_gain_value,
                 summary_polyline=(
-                    run_activity.map and run_activity.map.summary_polyline or ""
+                    run_activity.map
+                    and run_activity.map.summary_polyline
+                    or ""
                 ),
             )
             session.add(activity)
@@ -168,7 +181,8 @@ def add_missing_columns(engine, model):
                 column_type = str(column.type)
                 conn.execute(
                     text(
-                        f"ALTER TABLE {table_name} ADD COLUMN {column.name} {column_type}"
+                        f"ALTER TABLE {table_name} "
+                        f"ADD COLUMN {column.name} {column_type}"
                     )
                 )
 

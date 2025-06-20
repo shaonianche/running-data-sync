@@ -14,10 +14,15 @@ def run_strava_sync(
     # Try to load from env if no credentials provided
     if not all([client_id, client_secret, refresh_token]):
         env_config = load_env_config()
-        if env_config and all(env_config.values()):
-            client_id = env_config["client_id"]
-            client_secret = env_config["client_secret"]
-            refresh_token = env_config["refresh_token"]
+        if (
+            env_config
+            and env_config["strava_client_id"]
+            and env_config["strava_client_secret"]
+            and env_config["strava_refresh_token"]
+        ):
+            client_id = env_config["strava_client_id"]
+            client_secret = env_config["strava_client_secret"]
+            refresh_token = env_config["strava_refresh_token"]
         else:
             raise ValueError(
                 "Missing Strava credentials. "

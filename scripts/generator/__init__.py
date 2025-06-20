@@ -1,9 +1,13 @@
 import datetime
 import os
+import random
+import string
 import sys
 
 import arrow
+import geopy
 import stravalib
+from geopy.geocoders import Nominatim
 from gpxtrackposter import track_loader
 from polyline_processor import filter_out
 from sqlalchemy import func
@@ -12,6 +16,17 @@ from synced_data_file_logger import save_synced_data_file_list
 from .db import Activity, init_db, update_or_create_activity
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
+
+
+# random user name 8 letters
+def randomword():
+    letters = string.ascii_lowercase
+    return "".join(random.choice(letters) for i in range(4))
+
+
+geopy.geocoders.options.default_user_agent = "my-application"
+# reverse the location (lat, lon) -> location detail
+g = Nominatim(user_agent=randomword())
 
 
 class Generator:
@@ -53,7 +68,9 @@ class Generator:
         if force:
             filters = {"before": datetime.datetime.utcnow()}
         else:
-            last_activity = self.session.query(func.max(Activity.start_date)).scalar()
+            last_activity = self.session.query(
+                func.max(Activity.start_date)
+            ).scalar()
             if last_activity:
                 last_activity_date = arrow.get(last_activity)
                 last_activity_date = last_activity_date.shift(days=-7)
@@ -62,6 +79,28 @@ class Generator:
                 filters = {"before": datetime.datetime.utcnow()}
 
         for activity in self.client.get_activities(**filters):
+            reverse_country = None
+            if hasattr(activity, "start_latlng") and activity.start_latlng:
+                try:
+                    reverse_location = g.reverse(
+                        f"{activity.start_latlng.lat},"
+                        f"{activity.start_latlng.lon}",
+                        language="zh-CN",
+                    )
+                    if (
+                        reverse_location
+                        and reverse_location.raw
+                        and "address" in reverse_location.raw
+                    ):
+                        reverse_country = reverse_location.raw["address"].get(
+                            "country"
+                        )
+                    if reverse_country:
+                        activity.location_country = reverse_country
+                except Exception as e:
+                    print(f"Reverse geocoding failed: {e}")
+            else:
+                print("no start_latlng, cannot reverse location_country")
             if self.only_run and activity.type != "Run":
                 continue
             if IGNORE_BEFORE_SAVING:
@@ -78,10 +117,14 @@ class Generator:
             sys.stdout.flush()
         self.session.commit()
 
-    def sync_from_data_dir(self, data_dir, file_suffix="gpx", activity_title_dict={}):
+    def sync_from_data_dir(
+        self, data_dir, file_suffix="gpx", activity_title_dict={}
+    ):
         loader = track_loader.TrackLoader()
         tracks = loader.load_tracks(
-            data_dir, file_suffix=file_suffix, activity_title_dict=activity_title_dict
+            data_dir,
+            file_suffix=file_suffix,
+            activity_title_dict=activity_title_dict,
         )
         print(f"load {len(tracks)} tracks")
         if not tracks:
@@ -153,7 +196,9 @@ class Generator:
             activity.streak = streak
             last_date = date
             if not IGNORE_BEFORE_SAVING:
-                activity.summary_polyline = filter_out(activity.summary_polyline)
+                activity.summary_polyline = filter_out(
+                    activity.summary_polyline
+                )
             activity_list.append(activity.to_dict())
 
         return activity_list
