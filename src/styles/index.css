@@ -12,6 +12,7 @@
   --color-run-date: var(--color-run-date);
   --color-run-table-thead: var(--color-run-table-thead);
   --color-run-row-hover-background: var(--color-run-row-hover-background);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
 }
 
@@ -25,6 +26,8 @@
     --color-run-date: #dddddd;
     --color-run-table-thead: #9f9f9f;
     --color-run-row-hover-background: #262626;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
 }
 
@@ -38,6 +41,8 @@
     --color-run-date: #262626;
     --color-run-table-thead: #9f9f9f;
     --color-run-row-hover-background: #e5e5e5;
+    --font-sans: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
 }
 
@@ -50,6 +55,8 @@
   --color-run-date: #dddddd;
   --color-run-table-thead: #9f9f9f;
   --color-run-row-hover-background: #262626;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 }
 
 [data-theme='light'] {
@@ -61,6 +68,8 @@
   --color-run-date: #262626;
   --color-run-table-thead: #9f9f9f;
   --color-run-row-hover-background: #e5e5e5;
+  --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 }
 
 @layer base {
@@ -71,6 +80,7 @@
     transition:
       background-color 0.1s ease,
       color 0.1s ease;
+    font-family: var(--font-sans);
   }
 }
 
