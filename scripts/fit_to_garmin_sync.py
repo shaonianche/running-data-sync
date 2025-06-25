@@ -1,8 +1,8 @@
 import argparse
 import asyncio
 import os
-from datetime import datetime
 import sys
+from datetime import datetime
 
 from config import FIT_FOLDER
 from garmin_fit_sdk import Decoder, Stream

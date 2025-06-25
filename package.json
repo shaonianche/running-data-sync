@@ -28,6 +28,7 @@
     "ci": "pnpm run lint && pnpm run build"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "1.29.1-dev132.0",
     "@mapbox/mapbox-gl-language": "^1.0.1",
     "@mapbox/polyline": "^1.2.1",
     "@math.gl/web-mercator": "^4.1.0",
@@ -46,6 +47,7 @@
     "react-helmet-async": "^2.0.5",
     "react-map-gl": "^7.1.9",
     "react-router-dom": "^7.6.2",
+    "recharts": "^3.0.0",
     "vite": "^6.3.5",
     "vite-plugin-svgr": "^4.3.0",
     "vite-tsconfig-paths": "^5.1.4"

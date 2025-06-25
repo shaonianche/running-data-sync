@@ -117,6 +117,11 @@ jobs:
           python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}'  --output assets/github-light.svg --use-localtime --min-distance 0.5
           python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid-light.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime
 
+      - name: Save data to parqent
+        run: |
+          pdm install duckdb
+          python scripts/save_to_parqent.py
+
       - name: Push new runs
         run: |
           if git diff --quiet; then

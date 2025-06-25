@@ -10,6 +10,7 @@ GPX_FOLDER = os.path.join(parent, "GPX_OUT")
 TCX_FOLDER = os.path.join(parent, "TCX_OUT")
 FIT_FOLDER = os.path.join(parent, "FIT_OUT")
 PNG_FOLDER = os.path.join(parent, "PNG_OUT")
+DB_FOLDER = os.path.join(parent, "public", "db")
 ENDOMONDO_FILE_DIR = os.path.join(parent, "Workouts")
 FOLDER_DICT = {
     "gpx": GPX_FOLDER,

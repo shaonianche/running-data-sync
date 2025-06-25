@@ -1,7 +1,13 @@
 import type { Feature, FeatureCollection, GeoJsonProperties, LineString } from 'geojson'
 import type { RPGeometry } from '@/static/run_countries'
+import * as duckdb from '@duckdb/duckdb-wasm'
+import eh_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url'
+import mvp_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url'
+import duckdb_wasm_eh from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url'
+import duckdb_wasm from '@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url'
 import * as mapboxPolyline from '@mapbox/polyline'
 import { WebMercatorViewport } from '@math.gl/web-mercator'
+
 import worldGeoJson from '@surbowl/world-geo-json-zh/world.zh.json'
 import gcoord from 'gcoord'
 import { chinaCities } from '@/static/city'
@@ -14,6 +20,17 @@ import {
   RICH_TITLE,
   RUN_TITLES,
 } from './const'
+
+const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
+  mvp: {
+    mainModule: duckdb_wasm,
+    mainWorker: mvp_worker,
+  },
+  eh: {
+    mainModule: duckdb_wasm_eh,
+    mainWorker: eh_worker,
+  },
+}
 
 export type Coordinate = [number, number]
 
@@ -408,6 +425,36 @@ function sortDateFunc(a: Activity, b: Activity) {
 }
 const sortDateFuncReverse = (a: Activity, b: Activity) => sortDateFunc(b, a)
 
+let duckdbInstance: duckdb.AsyncDuckDB | null = null
+let duckdbConn: duckdb.AsyncDuckDBConnection | null = null
+
+async function initDuckDB(): Promise<{ db: duckdb.AsyncDuckDB, conn: duckdb.AsyncDuckDBConnection }> {
+  if (duckdbInstance && duckdbConn) {
+    return { db: duckdbInstance, conn: duckdbConn }
+  }
+  const bundle = await duckdb.selectBundle(MANUAL_BUNDLES)
+  const worker = new Worker(bundle.mainWorker!)
+  const logger = new duckdb.ConsoleLogger()
+  duckdbInstance = new duckdb.AsyncDuckDB(logger, worker)
+  await duckdbInstance.instantiate(bundle.mainModule, bundle.pthreadWorker)
+  duckdbConn = await duckdbInstance.connect()
+  return { db: duckdbInstance, conn: duckdbConn }
+}
+
+function getDuckDBConnection(): duckdb.AsyncDuckDBConnection | null {
+  return duckdbConn
+}
+
+async function loadDuckDBFile(db: duckdb.AsyncDuckDB, filePath: string = '/db/activities.parquet', dbName: string = 'activities.parquet') {
+  const response = await fetch(filePath)
+  if (!response.ok)
+    throw new Error(`Failed to fetch duckdb file: ${filePath}`)
+  const arrayBuffer = await response.arrayBuffer()
+  await db.registerFileBuffer(dbName, new Uint8Array(arrayBuffer))
+  const conn = await db.connect()
+  return conn
+}
+
 export {
   convertMovingTime2Sec,
   filterAndSortRuns,
@@ -419,7 +466,10 @@ export {
   geoJsonForMap,
   geoJsonForRuns,
   getBoundsForGeoData,
+  getDuckDBConnection,
+  initDuckDB,
   intComma,
+  loadDuckDBFile,
   locationForRun,
   pathForRun,
   scrollToMap,
