@@ -141,16 +141,16 @@
   text-align: center;
   margin-bottom: 20px;
   font-size: 1.2rem;
-  color: var(--color-text-primary); 
+  color: var(--color-text-primary);
 }
 
 .chartWrapper {
   width: 100%;
-  min-height: 320px; 
+  min-height: 320px;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: var(--color-svg-background); 
+  background-color: var(--color-svg-background);
   padding: 10px;
   box-sizing: border-box;
 }
@@ -160,5 +160,5 @@
 .noDataText {
   padding: 20px;
   text-align: center;
-  color: var(--color-text-secondary, #555); 
+  color: var(--color-text-secondary, #555);
 }

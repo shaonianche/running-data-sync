@@ -37,6 +37,19 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    cors: true,
+    proxy: {
+      '/duckdb-wasm/': {
+        target: 'https://cdn.jsdelivr.net/npm/duckdb-wasm@1.29.0/',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/duckdb-wasm\//, ''),
+      },
+    },
+  },
+  worker: {
+    format: 'es',
+  },
   base: process.env.PATH_PREFIX || '/',
   define: {
     'import.meta.env.VERCEL': JSON.stringify(process.env.VERCEL),

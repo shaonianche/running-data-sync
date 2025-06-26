@@ -1,10 +1,6 @@
 import type { Feature, FeatureCollection, GeoJsonProperties, LineString } from 'geojson'
 import type { RPGeometry } from '@/static/run_countries'
 import * as duckdb from '@duckdb/duckdb-wasm'
-import eh_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url'
-import mvp_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url'
-import duckdb_wasm_eh from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url'
-import duckdb_wasm from '@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url'
 import * as mapboxPolyline from '@mapbox/polyline'
 import { WebMercatorViewport } from '@math.gl/web-mercator'
 
@@ -21,14 +17,31 @@ import {
   RUN_TITLES,
 } from './const'
 
+const DUCKDB_WASM_VERSION = '1.29.0'
+
+const DUCKDB_CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${DUCKDB_WASM_VERSION}/dist/`
+
+const DUCKDB_MVP_WASM_URL = `${DUCKDB_CDN_BASE}duckdb-mvp.wasm`
+const MVP_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-mvp.worker.js`
+const DUCKDB_EH_WASM_URL = `${DUCKDB_CDN_BASE}duckdb-eh.wasm`
+const EH_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-eh.worker.js`
+const DUCKDB_COI_WASM_URL = `${DUCKDB_CDN_BASE}duckdb-coi.wasm`
+const COI_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-coi.worker.js`
+const COI_PTHREAD_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-coi.pthread.worker.js`
+
 const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
   mvp: {
-    mainModule: duckdb_wasm,
-    mainWorker: mvp_worker,
+    mainModule: DUCKDB_MVP_WASM_URL,
+    mainWorker: MVP_WORKER_URL,
   },
   eh: {
-    mainModule: duckdb_wasm_eh,
-    mainWorker: eh_worker,
+    mainModule: DUCKDB_EH_WASM_URL,
+    mainWorker: EH_WORKER_URL,
+  },
+  coi: {
+    mainModule: DUCKDB_COI_WASM_URL,
+    mainWorker: COI_WORKER_URL,
+    pthreadWorker: COI_PTHREAD_WORKER_URL,
   },
 }
 
