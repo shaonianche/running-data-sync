@@ -17,9 +17,7 @@ import {
   RUN_TITLES,
 } from './const'
 
-const DUCKDB_WASM_VERSION = '1.29.0'
-
-const DUCKDB_CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${DUCKDB_WASM_VERSION}/dist/`
+const DUCKDB_CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/`
 
 const DUCKDB_MVP_WASM_URL = `${DUCKDB_CDN_BASE}duckdb-mvp.wasm`
 const MVP_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-mvp.worker.js`
