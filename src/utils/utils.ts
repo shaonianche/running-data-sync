@@ -17,32 +17,6 @@ import {
   RUN_TITLES,
 } from './const'
 
-const DUCKDB_CDN_BASE = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/`
-
-const DUCKDB_MVP_WASM_URL = `${DUCKDB_CDN_BASE}duckdb-mvp.wasm`
-const MVP_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-mvp.worker.js`
-const DUCKDB_EH_WASM_URL = `${DUCKDB_CDN_BASE}duckdb-eh.wasm`
-const EH_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-eh.worker.js`
-const DUCKDB_COI_WASM_URL = `${DUCKDB_CDN_BASE}duckdb-coi.wasm`
-const COI_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-coi.worker.js`
-const COI_PTHREAD_WORKER_URL = `${DUCKDB_CDN_BASE}duckdb-browser-coi.pthread.worker.js`
-
-const MANUAL_BUNDLES: duckdb.DuckDBBundles = {
-  mvp: {
-    mainModule: DUCKDB_MVP_WASM_URL,
-    mainWorker: MVP_WORKER_URL,
-  },
-  eh: {
-    mainModule: DUCKDB_EH_WASM_URL,
-    mainWorker: EH_WORKER_URL,
-  },
-  coi: {
-    mainModule: DUCKDB_COI_WASM_URL,
-    mainWorker: COI_WORKER_URL,
-    pthreadWorker: COI_PTHREAD_WORKER_URL,
-  },
-}
-
 export type Coordinate = [number, number]
 
 export type RunIds = Array<number> | []
@@ -439,16 +413,22 @@ const sortDateFuncReverse = (a: Activity, b: Activity) => sortDateFunc(b, a)
 let duckdbInstance: duckdb.AsyncDuckDB | null = null
 let duckdbConn: duckdb.AsyncDuckDBConnection | null = null
 
+const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles()
+
 async function initDuckDB(): Promise<{ db: duckdb.AsyncDuckDB, conn: duckdb.AsyncDuckDBConnection }> {
   if (duckdbInstance && duckdbConn) {
     return { db: duckdbInstance, conn: duckdbConn }
   }
-  const bundle = await duckdb.selectBundle(MANUAL_BUNDLES)
-  const worker = new Worker(bundle.mainWorker!)
+  const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES)
+  const worker_url = URL.createObjectURL(
+    new Blob([`importScripts("${bundle.mainWorker!}");`], { type: 'text/javascript' }),
+  )
+  const worker = new Worker(worker_url)
   const logger = new duckdb.ConsoleLogger()
   duckdbInstance = new duckdb.AsyncDuckDB(logger, worker)
   await duckdbInstance.instantiate(bundle.mainModule, bundle.pthreadWorker)
   duckdbConn = await duckdbInstance.connect()
+  URL.revokeObjectURL(worker_url)
   return { db: duckdbInstance, conn: duckdbConn }
 }
 
