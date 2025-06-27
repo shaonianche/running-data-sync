@@ -18,7 +18,7 @@ import cloudscraper
 import garth
 import httpx
 from config import FOLDER_DICT, JSON_FILE, SQL_FILE
-from garmin_device_adaptor import wrap_device_info
+from garmin_device_adaptor import process_garmin_data
 from lxml import etree
 
 from utils import load_env_config, make_activities_file
@@ -90,9 +90,7 @@ class Garmin:
             response = await self.req.get(url, headers=self.headers)
             if response.status_code == 429:
                 raise GarminConnectTooManyRequestsError("Too many requests")
-            logger.debug(
-                f"fetch_data got response code {response.status_code}"
-            )
+            logger.debug(f"fetch_data got response code {response.status_code}")
             response.raise_for_status()
             return response.json()
         except Exception as err:
@@ -143,16 +141,11 @@ class Garmin:
             use_fake_garmin_device,
         )
         for data in datas:
-            print(data.filename)
             with open(data.filename, "wb") as f:
                 for chunk in data.content:
                     f.write(chunk)
             f = open(data.filename, "rb")
-            # wrap fake garmin device to origin fit file, current not support gpx file
-            if use_fake_garmin_device:
-                file_body = wrap_device_info(f)
-            else:
-                file_body = BytesIO(f.read())
+            file_body = process_garmin_data(f, use_fake_garmin_device)
             files = {"file": (data.filename, file_body)}
 
             try:
@@ -281,13 +274,9 @@ async def download_garmin_data(
 ):
     folder = FOLDER_DICT.get(file_type, "gpx")
     try:
-        file_data = await client.download_activity(
-            activity_id, file_type=file_type
-        )
+        file_data = await client.download_activity(activity_id, file_type=file_type)
         if summary_infos is not None:
-            file_data = add_summary_info(
-                file_data, summary_infos.get(activity_id)
-            )
+            file_data = add_summary_info(file_data, summary_infos.get(activity_id))
         file_path = os.path.join(folder, f"{activity_id}.{file_type}")
         need_unzip = False
         if file_type == "fit":
@@ -338,9 +327,7 @@ async def gather_with_concurrency(n, tasks):
 
 
 def get_downloaded_ids(folder):
-    return [
-        i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")
-    ]
+    return [i.split(".")[0] for i in os.listdir(folder) if not i.startswith(".")]
 
 
 def get_garmin_summary_infos(activity_summary, activity_id):
@@ -453,9 +440,7 @@ if __name__ == "__main__":
             )
             sys.exit(1)
 
-    auth_domain = (
-        "CN" if options.is_cn else "COM"
-    )  # Default to COM if not specified
+    auth_domain = "CN" if options.is_cn else "COM"  # Default to COM if not specified
     file_type = options.download_file_type
     is_only_running = options.only_run
 
