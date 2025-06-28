@@ -3,9 +3,7 @@
 import gettext
 import locale
 from collections import defaultdict
-from datetime import datetime
 
-import pytz
 import svgwrite
 
 from .utils import format_float
@@ -59,7 +57,6 @@ class Poster:
         self.tracks_drawer = None
         self.trans = None
         self.set_language(None)
-        self.tc_offset = datetime.now(pytz.timezone("Asia/Shanghai")).utcoffset()
         self.github_style = "align-firstday"
 
     def set_language(self, language):

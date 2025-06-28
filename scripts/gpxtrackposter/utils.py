@@ -7,26 +7,22 @@
 
 import locale
 import math
-from datetime import datetime
 from typing import List, Optional, Tuple
+from zoneinfo import ZoneInfo
 
 import colour
-import pytz
 import s2sphere as s2
+from timezonefinder import TimezoneFinder
+from value_range import ValueRange
+from xy import XY
 
 try:
     from tzfpy import get_tz
-
-    tf = None
 except ImportError:
-    # tzfpy is not available, fallback to timezonefinder
-    from timezonefinder import TimezoneFinder
-
-    tf = TimezoneFinder()
+    get_tz = None
 
 
-from .value_range import ValueRange
-from .xy import XY
+tf = TimezoneFinder()
 
 
 # mercator projection
@@ -139,12 +135,22 @@ def parse_datetime_to_local(start_time, end_time, point):
         if offset:
             return start_time + offset, end_time + offset
         lat, lng = point
-        try:
+        if get_tz:
             timezone = get_tz(lng=lng, lat=lat)
-        except Exception as e:
-            # just a little trick when tzfpy support windows will delete this
-            print(f"tzfpy error: {e} fallback to timezonefinder")
-            lat, lng = point
+        if not timezone:
             timezone = tf.timezone_at(lng=lng, lat=lat)
-    tc_offset = datetime.now(pytz.timezone(timezone)).utcoffset()
-    return start_time + tc_offset, end_time + tc_offset
+    if not timezone:
+        timezone = "Asia/Shanghai"  # Fallback
+    try:
+        tz = ZoneInfo(timezone)
+        # Calculate offset based on the actual start_time (assuming it's naive UTC)
+        start_tc_offset = (
+            start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
+        )
+        end_tc_offset = (
+            end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
+        )
+        return start_time + start_tc_offset, end_time + end_tc_offset
+    except Exception:
+        # Fallback for safety
+        return start_time, end_time

@@ -2,8 +2,7 @@ import json
 import time
 from datetime import datetime
 from pathlib import Path
-
-import pytz
+from zoneinfo import ZoneInfo
 
 try:
     from rich import print
@@ -39,21 +38,45 @@ def load_env_config():
 
 
 def adjust_time(time, tz_name):
-    tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
-    return time + tc_offset
+    """
+    Converts a naive UTC datetime to a naive local datetime.
+    """
+    try:
+        utc_time = time.replace(tzinfo=ZoneInfo("UTC"))
+        local_time = utc_time.astimezone(ZoneInfo(tz_name))
+        return local_time.replace(tzinfo=None)
+    except Exception:
+        # Fallback to original time if conversion fails
+        return time
 
 
 def adjust_time_to_utc(time, tz_name):
-    tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
-    return time - tc_offset
+    """
+    Converts a naive local datetime to a naive UTC datetime.
+    """
+    try:
+        tz = ZoneInfo(tz_name)
+        tc_offset = time.replace(tzinfo=tz).utcoffset()
+        if tc_offset is None:
+            return time  # Cannot determine offset for ambiguous time
+        return time - tc_offset
+    except Exception:
+        return time
 
 
 def adjust_timestamp_to_utc(timestamp, tz_name):
-    tc_offset = datetime.now(pytz.timezone(tz_name)).utcoffset()
-    if tc_offset is None:
-        raise ValueError(f"Invalid timezone name: {tz_name}")
-    delta = int(tc_offset.total_seconds())
-    return int(timestamp) - delta
+    """
+    Converts a local unix timestamp to a UTC unix timestamp.
+    """
+    try:
+        tz = ZoneInfo(tz_name)
+        # Create a naive datetime from the local timestamp
+        naive_local_dt = datetime.fromtimestamp(timestamp)
+        # Determine the offset for that specific datetime
+        offset_seconds = naive_local_dt.replace(tzinfo=tz).utcoffset().total_seconds()
+        return int(timestamp - offset_seconds)
+    except Exception:
+        return int(timestamp)
 
 
 def to_date(ts):
@@ -73,9 +96,7 @@ def to_date(ts):
             )
             pass
 
-    raise ValueError(
-        f"cannot parse timestamp {ts} into date with fmts: {ts_fmts}"
-    )
+    raise ValueError(f"cannot parse timestamp {ts} into date with fmts: {ts_fmts}")
 
 
 def make_activities_file(
@@ -138,17 +159,12 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
                     activity_file=f, data_type=data_type, activity_type="run"
                 )
             else:
-                r = client.upload_activity(
-                    activity_file=f, data_type=data_type
-                )
+                r = client.upload_activity(activity_file=f, data_type=data_type)
 
         except RateLimitExceeded as e:
             timeout = 60.0 if e.timeout is None else float(e.timeout)
             print()
-            print(
-                f"Strava API Rate Limit Exceeded. "
-                f"Retry after {timeout} seconds"
-            )
+            print(f"Strava API Rate Limit Exceeded. Retry after {timeout} seconds")
             print()
             time.sleep(timeout)
             if force_to_run:
@@ -156,9 +172,7 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
                     activity_file=f, data_type=data_type, activity_type="run"
                 )
             else:
-                r = client.upload_activity(
-                    activity_file=f, data_type=data_type
-                )
+                r = client.upload_activity(activity_file=f, data_type=data_type)
         print(
             f"Uploading {data_type} file: {file_name} to strava, "
             f"upload_id: {r.upload_id}."
