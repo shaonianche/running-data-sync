@@ -1,7 +1,9 @@
 import datetime
 import random
+import ssl
 import string
 
+import certifi
 import geopy
 from geopy.geocoders import Nominatim
 from sqlalchemy import (
@@ -26,9 +28,11 @@ def randomword():
     return "".join(random.choice(letters) for i in range(4))
 
 
-geopy.geocoders.options.default_user_agent = "my-application"
+geopy.geocoders.options.default_user_agent = "running-data-sync"
 # reverse the location (lat, lon) -> location detail
-g = Nominatim(user_agent=randomword())
+ctx = ssl.create_default_context(cafile=certifi.where())
+geopy.geocoders.options.default_ssl_context = ctx
+g = Nominatim(user_agent=randomword(), timeout=10)
 
 
 ACTIVITY_KEYS = [
@@ -86,9 +90,7 @@ def update_or_create_activity(session, run_activity):
     created = False
     try:
         activity = (
-            session.query(Activity)
-            .filter_by(run_id=int(run_activity.id))
-            .first()
+            session.query(Activity).filter_by(run_id=int(run_activity.id)).first()
         )
         gain = getattr(
             run_activity,
@@ -100,11 +102,7 @@ def update_or_create_activity(session, run_activity):
             start_point = run_activity.start_latlng
             location_country = getattr(run_activity, "location_country", "")
             # or China for #176 to fix
-            if (
-                not location_country
-                and start_point
-                or location_country == "China"
-            ):
+            if not location_country and start_point or location_country == "China":
                 try:
                     location_country = str(
                         g.reverse(
@@ -139,9 +137,7 @@ def update_or_create_activity(session, run_activity):
                 average_speed=float(run_activity.average_speed),
                 elevation_gain=elevation_gain_value,
                 summary_polyline=(
-                    run_activity.map
-                    and run_activity.map.summary_polyline
-                    or ""
+                    run_activity.map and run_activity.map.summary_polyline or ""
                 ),
             )
             session.add(activity)

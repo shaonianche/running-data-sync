@@ -1,10 +1,12 @@
 import datetime
 import os
 import random
+import ssl
 import string
 import sys
 
 import arrow
+import certifi
 import geopy
 import stravalib
 from geopy.geocoders import Nominatim
@@ -24,9 +26,11 @@ def randomword():
     return "".join(random.choice(letters) for i in range(4))
 
 
-geopy.geocoders.options.default_user_agent = "my-application"
+geopy.geocoders.options.default_user_agent = "running-data-sync"
 # reverse the location (lat, lon) -> location detail
-g = Nominatim(user_agent=randomword())
+ctx = ssl.create_default_context(cafile=certifi.where())
+geopy.geocoders.options.default_ssl_context = ctx
+g = Nominatim(user_agent=randomword(), timeout=10)
 
 
 class Generator:
