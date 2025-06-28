@@ -66,25 +66,22 @@ class Generator:
 
         print("Start syncing")
         if force:
-            filters = {"before": datetime.datetime.utcnow()}
+            filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
         else:
-            last_activity = self.session.query(
-                func.max(Activity.start_date)
-            ).scalar()
+            last_activity = self.session.query(func.max(Activity.start_date)).scalar()
             if last_activity:
                 last_activity_date = arrow.get(last_activity)
                 last_activity_date = last_activity_date.shift(days=-7)
                 filters = {"after": last_activity_date.datetime}
             else:
-                filters = {"before": datetime.datetime.utcnow()}
+                filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
 
         for activity in self.client.get_activities(**filters):
             reverse_country = None
             if hasattr(activity, "start_latlng") and activity.start_latlng:
                 try:
                     reverse_location = g.reverse(
-                        f"{activity.start_latlng.lat},"
-                        f"{activity.start_latlng.lon}",
+                        f"{activity.start_latlng.lat},{activity.start_latlng.lon}",
                         language="zh-CN",
                     )
                     if (
@@ -92,9 +89,7 @@ class Generator:
                         and reverse_location.raw
                         and "address" in reverse_location.raw
                     ):
-                        reverse_country = reverse_location.raw["address"].get(
-                            "country"
-                        )
+                        reverse_country = reverse_location.raw["address"].get("country")
                     if reverse_country:
                         activity.location_country = reverse_country
                 except Exception as e:
@@ -117,9 +112,7 @@ class Generator:
             sys.stdout.flush()
         self.session.commit()
 
-    def sync_from_data_dir(
-        self, data_dir, file_suffix="gpx", activity_title_dict={}
-    ):
+    def sync_from_data_dir(self, data_dir, file_suffix="gpx", activity_title_dict={}):
         loader = track_loader.TrackLoader()
         tracks = loader.load_tracks(
             data_dir,
@@ -196,9 +189,7 @@ class Generator:
             activity.streak = streak
             last_date = date
             if not IGNORE_BEFORE_SAVING:
-                activity.summary_polyline = filter_out(
-                    activity.summary_polyline
-                )
+                activity.summary_polyline = filter_out(activity.summary_polyline)
             activity_list.append(activity.to_dict())
 
         return activity_list
