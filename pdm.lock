@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:e93a6d7f4cf6bf84e0494fe4f82325eb5e8493394ce6d18986b4a99e766fd5e9"
+content_hash = "sha256:b396e3a667c61b997a9da15c4accc9a005f6e6a3f1b579f13d40ef172ad158e7"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -280,8 +280,8 @@ files = [
 ]
 
 [[package]]
-name = "fit-tool"
-version = "0.9.13"
+name = "fit-tool-ng"
+version = "0.9.14a1.dev6"
 requires_python = ">=3.7"
 git = "https://github.com/shaonianche/python_fit_tool.git"
 ref = "main"
