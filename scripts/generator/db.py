@@ -5,10 +5,10 @@ import string
 import geopy
 from geopy.geocoders import Nominatim
 from sqlalchemy import (
+    BigInteger,
     Column,
     Float,
     Integer,
-    Interval,
     String,
     create_engine,
     inspect,
@@ -51,11 +51,11 @@ ACTIVITY_KEYS = [
 class Activity(Base):
     __tablename__ = "activities"
 
-    run_id = Column(Integer, primary_key=True)
+    run_id = Column(BigInteger, primary_key=True, autoincrement=False)
     name = Column(String)
     distance = Column(Float)
-    moving_time = Column(Interval)
-    elapsed_time = Column(Interval)
+    moving_time = Column(Integer)
+    elapsed_time = Column(Integer)
     type = Column(String)
     subtype = Column(String)
     start_date = Column(String)
@@ -71,7 +71,9 @@ class Activity(Base):
         out = {}
         for key in ACTIVITY_KEYS:
             attr = getattr(self, key)
-            if isinstance(attr, (datetime.timedelta, datetime.datetime)):
+            if key in ("moving_time", "elapsed_time"):
+                out[key] = str(datetime.timedelta(seconds=attr))
+            elif isinstance(attr, datetime.datetime):
                 out[key] = str(attr)
             else:
                 out[key] = attr
@@ -122,8 +124,8 @@ def update_or_create_activity(session, run_activity):
                 run_id=run_activity.id,
                 name=run_activity.name,
                 distance=run_activity.distance,
-                moving_time=run_activity.moving_time,
-                elapsed_time=run_activity.elapsed_time,
+                moving_time=run_activity.moving_time.total_seconds(),
+                elapsed_time=run_activity.elapsed_time.total_seconds(),
                 type=run_activity.type,
                 subtype=run_activity.subtype,
                 start_date=run_activity.start_date,
@@ -141,8 +143,8 @@ def update_or_create_activity(session, run_activity):
         else:
             activity.name = run_activity.name
             activity.distance = float(run_activity.distance)
-            activity.moving_time = run_activity.moving_time
-            activity.elapsed_time = run_activity.elapsed_time
+            activity.moving_time = run_activity.moving_time.total_seconds()
+            activity.elapsed_time = run_activity.elapsed_time.total_seconds()
             activity.type = run_activity.type
             activity.subtype = run_activity.subtype
             activity.average_heartrate = run_activity.average_heartrate
