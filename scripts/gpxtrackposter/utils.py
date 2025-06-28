@@ -13,8 +13,9 @@ from zoneinfo import ZoneInfo
 import colour
 import s2sphere as s2
 from timezonefinder import TimezoneFinder
-from value_range import ValueRange
-from xy import XY
+
+from .value_range import ValueRange
+from .xy import XY
 
 try:
     from tzfpy import get_tz
