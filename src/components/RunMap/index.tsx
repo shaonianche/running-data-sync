@@ -17,6 +17,7 @@ import LightsControl from '@/components/RunMap/LightsControl'
 import getActivities from '@/hooks/useActivities'
 import {
   COUNTRY_FILL_COLOR,
+  DISABLE_CHART,
   DISABLE_MAP,
   IS_CHINESE,
   LIGHTS_ON,
@@ -188,10 +189,10 @@ function RunMap({
         isMapVisible={isMapVisible}
         onToggleMapVisible={() => setIsMapVisible(v => !v)}
       />
-      {DISABLE_MAP
+      {!DISABLE_CHART
         ? <ActivityChart thisYear={thisYear} />
         : (
-            isMapVisible && (
+            !DISABLE_MAP && isMapVisible && (
               <div style={{ position: 'relative' }}>
                 <Map
                   {...viewState}

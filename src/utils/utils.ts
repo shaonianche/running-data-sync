@@ -25,7 +25,7 @@ export interface Activity {
   run_id: number
   name: string
   distance: number
-  moving_time: string
+  moving_time: number
   type: string
   subtype: string
   start_date: string
@@ -61,21 +61,8 @@ function formatPace(d: number): string {
   return `${minutes}'${seconds.toFixed(0).toString().padStart(2, '0')}"`
 }
 
-function convertMovingTime2Sec(moving_time: string): number {
-  if (!moving_time) {
-    return 0
-  }
-  // moving_time : '2 days, 12:34:56' or '12:34:56';
-  const splits = moving_time.split(', ')
-  const days = splits.length === 2 ? Number.parseInt(splits[0]) : 0
-  const time = splits.splice(-1)[0]
-  const [hours, minutes, seconds] = time.split(':').map(Number)
-  const totalSeconds = ((days * 24 + hours) * 60 + minutes) * 60 + seconds
-  return totalSeconds
-}
-
-function formatRunTime(moving_time: string): string {
-  const totalSeconds = convertMovingTime2Sec(moving_time)
+function formatRunTime(moving_time: number): string {
+  const totalSeconds = moving_time
   const seconds = totalSeconds % 60
   const minutes = (totalSeconds - seconds) / 60
   if (minutes === 0) {
@@ -447,7 +434,6 @@ async function loadDuckDBFile(db: duckdb.AsyncDuckDB, filePath: string = '/db/ac
 }
 
 export {
-  convertMovingTime2Sec,
   filterAndSortRuns,
   filterCityRuns,
   filterTitleRuns,

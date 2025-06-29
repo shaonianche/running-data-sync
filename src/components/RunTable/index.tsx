@@ -4,7 +4,6 @@ import type {
 } from '@/utils/utils'
 import React, { useState } from 'react'
 import {
-  convertMovingTime2Sec,
   sortDateFunc,
   sortDateFuncReverse,
 } from '@/utils/utils'
@@ -42,11 +41,9 @@ function RunTable({
       : (b.average_heartrate ?? 0) - (a.average_heartrate ?? 0)
   }
   const sortRunTimeFunc: SortFunc = (a, b) => {
-    const aTotalSeconds = convertMovingTime2Sec(a.moving_time)
-    const bTotalSeconds = convertMovingTime2Sec(b.moving_time)
     return sortFuncInfo === 'Time'
-      ? aTotalSeconds - bTotalSeconds
-      : bTotalSeconds - aTotalSeconds
+      ? a.moving_time - b.moving_time
+      : b.moving_time - a.moving_time
   }
   const sortDateFuncClick
     = sortFuncInfo === 'Date' ? sortDateFunc : sortDateFuncReverse

@@ -37,6 +37,7 @@ dependencies = [
   "garth",
   "pycryptodome",
   "duckdb",
+  "duckdb-engine",
 ]
 
 [build-system]

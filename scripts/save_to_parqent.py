@@ -1,10 +1,9 @@
 import duckdb
 from config import DB_FOLDER, SQL_FILE
 
-with duckdb.connect() as conn:
-    conn.install_extension("sqlite")
-    conn.load_extension("sqlite")
-    conn.sql(f"ATTACH '{SQL_FILE}' (TYPE SQLITE);USE data;")
+# The SQL_FILE is now a duckdb file
+with duckdb.connect(SQL_FILE) as conn:
     conn.sql(
-        f"COPY (SELECT * FROM activities) TO '{DB_FOLDER}/activities.parquet' (FORMAT PARQUET);"  # noqa: E501
+        f"COPY (SELECT * FROM activities) TO '{DB_FOLDER}/activities.parquet'"
+        f" (FORMAT PARQUET);"
     )

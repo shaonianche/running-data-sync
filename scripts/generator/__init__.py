@@ -20,17 +20,11 @@ from .db import Activity, init_db, update_or_create_activity
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
 
 
-# random user name 8 letters
-def randomword():
-    letters = string.ascii_lowercase
-    return "".join(random.choice(letters) for i in range(4))
-
-
 geopy.geocoders.options.default_user_agent = "running-data-sync"
 # reverse the location (lat, lon) -> location detail
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
-g = Nominatim(user_agent=randomword(), timeout=10)
+g = Nominatim(user_agent="running-data-sync", timeout=10)
 
 
 class Generator:
@@ -81,25 +75,6 @@ class Generator:
                 filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
 
         for activity in self.client.get_activities(**filters):
-            reverse_country = None
-            if hasattr(activity, "start_latlng") and activity.start_latlng:
-                try:
-                    reverse_location = g.reverse(
-                        f"{activity.start_latlng.lat},{activity.start_latlng.lon}",
-                        language="zh-CN",
-                    )
-                    if (
-                        reverse_location
-                        and reverse_location.raw
-                        and "address" in reverse_location.raw
-                    ):
-                        reverse_country = reverse_location.raw["address"].get("country")
-                    if reverse_country:
-                        activity.location_country = reverse_country
-                except Exception as e:
-                    print(f"Reverse geocoding failed: {e}")
-            else:
-                print("no start_latlng, cannot reverse location_country")
             if self.only_run and activity.type != "Run":
                 continue
             if IGNORE_BEFORE_SAVING:

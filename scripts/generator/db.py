@@ -7,10 +7,10 @@ import certifi
 import geopy
 from geopy.geocoders import Nominatim
 from sqlalchemy import (
+    BigInteger,
     Column,
     Float,
     Integer,
-    Interval,
     String,
     create_engine,
     inspect,
@@ -32,7 +32,7 @@ geopy.geocoders.options.default_user_agent = "running-data-sync"
 # reverse the location (lat, lon) -> location detail
 ctx = ssl.create_default_context(cafile=certifi.where())
 geopy.geocoders.options.default_ssl_context = ctx
-g = Nominatim(user_agent=randomword(), timeout=10)
+g = Nominatim(user_agent="running-data-sync", timeout=10)
 
 
 ACTIVITY_KEYS = [
@@ -55,11 +55,11 @@ ACTIVITY_KEYS = [
 class Activity(Base):
     __tablename__ = "activities"
 
-    run_id = Column(Integer, primary_key=True)
+    run_id = Column(BigInteger, primary_key=True, autoincrement=False)
     name = Column(String)
     distance = Column(Float)
-    moving_time = Column(Interval)
-    elapsed_time = Column(Interval)
+    moving_time = Column(Integer)
+    elapsed_time = Column(Integer)
     type = Column(String)
     subtype = Column(String)
     start_date = Column(String)
@@ -92,69 +92,64 @@ def update_or_create_activity(session, run_activity):
         activity = (
             session.query(Activity).filter_by(run_id=int(run_activity.id)).first()
         )
+
         gain = getattr(
             run_activity,
             "total_elevation_gain",
             getattr(run_activity, "elevation_gain", 0.0),
         )
-        elevation_gain_value = float(gain or 0.0)
+
+        # Consolidate common attributes to avoid repetition
+        common_data = {
+            "name": run_activity.name,
+            "distance": float(run_activity.distance),
+            "moving_time": run_activity.moving_time.total_seconds(),
+            "elapsed_time": run_activity.elapsed_time.total_seconds(),
+            "type": run_activity.type,
+            "subtype": run_activity.subtype,
+            "average_heartrate": run_activity.average_heartrate or 0.0,
+            "average_speed": float(run_activity.average_speed),
+            "elevation_gain": float(gain or 0.0),
+            "summary_polyline": (
+                run_activity.map and run_activity.map.summary_polyline or ""
+            ),
+        }
+
         if not activity:
+            # Logic for creating a new activity
             start_point = run_activity.start_latlng
             location_country = getattr(run_activity, "location_country", "")
-            # or China for #176 to fix
-            if not location_country and start_point or location_country == "China":
+
+            # or China for #176 to fix. This re-geocodes if location is just "China"
+            if (not location_country and start_point) or location_country == "China":
                 try:
                     location_country = str(
                         g.reverse(
-                            f"{start_point.lat}, {start_point.lon}",
+                            f"{start_point.lat},{start_point.lon}",
                             language="zh-CN",
                         )
                     )
-                # limit (only for the first time)
                 except Exception:
-                    try:
-                        location_country = str(
-                            g.reverse(
-                                f"{start_point.lat}, {start_point.lon}",
-                                language="zh-CN",
-                            )
-                        )
-                    except Exception:
-                        pass
+                    # pass if geocoding fails
+                    pass
+
+            if not location_country:
+                location_country = "中国"
 
             activity = Activity(
                 run_id=run_activity.id,
-                name=run_activity.name,
-                distance=run_activity.distance,
-                moving_time=run_activity.moving_time,
-                elapsed_time=run_activity.elapsed_time,
-                type=run_activity.type,
-                subtype=run_activity.subtype,
                 start_date=run_activity.start_date,
                 start_date_local=run_activity.start_date_local,
                 location_country=location_country,
-                average_heartrate=run_activity.average_heartrate,
-                average_speed=float(run_activity.average_speed),
-                elevation_gain=elevation_gain_value,
-                summary_polyline=(
-                    run_activity.map and run_activity.map.summary_polyline or ""
-                ),
+                **common_data,
             )
             session.add(activity)
             created = True
         else:
-            activity.name = run_activity.name
-            activity.distance = float(run_activity.distance)
-            activity.moving_time = run_activity.moving_time
-            activity.elapsed_time = run_activity.elapsed_time
-            activity.type = run_activity.type
-            activity.subtype = run_activity.subtype
-            activity.average_heartrate = run_activity.average_heartrate
-            activity.average_speed = float(run_activity.average_speed)
-            activity.elevation_gain = elevation_gain_value
-            activity.summary_polyline = (
-                run_activity.map and run_activity.map.summary_polyline or ""
-            )
+            # Logic for updating an existing activity
+            for key, value in common_data.items():
+                setattr(activity, key, value)
+
     except Exception as e:
         print(f"something wrong with {run_activity.id}")
         print(str(e))
@@ -184,9 +179,7 @@ def add_missing_columns(engine, model):
 
 
 def init_db(db_path):
-    engine = create_engine(
-        f"sqlite:///{db_path}", connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(f"duckdb:///{db_path}")
     Base.metadata.create_all(engine)
 
     # check missing columns

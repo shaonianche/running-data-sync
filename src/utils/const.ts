@@ -31,6 +31,7 @@ const USE_GOOGLE_ANALYTICS = true
 const GOOGLE_ANALYTICS_TRACKING_ID = 'G-W2EVGZBMZR'
 
 const DISABLE_MAP = true
+const DISABLE_CHART = false
 // styling: set to `true` if you want dash-line route
 const USE_DASH_LINE = true
 // styling: route line opacity: [0, 1]
@@ -104,6 +105,7 @@ export {
   ACTIVITY_TYPES,
   CHINESE_LOCATION_INFO_MESSAGE_FIRST,
   CHINESE_LOCATION_INFO_MESSAGE_SECOND,
+  DISABLE_CHART,
   DISABLE_MAP,
   GOOGLE_ANALYTICS_TRACKING_ID,
   INFO_MESSAGE,
