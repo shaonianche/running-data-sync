@@ -6,9 +6,9 @@
 # license that can be found in the LICENSE file.
 
 import datetime
-from datetime import timezone
 import os
 from collections import namedtuple
+from datetime import timezone
 
 import gpxpy as mod_gpxpy
 import lxml
@@ -126,7 +126,7 @@ class Track:
             activity.start_date_local, "%Y-%m-%d %H:%M:%S"
         )
         self.start_time_local = start_time
-        self.end_time = start_time + activity.elapsed_time
+        self.end_time = start_time + datetime.timedelta(seconds=activity.elapsed_time)
         self.length = float(activity.distance)
         if IGNORE_BEFORE_SAVING:
             summary_polyline = filter_out(activity.summary_polyline)
@@ -218,13 +218,11 @@ class Track:
                         for p in s.points
                         if p.extensions
                     ]
-                    heart_rate_list.extend(
-                        [
-                            int(p["hr"]) if p.__contains__("hr") else None
-                            for p in extensions
-                            if extensions
-                        ]
-                    )
+                    heart_rate_list.extend([
+                        int(p["hr"]) if p.__contains__("hr") else None
+                        for p in extensions
+                        if extensions
+                    ])
                     heart_rate_list = list(filter(None, heart_rate_list))
                 except lxml.etree.XMLSyntaxError:
                     # Ignore XML syntax errors in extensions
