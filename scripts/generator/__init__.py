@@ -140,11 +140,7 @@ class Generator:
 
     def load(self):
         # if sub_type is not in the db, just add an empty string to it
-        activities = (
-            self.session.query(Activity)
-            .filter(Activity.distance > 0.1)
-            .order_by(Activity.start_date_local)
-        )
+        activities = self.session.query(Activity).order_by(Activity.start_date_local)
         activity_list = []
 
         streak = 0

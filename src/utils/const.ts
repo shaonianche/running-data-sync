@@ -47,15 +47,11 @@ const PRIVACY_MODE = false
 // set to `false` if you want to make light off as default, only effect when `PRIVACY_MODE` = false
 const LIGHTS_ON = true
 // richer title for the activity types (like garmin style)
-const RICH_TITLE = false
+const RICH_TITLE = true
 
 // IF you outside China please make sure IS_CHINESE = false
 const IS_CHINESE = true
 const USE_ANIMATION_FOR_GRID = false
-function CHINESE_INFO_MESSAGE(yearLength: number, year: string): string {
-  const yearStr = year === 'Total' ? '所有' : ` ${year} `
-  return `我用 App 记录自己跑步 ${yearLength} 年了，下面列表展示的是${yearStr}的数据`
-}
 function ENGLISH_INFO_MESSAGE(yearLength: number, year: string): string {
   return `Running Journey with ${yearLength} Years, the table shows year ${year} data`
 }
@@ -65,21 +61,27 @@ const CHINESE_LOCATION_INFO_MESSAGE_FIRST
   = '我跑过了一些地方，希望随着时间推移，地图点亮的地方越来越多'
 const CHINESE_LOCATION_INFO_MESSAGE_SECOND = '不要停下来，不要停下奔跑的脚步'
 
-const INFO_MESSAGE = IS_CHINESE ? CHINESE_INFO_MESSAGE : ENGLISH_INFO_MESSAGE
-const FULL_MARATHON_RUN_TITLE = IS_CHINESE ? '全程马拉松' : 'Full Marathon'
-const HALF_MARATHON_RUN_TITLE = IS_CHINESE ? '半程马拉松' : 'Half Marathon'
-const MORNING_RUN_TITLE = IS_CHINESE ? '清晨跑步' : 'Morning Run'
-const MIDDAY_RUN_TITLE = IS_CHINESE ? '午间跑步' : 'Midday Run'
-const AFTERNOON_RUN_TITLE = IS_CHINESE ? '午后跑步' : 'Afternoon Run'
-const EVENING_RUN_TITLE = IS_CHINESE ? '傍晚跑步' : 'Evening Run'
-const NIGHT_RUN_TITLE = IS_CHINESE ? '夜晚跑步' : 'Night Run'
-const RUN_GENERIC_TITLE = IS_CHINESE ? '跑步' : 'Run'
-const RUN_TRAIL_TITLE = IS_CHINESE ? '越野跑' : 'Trail Run'
-const RUN_TREADMILL_TITLE = IS_CHINESE ? '跑步机' : 'Treadmill Run'
-const HIKING_TITLE = IS_CHINESE ? '徒步' : 'Hiking'
-const CYCLING_TITLE = IS_CHINESE ? '骑行' : 'Cycling'
-const SKIING_TITLE = IS_CHINESE ? '滑雪' : 'Skiing'
-const WALKING_TITLE = IS_CHINESE ? '步行' : 'Walking'
+const INFO_MESSAGE = ENGLISH_INFO_MESSAGE
+const FULL_MARATHON_RUN_TITLE = 'Full Marathon'
+const HALF_MARATHON_RUN_TITLE = 'Half Marathon'
+const MORNING_RUN_TITLE = 'Morning Run'
+const MIDDAY_RUN_TITLE = 'Midday Run'
+const AFTERNOON_RUN_TITLE = 'Afternoon Run'
+const EVENING_RUN_TITLE = 'Evening Run'
+const NIGHT_RUN_TITLE = 'Night Run'
+const RUN_GENERIC_TITLE = 'Run'
+const RUN_TRAIL_TITLE = 'Trail Run'
+const RUN_TREADMILL_TITLE = 'Treadmill Run'
+const HIKING_TITLE = 'Hiking'
+const CYCLING_TITLE = 'Cycling'
+const SKIING_TITLE = 'Skiing'
+const WALKING_TITLE = 'Walking'
+
+const MORNING_CYCLING_TITLE = 'Morning Ride'
+const MIDDAY_CYCLING_TITLE = 'Midday Ride'
+const AFTERNOON_CYCLING_TITLE = 'Afternoon Ride'
+const EVENING_CYCLING_TITLE = 'Evening Ride'
+const NIGHT_CYCLING_TITLE = 'Night Ride'
 
 const ACTIVITY_TYPES = {
   RUN_GENERIC_TITLE,
@@ -101,10 +103,19 @@ const RUN_TITLES = {
   NIGHT_RUN_TITLE,
 }
 
+const CYCLING_TITLES = {
+  MORNING_CYCLING_TITLE,
+  MIDDAY_CYCLING_TITLE,
+  AFTERNOON_CYCLING_TITLE,
+  EVENING_CYCLING_TITLE,
+  NIGHT_CYCLING_TITLE,
+}
+
 export {
   ACTIVITY_TYPES,
   CHINESE_LOCATION_INFO_MESSAGE_FIRST,
   CHINESE_LOCATION_INFO_MESSAGE_SECOND,
+  CYCLING_TITLES,
   DISABLE_CHART,
   DISABLE_MAP,
   GOOGLE_ANALYTICS_TRACKING_ID,

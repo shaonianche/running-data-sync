@@ -3,7 +3,7 @@ name: Strava Sync
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */3 * * *"
+    - cron: '0 */3 * * *'
   push:
     branches:
       - main
@@ -14,7 +14,7 @@ on:
       - scripts/garmin_sync.py
       - scripts/fit_to_garmin_sync.py
       - scripts/strava_to_garmin_sync.py
-      - scripts/save_to_parqent.py
+      - scripts/save_to_parquet.py
       - requirements.txt
 
 env:
@@ -82,16 +82,16 @@ jobs:
           python-version: 3.12
           cache: true
           cache-dependency-path: ./pdm.lock
-          
+
       - name: Install dependencies
         run: |
           pdm install
           echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
-                
+
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
         run: python scripts/strava_sync.py --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
-      
+
       - name: Run strava_to_garmin_sync script
         if: env.RUN_TYPE == 'strava'
         continue-on-error: true
@@ -117,8 +117,8 @@ jobs:
           python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}'  --output assets/github-light.svg --use-localtime --min-distance 0.5
           python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}'  --output assets/grid-light.svg --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime
 
-      - name: Save data to parqent
-        run:  python scripts/save_to_parqent.py
+      - name: Save data to parquet
+        run: python scripts/save_to_parquet.py
 
       - name: Push new runs
         run: |

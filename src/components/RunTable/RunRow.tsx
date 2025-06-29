@@ -24,8 +24,8 @@ function RunRow({
   runIndex,
   setRunIndex,
 }: IRunRowProperties) {
-  const distance = (run.distance / 1000.0).toFixed(2)
-  const paceParts = run.average_speed ? formatPace(run.average_speed) : null
+  const distance = ((run.distance || 0) / 1000.0).toFixed(2)
+  const paceParts = formatPace(run.average_speed)
   const heartRate = run.average_heartrate
   const runTime = formatRunTime(run.moving_time)
   const handleClick = () => {
@@ -46,7 +46,7 @@ function RunRow({
     >
       <td>{titleForRun(run)}</td>
       <td>{distance}</td>
-      {paceParts && <td>{paceParts}</td>}
+      <td>{paceParts}</td>
       <td>{heartRate && heartRate.toFixed(0)}</td>
       <td>{runTime}</td>
       <td>{run.start_date_local}</td>

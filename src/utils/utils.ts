@@ -10,6 +10,7 @@ import { chinaCities } from '@/static/city'
 import { chinaGeojson } from '@/static/run_countries'
 import {
   ACTIVITY_TYPES,
+  CYCLING_TITLES,
   MAIN_COLOR,
   MUNICIPALITY_CITIES_ARR,
   NEED_FIX_MAP,
@@ -53,8 +54,9 @@ function titleForShow(run: Activity): string {
 }
 
 function formatPace(d: number): string {
-  if (Number.isNaN(d))
-    return '0'
+  if (!d || Number.isNaN(d)) {
+    return `0'00"`
+  }
   const pace = (1000.0 / 60.0) * (1.0 / d)
   const minutes = Math.floor(pace)
   const seconds = Math.floor((pace - minutes) * 60.0)
@@ -63,12 +65,19 @@ function formatPace(d: number): string {
 
 function formatRunTime(moving_time: number): string {
   const totalSeconds = moving_time
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  const minutes = (totalSeconds - seconds) / 60
-  if (minutes === 0) {
-    return `${seconds}s`
+
+  const minutesStr = minutes.toString().padStart(2, '0')
+  const secondsStr = seconds.toString().padStart(2, '0')
+
+  if (hours > 0) {
+    return `${hours}:${minutesStr}:${secondsStr}`
   }
-  return `${minutes}min`
+  else {
+    return `${minutesStr}:${secondsStr}`
+  }
 }
 
 // for scroll to the map
@@ -270,7 +279,7 @@ function getActivitySport(act: Activity): string {
   else if (act.type === 'hiking') {
     return ACTIVITY_TYPES.HIKING_TITLE
   }
-  else if (act.type === 'cycling') {
+  else if (act.type === 'cycling' || act.type === 'Ride') {
     return ACTIVITY_TYPES.CYCLING_TITLE
   }
   else if (act.type === 'walking') {
@@ -284,39 +293,73 @@ function getActivitySport(act: Activity): string {
 }
 
 function titleForRun(run: Activity): string {
+  const activity_sport = getActivitySport(run)
+  const runHour = +run.start_date_local.slice(11, 13)
+
   if (RICH_TITLE) {
-    // 1. try to use user defined name
+    // 1. Cycling activities
+    if (activity_sport === ACTIVITY_TYPES.CYCLING_TITLE) {
+      if (runHour >= 0 && runHour <= 10)
+        return CYCLING_TITLES.MORNING_CYCLING_TITLE
+      if (runHour > 10 && runHour <= 14)
+        return CYCLING_TITLES.MIDDAY_CYCLING_TITLE
+      if (runHour > 14 && runHour <= 18)
+        return CYCLING_TITLES.AFTERNOON_CYCLING_TITLE
+      if (runHour > 18 && runHour <= 21)
+        return CYCLING_TITLES.EVENING_CYCLING_TITLE
+      return CYCLING_TITLES.NIGHT_CYCLING_TITLE
+    }
+
+    // 2. Running activities
+    if (
+      activity_sport === ACTIVITY_TYPES.RUN_GENERIC_TITLE
+      || activity_sport === ACTIVITY_TYPES.RUN_TRAIL_TITLE
+      || activity_sport === ACTIVITY_TYPES.RUN_TREADMILL_TITLE
+    ) {
+      const runDistance = run.distance / 1000
+      if (runDistance > 20 && runDistance < 40)
+        return RUN_TITLES.HALF_MARATHON_RUN_TITLE
+      if (runDistance >= 40)
+        return RUN_TITLES.FULL_MARATHON_RUN_TITLE
+      if (runHour >= 0 && runHour <= 10)
+        return RUN_TITLES.MORNING_RUN_TITLE
+      if (runHour > 10 && runHour <= 14)
+        return RUN_TITLES.MIDDAY_RUN_TITLE
+      if (runHour > 14 && runHour <= 18)
+        return RUN_TITLES.AFTERNOON_RUN_TITLE
+      if (runHour > 18 && runHour <= 21)
+        return RUN_TITLES.EVENING_RUN_TITLE
+      return RUN_TITLES.NIGHT_RUN_TITLE
+    }
+
+    // 3. All other activities
     if (run.name !== '') {
       return run.name
     }
-    // 2. try to use location+type if the location is available, eg. 'Shanghai Run'
-    const { city } = locationForRun(run)
-    const activity_sport = getActivitySport(run)
-    if (city && city.length > 0 && activity_sport.length > 0) {
-      return `${city} ${activity_sport}`
-    }
+    return activity_sport // e.g. "Hiking", "Skiing"
   }
-  // 3. use time+length if location or type is not available
+
+  // Fallback for when RICH_TITLE is false
+  if (run.name !== '') {
+    return run.name
+  }
+  const { city } = locationForRun(run)
+  if (city && city.length > 0 && activity_sport.length > 0) {
+    return `${city} ${activity_sport}`
+  }
   const runDistance = run.distance / 1000
-  const runHour = +run.start_date_local.slice(11, 13)
-  if (runDistance > 20 && runDistance < 40) {
+  if (runDistance > 20 && runDistance < 40)
     return RUN_TITLES.HALF_MARATHON_RUN_TITLE
-  }
-  if (runDistance >= 40) {
+  if (runDistance >= 40)
     return RUN_TITLES.FULL_MARATHON_RUN_TITLE
-  }
-  if (runHour >= 0 && runHour <= 10) {
+  if (runHour >= 0 && runHour <= 10)
     return RUN_TITLES.MORNING_RUN_TITLE
-  }
-  if (runHour > 10 && runHour <= 14) {
+  if (runHour > 10 && runHour <= 14)
     return RUN_TITLES.MIDDAY_RUN_TITLE
-  }
-  if (runHour > 14 && runHour <= 18) {
+  if (runHour > 14 && runHour <= 18)
     return RUN_TITLES.AFTERNOON_RUN_TITLE
-  }
-  if (runHour > 18 && runHour <= 21) {
+  if (runHour > 18 && runHour <= 21)
     return RUN_TITLES.EVENING_RUN_TITLE
-  }
   return RUN_TITLES.NIGHT_RUN_TITLE
 }
 
