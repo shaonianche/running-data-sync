@@ -34,6 +34,7 @@ def load_env_config():
         "garmin_password": config.get("GARMIN_PASSWORD"),
         "garmin_is_cn": config.get("GARMIN_IS_CN"),
         "garmin_secret": config.get("GARMIN_SECRET"),
+        "garmin_secret_cn": config.get("GARMIN_SECRET_CN"),
     }
 
 
