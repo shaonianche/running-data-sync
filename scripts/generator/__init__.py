@@ -1,7 +1,6 @@
 import datetime
 import os
 import ssl
-import sys
 import time
 from xml.dom import minidom
 from xml.etree.ElementTree import Element, SubElement, tostring
@@ -9,14 +8,17 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 import arrow
 import certifi
 import geopy
+import pandas as pd
 import stravalib
 from geopy.geocoders import Nominatim
 from gpxtrackposter import track_loader
 from polyline_processor import filter_out
-from sqlalchemy import func
-from synced_data_file_logger import save_synced_data_file_list
 
-from .db import Activity, init_db, update_or_create_activity
+from .db import (
+    get_dataframe_from_strava_activities,
+    init_db,
+    update_or_create_activities,
+)
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
 
@@ -31,7 +33,7 @@ g = Nominatim(user_agent="running-data-sync", timeout=10)
 class Generator:
     def __init__(self, db_path):
         self.client = stravalib.Client()
-        self.session = init_db(db_path)
+        self.db_connection = init_db(db_path)
 
         self.client_id = ""
         self.client_secret = ""
@@ -58,8 +60,7 @@ class Generator:
 
     def sync(self, force):
         """
-        Sync activities means sync from strava
-        TODO, better name later
+        Sync activities from Strava to the local DuckDB database.
         """
         self.check_access()
 
@@ -67,32 +68,32 @@ class Generator:
         if force:
             filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
         else:
-            last_activity = self.session.query(func.max(Activity.start_date)).scalar()
-            if last_activity:
-                last_activity_date = arrow.get(last_activity)
-                filters = {"after": last_activity_date.datetime}
+            # Use a raw SQL query to get the last activity's start_date
+            last_activity_date_result = self.db_connection.execute(
+                "SELECT MAX(start_date) FROM activities"
+            ).fetchone()
+            last_activity_date = (
+                last_activity_date_result[0] if last_activity_date_result else None
+            )
+
+            if last_activity_date:
+                # The date from DB is timezone-aware, so we can parse it directly.
+                last_activity_date = arrow.get(last_activity_date).datetime
+                filters = {"after": last_activity_date}
             else:
                 filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
 
-        activities = list(self.client.get_activities(**filters))
-        print(f"Syncing {len(activities)} activities")
+        strava_activities = list(self.client.get_activities(**filters))
+        print(f"Found {len(strava_activities)} new activities from Strava.")
 
-        for activity in activities:
-            if self.only_run and activity.type != "Run":
-                continue
-            if IGNORE_BEFORE_SAVING:
-                if activity.map and activity.map.summary_polyline:
-                    activity.map.summary_polyline = filter_out(
-                        activity.map.summary_polyline
-                    )
-            activity.subtype = activity.type
-            created = update_or_create_activity(self.session, activity)
-            if created:
-                sys.stdout.write("+")
-            else:
-                sys.stdout.write(".")
-            sys.stdout.flush()
-        self.session.commit()
+        if not strava_activities:
+            print("No new activities to sync.")
+            return
+
+        # Convert to DataFrame and upsert
+        activities_df = get_dataframe_from_strava_activities(strava_activities)
+        updated_count = update_or_create_activities(self.db_connection, activities_df)
+        print(f"Synced {updated_count} activities to the database.")
 
     def _make_tcx_from_streams(self, activity, streams):
         # TCX XML structure
@@ -242,95 +243,109 @@ class Generator:
             file_suffix=file_suffix,
             activity_title_dict=activity_title_dict,
         )
-        print(f"load {len(tracks)} tracks")
+        print(f"Found {len(tracks)} tracks from {data_dir}.")
         if not tracks:
-            print("No tracks found.")
             return
 
-        synced_files = []
-
-        for t in tracks:
-            created = update_or_create_activity(
-                self.session, t.to_namedtuple(run_from=file_suffix)
-            )
-            if created:
-                sys.stdout.write("+")
-            else:
-                sys.stdout.write(".")
-            synced_files.extend(t.file_names)
-            sys.stdout.flush()
-
-        save_synced_data_file_list(synced_files)
-
-        self.session.commit()
+        self.sync_from_app(tracks)
 
     def sync_from_app(self, app_tracks):
         if not app_tracks:
-            print("No tracks found.")
+            print("No tracks to sync from app.")
             return
-        print("Syncing tracks '+' means new track '.' means update tracks")
-        synced_files = []
-        for t in app_tracks:
-            created = update_or_create_activity(self.session, t)
-            if created:
-                sys.stdout.write("+")
-            else:
-                sys.stdout.write(".")
-            if "file_names" in t:
-                synced_files.extend(t.file_names)
-            sys.stdout.flush()
 
-        self.session.commit()
+        activities_data = []
+        for t in app_tracks:
+            # Convert track object to a dictionary-like structure
+            track_data = t.to_namedtuple()._asdict()
+            record = {
+                "run_id": track_data["id"],
+                "name": track_data["name"],
+                "distance": track_data["length"],
+                "moving_time": track_data["moving_time"].total_seconds(),
+                "elapsed_time": track_data["elapsed_time"].total_seconds(),
+                "type": track_data["type"],
+                "subtype": track_data["subtype"],
+                "start_date": datetime.datetime.strptime(
+                    track_data["start_date"], "%Y-%m-%d %H:%M:%S"
+                ),
+                "start_date_local": datetime.datetime.strptime(
+                    track_data["start_date_local"], "%Y-%m-%d %H:%M:%S"
+                ),
+                "location_country": "",  # GPX/FIT files don't have this
+                "summary_polyline": track_data["map"].summary_polyline,
+                "average_heartrate": track_data["average_heartrate"],
+                "average_speed": track_data["average_speed"],
+                "elevation_gain": track_data["elevation_gain"],
+            }
+            activities_data.append(record)
+
+        activities_df = pd.DataFrame(activities_data)
+        updated_count = update_or_create_activities(self.db_connection, activities_df)
+        print(f"Synced {updated_count} activities to the database.")
 
     def load(self):
-        # if sub_type is not in the db, just add an empty string to it
-        activities = self.session.query(Activity).order_by(Activity.start_date_local)
-        activity_list = []
+        """
+        Loads activities from the database and calculates the running streak.
+        """
+        query = "SELECT * FROM activities ORDER BY start_date_local"
+        activities_df = self.db_connection.execute(query).fetchdf()
 
-        streak = 0
-        last_date = None
-        for activity in activities:
-            if self.only_run and activity.type != "Run":
-                continue
-            # Determine running streak.
-            date = datetime.datetime.strptime(
-                activity.start_date_local, "%Y-%m-%d %H:%M:%S"
-            ).date()
-            if last_date is None:
-                streak = 1
-            elif date == last_date:
-                pass
-            elif date == last_date + datetime.timedelta(days=1):
-                streak += 1
-            else:
-                assert date > last_date
-                streak = 1
-            activity.streak = streak
-            last_date = date
-            if not IGNORE_BEFORE_SAVING:
-                activity.summary_polyline = filter_out(activity.summary_polyline)
-            activity_list.append(activity.to_dict())
+        if self.only_run:
+            activities_df = activities_df[activities_df["type"] == "Run"].copy()
 
-        return activity_list
+        if activities_df.empty:
+            return []
+
+        # Calculate streak
+        activities_df["start_date_local_date"] = pd.to_datetime(
+            activities_df["start_date_local"]
+        ).dt.date
+        activities_df = activities_df.sort_values("start_date_local_date")
+        # Get the difference in days between consecutive runs
+        activities_df["date_diff"] = (
+            activities_df["start_date_local_date"].diff().dt.days
+        )
+        # Identify the start of a new streak
+        activities_df["new_streak"] = (activities_df["date_diff"] != 1).cumsum()
+        # Calculate streak number within each group
+        activities_df["streak"] = activities_df.groupby("new_streak").cumcount() + 1
+
+        # Drop temporary columns
+        activities_df = activities_df.drop(
+            columns=["start_date_local_date", "date_diff", "new_streak"]
+        )
+
+        # Polyline filtering
+        if not IGNORE_BEFORE_SAVING:
+            activities_df["summary_polyline"] = activities_df["summary_polyline"].apply(
+                filter_out
+            )
+
+        return activities_df.to_dict("records")
 
     def get_old_tracks_ids(self):
         try:
-            activities = self.session.query(Activity).all()
-            return [str(a.run_id) for a in activities]
+            return (
+                self.db_connection.execute("SELECT run_id FROM activities")
+                .fetchdf()["run_id"]
+                .astype(str)
+                .tolist()
+            )
         except Exception as e:
-            # pass the error
-            print(f"something wrong with {str(e)}")
+            print(f"Something wrong with get_old_tracks_ids: {str(e)}")
             return []
 
     def get_old_tracks_dates(self):
         try:
-            activities = (
-                self.session.query(Activity)
-                .order_by(Activity.start_date_local.desc())
-                .all()
+            return (
+                self.db_connection.execute(
+                    "SELECT start_date_local FROM activities ORDER BY start_date_local DESC"
+                )
+                .fetchdf()["start_date_local"]
+                .astype(str)
+                .tolist()
             )
-            return [str(a.start_date_local) for a in activities]
         except Exception as e:
-            # pass the error
-            print(f"something wrong with {str(e)}")
+            print(f"Something wrong with get_old_tracks_dates: {str(e)}")
             return []
