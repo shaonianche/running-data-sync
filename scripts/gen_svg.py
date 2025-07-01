@@ -4,6 +4,7 @@ import os
 import sys
 
 from config import SQL_FILE
+from generator import Generator
 from gpxtrackposter import (
     circular_drawer,
     github_drawer,
@@ -58,8 +59,7 @@ def main():
         metavar="YEAR",
         type=str,
         default="all",
-        help="Filter tracks by year; "
-        '"NUM", "NUM-NUM", "all" (default: all years)',
+        help='Filter tracks by year; "NUM", "NUM-NUM", "all" (default: all years)',
     )
     args_parser.add_argument(
         "--title", metavar="TITLE", type=str, help="Title to display."
@@ -85,8 +85,7 @@ def main():
         metavar="TYPE",
         default="grid",
         choices=drawers.keys(),
-        help=f"Type of poster to create "
-        f'(default: "grid", available: "{types}").',
+        help=f'Type of poster to create (default: "grid", available: "{types}").',
     )
     args_parser.add_argument(
         "--background-color",
@@ -147,9 +146,7 @@ def main():
         action="store_true",
         help="Verbose logging.",
     )
-    args_parser.add_argument(
-        "--logfile", dest="logfile", metavar="FILE", type=str
-    )
+    args_parser.add_argument("--logfile", dest="logfile", metavar="FILE", type=str)
     args_parser.add_argument(
         "--special-distance",
         dest="special_distance",
@@ -232,8 +229,9 @@ def main():
 
     if args.from_db:
         # for svg from db here if you want gpx please do not use --from-db
+        generator = Generator(SQL_FILE)
         # args.type == "grid" means have polyline data or not
-        tracks = loader.load_tracks_from_db(SQL_FILE, args.type == "grid")
+        tracks = generator.load(args.type == "grid")
     else:
         tracks = loader.load_tracks(args.gpx_dir)
     if not tracks:

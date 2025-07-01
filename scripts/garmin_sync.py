@@ -5,7 +5,6 @@ Copy most code from https://github.com/cyberjunky/python-garminconnect
 
 import argparse
 import asyncio
-import logging
 import os
 import sys
 import time
@@ -21,10 +20,9 @@ from config import FOLDER_DICT, JSON_FILE, SQL_FILE
 from garmin_device_adaptor import process_garmin_data
 from lxml import etree
 
-from utils import load_env_config, make_activities_file
+from utils import get_logger, load_env_config, make_activities_file
 
-# logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 TIME_OUT = httpx.Timeout(240.0, connect=360.0)
 GARMIN_COM_URL_DICT = {
@@ -51,7 +49,7 @@ class Garmin:
         """
         Init module
         """
-        self.req = httpx.AsyncClient(timeout=TIME_OUT)
+        self.req = httpx.AsyncClient(timeout=TIME_OUT, http2=False)
         self.cf_req = cloudscraper.CloudScraper()
         self.URL_DICT = (
             GARMIN_CN_URL_DICT
@@ -429,18 +427,18 @@ if __name__ == "__main__":
     secret_string = options.secret_string
 
     # if secret_string is not provided, try to load from .env.local
+    auth_domain = "CN" if options.is_cn else "COM"  # Default to COM if not specified
     if secret_string is None:
         env_config = load_env_config()
-        if env_config and env_config.get("garmin_secret"):
-            secret_string = env_config["garmin_secret"]
+        secret_key = "GARMIN_SECRET_CN" if options.is_cn else "GARMIN_SECRET"
+        if env_config and env_config.get(secret_key.lower()):
+            secret_string = env_config[secret_key.lower()]
         else:
             print(
-                "Missing Garmin secret string. Please provide it as an "
-                "argument or set GARMIN_SECRET in .env.local"
+                f"Missing Garmin secret string. Please provide it as an "
+                f"argument or set {secret_key} in .env.local"
             )
             sys.exit(1)
-
-    auth_domain = "CN" if options.is_cn else "COM"  # Default to COM if not specified
     file_type = options.download_file_type
     is_only_running = options.only_run
 

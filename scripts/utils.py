@@ -1,4 +1,6 @@
 import json
+import logging
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +13,22 @@ except Exception:
 from generator import Generator
 from stravalib.client import Client
 from stravalib.exc import RateLimitExceeded
+
+
+def get_logger(name):
+    """
+    Creates and configures a logger.
+    """
+    logger = logging.getLogger(name)
+    if not logger.handlers:  # Avoid adding handlers multiple times
+        logger.setLevel(logging.INFO)
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+    return logger
 
 
 def load_env_config():

@@ -1,12 +1,21 @@
 import argparse
 import asyncio
+import json
 import os
 import sys
-from datetime import datetime
+from collections import namedtuple
+from datetime import datetime, timezone
 
+import httpx
 from config import FIT_FOLDER
 from garmin_fit_sdk import Decoder, Stream
 from garmin_sync import Garmin
+
+from utils import get_logger, load_env_config
+
+logger = get_logger(__name__)
+
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class FitToGarmin(Garmin):
@@ -14,31 +23,54 @@ class FitToGarmin(Garmin):
         super().__init__(secret_string, garmin_auth_domain)
 
     async def upload_activities_fit(self, files):
-        print("start upload fit file to garmin ...")
+        logger.info(f"Start uploading {len(files)} FIT files to Garmin...")
         for fit_file_path in files:
+            logger.info(f"Uploading {fit_file_path}")
             with open(fit_file_path, "rb") as f:
                 file_body = f.read()
-            files = {"file": (fit_file_path, file_body)}
+            upload_data = {"file": (os.path.basename(fit_file_path), file_body)}
 
             try:
                 res = await self.req.post(
-                    self.upload_url, files=files, headers=self.headers
+                    self.upload_url, files=upload_data, headers=self.headers
                 )
-                f.close()
-            except Exception as e:
-                print(str(e))
-                continue
+                res.raise_for_status()
+                resp_json = res.json()
+                detailed_import_result = resp_json.get("detailedImportResult", {})
+                if detailed_import_result:
+                    logger.info(f"Garmin upload success: {detailed_import_result}")
+                else:
+                    logger.warning(
+                        f"Garmin upload response missing details: {resp_json}"
+                    )
 
-            try:
-                resp = res.json()["detailedImportResult"]
-                print("garmin upload success: ", resp)
+            except httpx.HTTPStatusError as e:
+                logger.error(f"HTTP error while uploading {fit_file_path}: {e}")
+                try:
+                    # Try to parse the error response from Garmin
+                    error_json = e.response.json()
+                    if any(
+                        "Duplicate Activity" in msg.get("content", "")
+                        for msg in error_json.get("messages", [])
+                    ):
+                        logger.warning(f"Skipping duplicate activity: {fit_file_path}")
+                        continue  # Skip to the next file
+                except json.JSONDecodeError:
+                    logger.error("Could not decode error response.")
+            except (json.JSONDecodeError, KeyError) as e:
+                logger.error(
+                    f"Failed to parse Garmin's response for {fit_file_path}: {e}"
+                )
             except Exception as e:
-                print("garmin upload failed: ", e)
+                logger.error(
+                    f"An unexpected error occurred while uploading {fit_file_path}: {e}"
+                )
 
         await self.req.aclose()
 
 
 def get_fit_files():
+    FitFile = namedtuple("FitFile", ["path", "time_created"])
     fit_files = []
     for filename in os.listdir(FIT_FOLDER):
         if filename.lower().endswith(".fit"):
@@ -48,39 +80,54 @@ def get_fit_files():
     fit_files_fullpath = [
         os.path.join(FIT_FOLDER, filename) for filename in fit_files_sorted
     ]
-    files = {}
+    files = []
     for file_path in fit_files_fullpath:
         stream = Stream.from_file(file_path)
         decoder = Decoder(stream)
         messages, errors = decoder.read()
-        file_id_mesgs_time_created_str = (
-            messages["file_id_mesgs"][0]["time_created"]
-        ).strftime("%Y-%m-%d %H:%M:%S")
-        files[file_path] = (file_path, file_id_mesgs_time_created_str)
+        time_created = messages["file_id_mesgs"][0]["time_created"]
+        # Assume the time in FIT file is UTC
+        files.append(
+            FitFile(
+                path=file_path, time_created=time_created.replace(tzinfo=timezone.utc)
+            )
+        )
     return files
 
 
 async def main(secret_string, garmin_auth_domain):
     garmin_client = FitToGarmin(secret_string, garmin_auth_domain)
-    last_activity = await garmin_client.get_activities(0, 1)
+    try:
+        last_activity = await garmin_client.get_activities(0, 1)
+    except Exception as e:
+        logger.error(f"Failed to get last activity from Garmin: {e}")
+        return
+
     all_fit_files = get_fit_files()
-    upload_file_path = []
+    upload_files = []
     if not last_activity:
-        print("no garmin activity")
+        logger.info("No Garmin activity found, preparing to upload all local files.")
+        upload_files = [f.path for f in all_fit_files]
     else:
-        # is this startTimeGMT must have ?
         after_datetime_str = last_activity[0]["startTimeGMT"]
-        after_datetime = datetime.strptime(after_datetime_str, "%Y-%m-%d %H:%M:%S")
-        print("garmin last activity date: ", after_datetime)
-        for file_path, file_id_mesgs_time_created_str in all_fit_files.values():
-            file_id_mesgs_time_created = datetime.strptime(
-                file_id_mesgs_time_created_str, "%Y-%m-%d %H:%M:%S"
-            )
-            if after_datetime == file_id_mesgs_time_created:
+        after_datetime = datetime.strptime(after_datetime_str, DATE_FORMAT).replace(
+            tzinfo=timezone.utc
+        )
+        logger.info(f"Garmin's last activity date: {after_datetime}")
+        for fit_file in all_fit_files:
+            if after_datetime >= fit_file.time_created:
+                # Stop when we find a file that is older or same as the last synced one
                 break
             else:
-                upload_file_path.append(file_path)
-        await garmin_client.upload_activities_fit(upload_file_path)
+                upload_files.append(fit_file.path)
+
+    if upload_files:
+        # The files are currently sorted from newest to oldest.
+        # Reversing to upload from oldest to newest.
+        upload_files.reverse()
+        await garmin_client.upload_activities_fit(upload_files)
+    else:
+        logger.info("No new activities to upload.")
 
 
 if __name__ == "__main__":
@@ -98,8 +145,19 @@ if __name__ == "__main__":
     secret_string = options.secret_string
     garmin_auth_domain = "CN" if options.is_cn else "COM"
     if secret_string is None:
-        print("Missing argument nor valid configuration file")
+        env_config = load_env_config()
+        secret_key = "GARMIN_SECRET_CN" if options.is_cn else "GARMIN_SECRET"
+        if env_config and env_config.get(secret_key.lower()):
+            secret_string = env_config[secret_key.lower()]
+        else:
+            logger.error(
+                f"Missing Garmin secret string. Please provide it as an "
+                f"argument or set {secret_key} in .env.local"
+            )
+            sys.exit(1)
+
+    try:
+        asyncio.run(main(secret_string, garmin_auth_domain))
+    except Exception as e:
+        logger.error(f"An unexpected error occurred in main execution: {e}")
         sys.exit(1)
-    loop = asyncio.get_event_loop()
-    future = asyncio.ensure_future(main(secret_string, garmin_auth_domain))
-    loop.run_until_complete(future)
