@@ -1,10 +1,12 @@
 import concurrent.futures
+import datetime
 import ssl
 
 import certifi
 import duckdb
 import geopy
 import pandas as pd
+from fit_tool.profile.profile_type import Sport
 from geopy.geocoders import Nominatim
 
 geopy.geocoders.options.default_user_agent = "running-data-sync"
@@ -30,6 +32,57 @@ ACTIVITIES_SCHEMA = {
     "average_speed": "DOUBLE",
     "elevation_gain": "DOUBLE",
 }
+
+FIT_FILE_ID_SCHEMA = {
+    "serial_number": "VARCHAR PRIMARY KEY",
+    "time_created": "TIMESTAMP",
+    "manufacturer": "INTEGER",
+    "product": "INTEGER",
+    "software_version": "DOUBLE",
+    "type": "INTEGER",
+}
+
+FIT_RECORD_SCHEMA = {
+    "activity_id": "BIGINT",
+    "timestamp": "TIMESTAMP",
+    "position_lat": "DOUBLE",
+    "position_long": "DOUBLE",
+    "distance": "DOUBLE",
+    "altitude": "DOUBLE",
+    "speed": "DOUBLE",
+    "heart_rate": "INTEGER",
+    "cadence": "INTEGER",
+}
+
+FIT_LAP_SCHEMA = {
+    "activity_id": "BIGINT",
+    "timestamp": "TIMESTAMP",
+    "start_time": "TIMESTAMP",
+    "total_elapsed_time": "DOUBLE",
+    "total_timer_time": "DOUBLE",
+    "total_distance": "DOUBLE",
+    "avg_speed": "DOUBLE",
+    "avg_heart_rate": "INTEGER",
+    "avg_cadence": "INTEGER",
+}
+
+FIT_SESSION_SCHEMA = {
+    "activity_id": "BIGINT PRIMARY KEY",
+    "timestamp": "TIMESTAMP",
+    "start_time": "TIMESTAMP",
+    "total_elapsed_time": "DOUBLE",
+    "total_timer_time": "DOUBLE",
+    "total_distance": "DOUBLE",
+    "avg_speed": "DOUBLE",
+    "avg_heart_rate": "INTEGER",
+    "avg_cadence": "INTEGER",
+    "sport": "INTEGER",
+}
+
+
+def _create_table_if_not_exists(db_connection, table_name, schema):
+    columns_def = ", ".join([f"{name} {dtype}" for name, dtype in schema.items()])
+    db_connection.execute(f"CREATE TABLE IF NOT EXISTS {table_name} ({columns_def});")
 
 
 def _migrate_schema(db_connection):
@@ -73,10 +126,7 @@ def init_db(db_path):
     _migrate_schema(con)
 
     # Create table if it doesn't exist, using the canonical schema
-    columns_def = ", ".join([
-        f"{name} {dtype}" for name, dtype in ACTIVITIES_SCHEMA.items()
-    ])
-    con.execute(f"CREATE TABLE IF NOT EXISTS activities ({columns_def});")
+    _create_table_if_not_exists(con, "activities", ACTIVITIES_SCHEMA)
 
     return con
 
@@ -224,3 +274,140 @@ def get_dataframe_from_strava_activities(activities):
     df = df.drop(columns=["start_lat", "start_lon"], errors="ignore")
 
     return df
+
+
+def get_dataframes_for_fit_tables(activity, streams):
+    """
+    Converts Strava activity and streams object into a dictionary of DataFrames
+    with data types suitable for database insertion.
+    """
+
+    from garmin_device_adaptor import (
+        GARMIN_DEVICE_PRODUCT_ID,
+        GARMIN_SOFTWARE_VERSION,
+        MANUFACTURER,
+    )
+
+    dataframes = {}
+
+    # Create fit_file_id DataFrame
+    file_id_data = {
+        "serial_number": [str(activity.id)],
+        "time_created": [pd.to_datetime(activity.start_date)],
+        "manufacturer": [MANUFACTURER],
+        "product": [GARMIN_DEVICE_PRODUCT_ID],
+        "software_version": [GARMIN_SOFTWARE_VERSION],
+        "type": [4],  # 4 = activity file
+    }
+    dataframes["fit_file_id"] = pd.DataFrame(file_id_data)
+
+    # Create fit_record DataFrame
+    time_stream_data = streams.get("time").data
+    record_data = {
+        "activity_id": [activity.id] * len(time_stream_data),
+        "timestamp": [
+            pd.to_datetime(activity.start_date) + datetime.timedelta(seconds=s)
+            for s in time_stream_data
+        ],
+        "position_lat": [latlng[0] for latlng in streams.get("latlng").data],
+        "position_long": [latlng[1] for latlng in streams.get("latlng").data],
+        "distance": streams.get("distance").data if streams.get("distance") else None,
+        "altitude": streams.get("altitude").data if streams.get("altitude") else None,
+        "speed": streams.get("velocity_smooth").data
+        if streams.get("velocity_smooth")
+        else None,
+        "heart_rate": streams.get("heartrate").data
+        if streams.get("heartrate")
+        else None,
+        "cadence": streams.get("cadence").data if streams.get("cadence") else None,
+    }
+    dataframes["fit_record"] = pd.DataFrame(record_data)
+
+    # Create fit_lap and fit_session DataFrames
+    sport_map = {
+        "Run": Sport.RUNNING.value,
+        "Hike": Sport.HIKING.value,
+        "Walk": Sport.WALKING.value,
+        "EBikeRide": Sport.E_BIKING.value,
+        "Swim": Sport.SWIMMING.value,
+        "Ride": Sport.CYCLING.value,
+    }
+    sport = sport_map.get(activity.type, Sport.GENERIC.value)
+
+    session_data = {
+        "activity_id": [activity.id],
+        "timestamp": [pd.to_datetime(activity.start_date) + activity.elapsed_time],
+        "start_time": [pd.to_datetime(activity.start_date)],
+        "total_elapsed_time": [activity.elapsed_time.total_seconds()],
+        "total_timer_time": [activity.moving_time.total_seconds()],
+        "total_distance": [float(activity.distance)],
+        "avg_speed": [float(activity.average_speed)],
+        "avg_heart_rate": [activity.average_heartrate],
+        "avg_cadence": [activity.average_cadence],
+        "sport": [sport],
+    }
+    dataframes["fit_session"] = pd.DataFrame(session_data)
+
+    # Lap does not have sport, so create a copy and drop the column
+    lap_data = session_data.copy()
+    lap_data.pop("sport")
+    dataframes["fit_lap"] = pd.DataFrame(lap_data)
+
+    return dataframes
+
+
+def write_fit_dataframes(db_connection, dataframes):
+    """
+    Writes a dictionary of DataFrames to their respective tables in the database
+    using DuckDB's native virtual table and INSERT INTO functionality.
+    """
+    if not dataframes:
+        return
+
+    schemas = {
+        "fit_file_id": FIT_FILE_ID_SCHEMA,
+        "fit_record": FIT_RECORD_SCHEMA,
+        "fit_lap": FIT_LAP_SCHEMA,
+        "fit_session": FIT_SESSION_SCHEMA,
+    }
+
+    for table_name, df in dataframes.items():
+        if df.empty:
+            continue
+
+        schema = schemas.get(table_name)
+        if not schema:
+            print(f"Warning: No schema defined for table {table_name}. Skipping.")
+            continue
+
+        try:
+            # 1. Ensure the target table exists with the correct schema.
+            _create_table_if_not_exists(db_connection, table_name, schema)
+
+            # 2. Register the Pandas DataFrame as a temporary virtual table.
+            db_connection.register(f"temp_{table_name}", df)
+
+            # 3. Use a SQL INSERT statement to copy data from the virtual table.
+            columns = ", ".join(df.columns)
+            # Use ON CONFLICT DO NOTHING to avoid errors with duplicate primary keys
+            # This is relevant for fit_file_id and fit_session which have PRIMARY KEYs
+            if "PRIMARY KEY" in " ".join(schema.values()):
+                db_connection.execute(
+                    f"""
+                    INSERT INTO {table_name} ({columns})
+                    SELECT {columns} FROM temp_{table_name}
+                    ON CONFLICT DO NOTHING
+                    """
+                )
+            else:
+                db_connection.execute(
+                    f"INSERT INTO {table_name} ({columns}) SELECT {columns} FROM temp_{table_name}"
+                )
+
+            # 4. Unregister the virtual table to clean up.
+            db_connection.unregister(f"temp_{table_name}")
+
+            print(f"Successfully saved {len(df)} records to table '{table_name}'.")
+
+        except Exception as e:
+            print(f"Failed to save DataFrame to table '{table_name}': {e}")

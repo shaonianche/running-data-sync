@@ -1,5 +1,6 @@
 import datetime
 import os
+import random
 import ssl
 import time
 from xml.dom import minidom
@@ -10,14 +11,36 @@ import certifi
 import geopy
 import pandas as pd
 import stravalib
+from fit_tool.fit_file_builder import FitFileBuilder
+from fit_tool.profile.messages.event_message import EventMessage
+from fit_tool.profile.messages.file_id_message import FileIdMessage
+from fit_tool.profile.messages.lap_message import LapMessage
+from fit_tool.profile.messages.record_message import RecordMessage
+from fit_tool.profile.messages.session_message import SessionMessage
+from fit_tool.profile.profile_type import (
+    Event,
+    EventType,
+    FileType,
+    Manufacturer,
+    Sport,
+)
+from garmin_device_adaptor import (
+    GARMIN_DEVICE_PRODUCT_ID,
+    GARMIN_SOFTWARE_VERSION,
+    MANUFACTURER,
+)
 from geopy.geocoders import Nominatim
 from gpxtrackposter import track_loader
 from polyline_processor import filter_out
 
+from utils import get_logger
+
 from .db import (
     get_dataframe_from_strava_activities,
+    get_dataframes_for_fit_tables,
     init_db,
     update_or_create_activities,
+    write_fit_dataframes,
 )
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
@@ -34,6 +57,7 @@ class Generator:
     def __init__(self, db_path):
         self.client = stravalib.Client()
         self.db_connection = init_db(db_path)
+        self.logger = get_logger(self.__class__.__name__)
 
         self.client_id = ""
         self.client_secret = ""
@@ -349,3 +373,175 @@ class Generator:
         except Exception as e:
             print(f"Something wrong with get_old_tracks_dates: {str(e)}")
             return []
+
+    def sync_and_generate_fit(self, force=False):
+        """
+        Syncs activities from Strava, saves them to DuckDB, and generates FIT files.
+        """
+        self.check_access()
+        self.logger.info("Starting FIT file generation process.")
+
+        # For testing, we only fetch the latest activity.
+        activities = list(self.client.get_activities(limit=1))
+        if not activities:
+            self.logger.info("No activities found to generate FIT file.")
+            return []
+
+        fit_files_generated = []
+        for activity in activities:
+            self.logger.info(f"Processing activity: {activity.id} ({activity.name})")
+            try:
+                stream_types = [
+                    "time",
+                    "latlng",
+                    "altitude",
+                    "heartrate",
+                    "cadence",
+                    "velocity_smooth",
+                    "distance",
+                ]
+                streams = self.client.get_activity_streams(
+                    activity.id, types=stream_types, resolution="high"
+                )
+
+                if not streams.get("latlng") or not streams.get("time"):
+                    self.logger.warning(
+                        f"Skipping activity {activity.id} due to missing essential streams."
+                    )
+                    continue
+
+                dataframes = get_dataframes_for_fit_tables(activity, streams)
+                write_fit_dataframes(self.db_connection, dataframes)
+                fit_byte_data = self._build_fit_file_from_dataframes(dataframes)
+
+                filename = f"{activity.id}.fit"
+                filepath = os.path.join("FIT_OUT", filename)
+                with open(filepath, "wb") as f:
+                    f.write(fit_byte_data)
+                fit_files_generated.append(filename)
+                self.logger.info(f"Successfully generated FIT file: {filepath}")
+
+            except Exception as e:
+                self.logger.error(
+                    f"Failed to generate FIT file for activity {activity.id}: {e}",
+                    exc_info=True,
+                )
+        return fit_files_generated
+
+    def _build_fit_file_from_dataframes(self, dataframes):
+        """
+        Builds a FIT file from a dictionary of DataFrames, following the official example's logic.
+        """
+        builder = FitFileBuilder(auto_define=True)
+
+        # The order of messages is important.
+        self._add_file_id_mesg(builder, dataframes.get("fit_file_id"))
+        self._add_event_mesg(builder, dataframes, event_type="start")
+        self._add_record_mesgs(builder, dataframes.get("fit_record"))
+        self._add_lap_mesg(builder, dataframes.get("fit_lap"))
+        self._add_session_mesg(builder, dataframes.get("fit_session"))
+        self._add_event_mesg(builder, dataframes, event_type="stop")
+
+        return builder.build().to_bytes()
+
+    def _add_file_id_mesg(self, builder, df):
+        if df is None or df.empty:
+            return
+        msg = FileIdMessage()
+        row = df.iloc[0]
+        msg.type = FileType(row["type"])
+        msg.manufacturer = row["manufacturer"]
+        msg.product = row["product"]
+        msg.software_version = row["software_version"]
+        msg.serial_number = random.randint(0, 4294967295)
+        naive_dt = row["time_created"].tz_localize(None)
+        msg.time_created = round(naive_dt.timestamp() * 1000)
+        builder.add(msg)
+
+    def _add_event_mesg(self, builder, dataframes, event_type):
+        if event_type == "start":
+            timestamp = dataframes["fit_session"].iloc[0]["start_time"]
+            event_type_enum = EventType.START
+        else:  # stop
+            timestamp = dataframes["fit_session"].iloc[0]["timestamp"]
+            event_type_enum = EventType.STOP_ALL
+
+        naive_dt = timestamp.tz_localize(None)
+        timestamp_ms = round(naive_dt.timestamp() * 1000)
+
+        event_msg = EventMessage()
+        event_msg.event = Event.TIMER
+        event_msg.event_type = event_type_enum
+        event_msg.timestamp = timestamp_ms
+        builder.add(event_msg)
+
+    def _add_record_mesgs(self, builder, df):
+        if df is None or df.empty:
+            return
+        for _, row in df.iterrows():
+            msg = RecordMessage()
+            naive_ts = row["timestamp"].tz_localize(None)
+            msg.timestamp = round(naive_ts.timestamp() * 1000)
+
+            if pd.notna(row["position_lat"]):
+                msg.position_lat = row["position_lat"]
+            if pd.notna(row["position_long"]):
+                msg.position_long = row["position_long"]
+            if pd.notna(row["distance"]):
+                msg.distance = row["distance"]
+            if pd.notna(row["altitude"]):
+                msg.altitude = row["altitude"]
+            if pd.notna(row["speed"]):
+                msg.speed = row["speed"]
+            if pd.notna(row["heart_rate"]):
+                msg.heart_rate = row["heart_rate"]
+            if pd.notna(row["cadence"]):
+                msg.cadence = row["cadence"]
+            builder.add(msg)
+
+    def _add_lap_mesg(self, builder, df):
+        if df is None or df.empty:
+            return
+        msg = LapMessage()
+        row = df.iloc[0]
+
+        naive_ts = row["timestamp"].tz_localize(None)
+        msg.timestamp = round(naive_ts.timestamp() * 1000)
+
+        naive_start = row["start_time"].tz_localize(None)
+        msg.start_time = round(naive_start.timestamp() * 1000)
+
+        msg.total_elapsed_time = row["total_elapsed_time"] * 1000
+        msg.total_timer_time = row["total_timer_time"] * 1000
+        msg.total_distance = row["total_distance"]
+        if pd.notna(row["avg_speed"]):
+            msg.avg_speed = row["avg_speed"]
+        if pd.notna(row["avg_heart_rate"]):
+            msg.avg_heart_rate = row["avg_heart_rate"]
+        if pd.notna(row["avg_cadence"]):
+            msg.avg_cadence = row["avg_cadence"]
+        builder.add(msg)
+
+    def _add_session_mesg(self, builder, df):
+        if df is None or df.empty:
+            return
+        msg = SessionMessage()
+        row = df.iloc[0]
+
+        naive_ts = row["timestamp"].tz_localize(None)
+        msg.timestamp = round(naive_ts.timestamp() * 1000)
+
+        naive_start = row["start_time"].tz_localize(None)
+        msg.start_time = round(naive_start.timestamp() * 1000)
+
+        msg.total_elapsed_time = row["total_elapsed_time"] * 1000
+        msg.total_timer_time = row["total_timer_time"] * 1000
+        msg.total_distance = row["total_distance"]
+        msg.sport = row["sport"]
+        if pd.notna(row["avg_speed"]):
+            msg.avg_speed = row["avg_speed"]
+        if pd.notna(row["avg_heart_rate"]):
+            msg.avg_heart_rate = row["avg_heart_rate"]
+        if pd.notna(row["avg_cadence"]):
+            msg.avg_cadence = row["avg_cadence"]
+        builder.add(msg)
