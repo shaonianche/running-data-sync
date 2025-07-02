@@ -14,6 +14,7 @@ from gpxtrackposter import (
     track_loader,
 )
 from gpxtrackposter.exceptions import ParameterError, PosterError
+from gpxtrackposter.track import Track
 
 # from flopp great repo
 __app_name__ = "create_poster"
@@ -231,7 +232,21 @@ def main():
         # for svg from db here if you want gpx please do not use --from-db
         generator = Generator(SQL_FILE)
         # args.type == "grid" means have polyline data or not
-        tracks = generator.load(args.type == "grid")
+        raw_tracks = generator.load()
+        tracks = []
+
+        class Activity:
+            def __init__(self, **kwargs):
+                self.__dict__.update(kwargs)
+
+        # load tracks from db
+        for r in raw_tracks:
+            # because track.py load_from_db is used for track obj
+            # so we need a class to pass the value
+            activity = Activity(**r)
+            t = Track()
+            t.load_from_db(activity)
+            tracks.append(t)
     else:
         tracks = loader.load_tracks(args.gpx_dir)
     if not tracks:
