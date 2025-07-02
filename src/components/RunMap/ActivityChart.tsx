@@ -48,6 +48,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ thisYear }) => {
               SUM(distance / 1000.0) AS total_distance_km
             FROM activities.parquet
             GROUP BY year
+            HAVING SUM(distance / 1000.0) > 0
             ORDER BY year ASC;
           `
         }
@@ -59,6 +60,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ thisYear }) => {
             FROM activities.parquet
             WHERE SUBSTRING(start_date_local, 1, 4) = '${thisYear}'
             GROUP BY month
+            HAVING SUM(distance / 1000.0) > 0
             ORDER BY month ASC;
           `
         }
