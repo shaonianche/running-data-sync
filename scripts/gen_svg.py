@@ -241,12 +241,13 @@ def main():
 
         # load tracks from db
         for r in raw_tracks:
-            # because track.py load_from_db is used for track obj
-            # so we need a class to pass the value
-            activity = Activity(**r)
-            t = Track()
-            t.load_from_db(activity)
-            tracks.append(t)
+            if r.get("type") == "Run":
+                # because track.py load_from_db is used for track obj
+                # so we need a class to pass the value
+                activity = Activity(**r)
+                t = Track()
+                t.load_from_db(activity)
+                tracks.append(t)
     else:
         tracks = loader.load_tracks(args.gpx_dir)
     if not tracks:
