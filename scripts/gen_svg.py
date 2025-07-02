@@ -241,7 +241,10 @@ def main():
 
         # load tracks from db
         for r in raw_tracks:
-            if r.get("type") == "Run":
+            if (
+                r.get("type") == "Run"
+                and r.get("distance", 0) >= args.min_distance * 1000
+            ):
                 # because track.py load_from_db is used for track obj
                 # so we need a class to pass the value
                 activity = Activity(**r)
