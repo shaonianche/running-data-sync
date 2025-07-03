@@ -21,13 +21,6 @@ from fit_tool.profile.profile_type import (
     Event,
     EventType,
     FileType,
-    Manufacturer,
-    Sport,
-)
-from garmin_device_adaptor import (
-    GARMIN_DEVICE_PRODUCT_ID,
-    GARMIN_SOFTWARE_VERSION,
-    MANUFACTURER,
 )
 from geopy.geocoders import Nominatim
 from gpxtrackposter import track_loader
@@ -80,7 +73,7 @@ class Generator:
         self.refresh_token = response["refresh_token"]
 
         self.client.access_token = response["access_token"]
-        print("Access ok")
+        self.logger.info("Strava access token refreshed successfully.")
 
     def sync(self, force):
         """
@@ -88,7 +81,7 @@ class Generator:
         """
         self.check_access()
 
-        print("Start syncing")
+        self.logger.info("Starting Strava DB sync.")
         if force:
             filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
         else:
@@ -108,16 +101,16 @@ class Generator:
                 filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
 
         strava_activities = list(self.client.get_activities(**filters))
-        print(f"Found {len(strava_activities)} new activities from Strava.")
+        self.logger.info(f"Found {len(strava_activities)} new activities from Strava.")
 
         if not strava_activities:
-            print("No new activities to sync.")
+            self.logger.info("No new activities to sync.")
             return
 
         # Convert to DataFrame and upsert
         activities_df = get_dataframe_from_strava_activities(strava_activities)
         updated_count = update_or_create_activities(self.db_connection, activities_df)
-        print(f"Synced {updated_count} activities to the database.")
+        self.logger.info(f"Synced {updated_count} activities to the database.")
 
     def _make_tcx_from_streams(self, activity, streams):
         # TCX XML structure
@@ -224,7 +217,9 @@ class Generator:
     def generate_missing_tcx(self, downloaded_ids):
         self.check_access()
 
-        print("Fetching all activities from Strava to check for missing TCX files...")
+        self.logger.info(
+            "Fetching all activities from Strava to check for missing TCX files..."
+        )
         activities = self.client.get_activities()  # Fetch all activities
 
         tcx_files = []
@@ -233,18 +228,22 @@ class Generator:
             a for a in activities if str(a.id) not in downloaded_ids
         ]
 
-        print(f"Found {len(activities_to_process)} new activities to generate TCX for.")
+        self.logger.info(
+            f"Found {len(activities_to_process)} new activities to generate TCX for."
+        )
 
         for activity in activities_to_process:
             try:
-                print(f"Processing activity: {activity.name} ({activity.id})")
+                self.logger.info(
+                    f"Processing activity: {activity.name} ({activity.id})"
+                )
                 stream_types = ["time", "latlng", "altitude", "heartrate"]
                 streams = self.client.get_activity_streams(
                     activity.id, types=stream_types
                 )
 
                 if not streams.get("latlng") or not streams.get("time"):
-                    print(
+                    self.logger.warning(
                         f"Skipping activity {activity.id} due to missing latlng or time streams."
                     )
                     continue
@@ -256,7 +255,9 @@ class Generator:
                 # Rate limiting
                 time.sleep(2)
             except Exception as e:
-                print(f"Failed to process activity {activity.id}: {e}")
+                self.logger.error(
+                    f"Failed to process activity {activity.id}: {e}", exc_info=True
+                )
 
         return tcx_files
 
@@ -267,7 +268,7 @@ class Generator:
             file_suffix=file_suffix,
             activity_title_dict=activity_title_dict,
         )
-        print(f"Found {len(tracks)} tracks from {data_dir}.")
+        self.logger.info(f"Found {len(tracks)} tracks from {data_dir}.")
         if not tracks:
             return
 
@@ -275,7 +276,7 @@ class Generator:
 
     def sync_from_app(self, app_tracks):
         if not app_tracks:
-            print("No tracks to sync from app.")
+            self.logger.info("No tracks to sync from app.")
             return
 
         activities_data = []
@@ -306,7 +307,7 @@ class Generator:
 
         activities_df = pd.DataFrame(activities_data)
         updated_count = update_or_create_activities(self.db_connection, activities_df)
-        print(f"Synced {updated_count} activities to the database.")
+        self.logger.info(f"Synced {updated_count} activities to the database.")
 
     def load(self):
         """
@@ -357,7 +358,7 @@ class Generator:
                 .tolist()
             )
         except Exception as e:
-            print(f"Something wrong with get_old_tracks_ids: {str(e)}")
+            self.logger.error(f"Something wrong with get_old_tracks_ids: {str(e)}")
             return []
 
     def get_old_tracks_dates(self):
@@ -371,7 +372,7 @@ class Generator:
                 .tolist()
             )
         except Exception as e:
-            print(f"Something wrong with get_old_tracks_dates: {str(e)}")
+            self.logger.error(f"Something wrong with get_old_tracks_dates: {str(e)}")
             return []
 
     def sync_and_generate_fit(self, force=False):
@@ -453,7 +454,7 @@ class Generator:
                 dataframes = get_dataframes_for_fit_tables(activity, streams)
                 # Assuming write_fit_dataframes handles upsert logic or we rely on the check above
                 write_fit_dataframes(self.db_connection, dataframes)
-                fit_byte_data = self._build_fit_file_from_dataframes(dataframes)
+                fit_byte_data = self.build_fit_file_from_dataframes(dataframes)
 
                 filename = f"{activity.id}.fit"
                 filepath = os.path.join("FIT_OUT", filename)
@@ -469,7 +470,7 @@ class Generator:
                 )
         return fit_files_generated
 
-    def _build_fit_file_from_dataframes(self, dataframes):
+    def build_fit_file_from_dataframes(self, dataframes):
         """
         Builds a FIT file from a dictionary of DataFrames, following the official example's logic.
         """

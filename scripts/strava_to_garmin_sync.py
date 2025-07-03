@@ -1,127 +1,98 @@
 import argparse
 import asyncio
-from datetime import datetime, timedelta
-from xml.etree import ElementTree
+from collections import namedtuple
+from datetime import datetime
 
-import gpxpy
-import gpxpy.gpx
+from config import SQL_FILE
 from garmin_sync import Garmin
+from generator import Generator
+from generator.db import get_dataframes_for_fit_tables
 from strava_sync import run_strava_sync
-from stravaweblib import DataFormat, WebClient
 
-from utils import load_env_config, make_strava_client
+from utils import get_logger, load_env_config, make_strava_client
 
-
-def generate_strava_run_points(start_time, strava_streams):
-    """
-    strava return same len data list
-    """
-    if not (strava_streams.get("time") and strava_streams.get("latlng")):
-        return None
-    points_dict_list = []
-    time_list = strava_streams["time"].data
-    time_list = [start_time + timedelta(seconds=int(i)) for i in time_list]
-    latlng_list = strava_streams["latlng"].data
-
-    for i, j in zip(time_list, latlng_list):
-        points_dict_list.append({
-            "latitude": j[0],
-            "longitude": j[1],
-            "time": i,
-        })
-    # add heart rate
-    if strava_streams.get("heartrate"):
-        heartrate_list = strava_streams.get("heartrate").data
-        for index, h in enumerate(heartrate_list):
-            points_dict_list[index]["heart_rate"] = h
-    # add altitude
-    if strava_streams.get("altitude"):
-        heartrate_list = strava_streams.get("altitude").data
-        for index, h in enumerate(heartrate_list):
-            points_dict_list[index]["elevation"] = h
-    return points_dict_list
-
-
-def make_gpx_from_points(title, points_dict_list):
-    gpx = gpxpy.gpx.GPX()
-    gpx.nsmap["gpxtpx"] = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
-    gpx_track = gpxpy.gpx.GPXTrack()
-    gpx_track.name = title
-    gpx_track.type = "Run"
-    gpx.tracks.append(gpx_track)
-
-    # Create first segment in our GPX track:
-    gpx_segment = gpxpy.gpx.GPXTrackSegment()
-    gpx_track.segments.append(gpx_segment)
-    for p in points_dict_list:
-        if p.get("heart_rate") is None:
-            point = gpxpy.gpx.GPXTrackPoint(**p)
-        else:
-            heart_rate_num = p.pop("heart_rate")
-            point = gpxpy.gpx.GPXTrackPoint(**p)
-            gpx_extension_hr = ElementTree.fromstring(
-                f"""<gpxtpx:TrackPointExtension xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1">
-                <gpxtpx:hr>{heart_rate_num}</gpxtpx:hr>
-                </gpxtpx:TrackPointExtension>
-            """
-            )
-            point.extensions.append(gpx_extension_hr)
-        gpx_segment.points.append(point)
-    return gpx.to_xml()
+logger = get_logger(__name__)
 
 
 async def upload_to_activities(
     garmin_client,
     strava_client,
-    strava_web_client,
-    format,
     use_fake_garmin_device,
 ):
     last_activity = await garmin_client.get_activities(0, 1)
     if not last_activity:
-        print("no garmin activity")
+        logger.info("No Garmin activity found. Syncing all Strava activities.")
         filters = {}
     else:
         # is this startTimeGMT must have ?
         after_datetime_str = last_activity[0]["startTimeGMT"]
         after_datetime = datetime.strptime(after_datetime_str, "%Y-%m-%d %H:%M:%S")
-        print("garmin last activity date: ", after_datetime)
+        logger.info(f"Last Garmin activity date: {after_datetime}")
         filters = {"after": after_datetime}
     strava_activities = list(strava_client.get_activities(**filters))
     files_list = []
-    print("strava activities size: ", len(strava_activities))
+    logger.info(f"Found {len(strava_activities)} new Strava activities to sync.")
     if not strava_activities:
-        print("no strava activity")
         return files_list
+
+    # a cheap way to init generator
+    generator = Generator(SQL_FILE)
+    FitFile = namedtuple("FitFile", ["filename", "content"])
 
     # strava rate limit
     for i in sorted(strava_activities, key=lambda i: int(i.id)):
         try:
-            data = strava_web_client.get_activity_data(i.id, fmt=format)
-            files_list.append(data)
+            logger.info(f"Processing activity: {i.name} ({i.id})")
+            stream_types = [
+                "time",
+                "latlng",
+                "altitude",
+                "heartrate",
+                "cadence",
+                "velocity_smooth",
+                "distance",
+            ]
+            streams = strava_client.get_activity_streams(
+                i.id, types=stream_types, resolution="high"
+            )
+
+            if not streams.get("latlng") or not streams.get("time"):
+                logger.warning(
+                    f"Skipping activity {i.id} due to missing essential streams."
+                )
+                continue
+
+            dataframes = get_dataframes_for_fit_tables(i, streams)
+            fit_bytes = generator._build_fit_file_from_dataframes(dataframes)
+
+            file_to_upload = FitFile(filename=f"{i.id}.fit", content=[fit_bytes])
+            files_list.append(file_to_upload)
+
             # sleep for a while to avoid strava rate limit
             await asyncio.sleep(2)
         except Exception as ex:
-            print("get strava data error: ", ex)
+            logger.error(f"Failed to process activity {i.id}: {ex}", exc_info=True)
+
     await garmin_client.upload_activities_original_from_strava(
         files_list, use_fake_garmin_device
     )
     return files_list
 
 
-if __name__ == "__main__":
+async def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("strava_client_id", help="strava client id")
-    parser.add_argument("strava_client_secret", help="strava client secret")
-    parser.add_argument("strava_refresh_token", help="strava refresh token")
+    parser.add_argument("--client-id", dest="client_id", help="strava client id")
+    parser.add_argument(
+        "--client-secret", dest="client_secret", help="strava client secret"
+    )
+    parser.add_argument(
+        "--refresh-token", dest="refresh_token", help="strava refresh token"
+    )
     parser.add_argument(
         "secret_string",
         nargs="?",
         help="secret_string from get_garmin_secret.py",
     )
-    parser.add_argument("strava_email", nargs="?", help="email of strava")
-    parser.add_argument("strava_password", nargs="?", help="password of strava")
-    parser.add_argument("strava_jwt", nargs="?", help="jwt token of strava")
     parser.add_argument(
         "--is-cn",
         dest="is_cn",
@@ -135,27 +106,36 @@ if __name__ == "__main__":
         help="whether to use a faked Garmin device",
     )
     options = parser.parse_args()
+
+    # Load Strava credentials from args or .env.local
+    client_id = options.client_id
+    client_secret = options.client_secret
+    refresh_token = options.refresh_token
+
+    if not all([client_id, client_secret, refresh_token]):
+        logger.info("Strava credentials not provided via args, trying to load from env")
+        env_config = load_env_config()
+        if env_config:
+            client_id = client_id or env_config.get("strava_client_id")
+            client_secret = client_secret or env_config.get("strava_client_secret")
+            refresh_token = refresh_token or env_config.get("strava_refresh_token")
+
+    if not all([client_id, client_secret, refresh_token]):
+        raise Exception(
+            "Missing Strava credentials. "
+            "Please provide them as arguments or in .env.local file"
+        )
+
     strava_client = make_strava_client(
-        options.strava_client_id,
-        options.strava_client_secret,
-        options.strava_refresh_token,
+        client_id,
+        client_secret,
+        refresh_token,
     )
-    if options.strava_jwt:
-        strava_web_client = WebClient(
-            access_token=strava_client.access_token,
-            jwt=options.strava_jwt,
-        )
-    elif options.strava_email and options.strava_password:
-        strava_web_client = WebClient(
-            access_token=strava_client.access_token,
-            email=options.strava_email,
-            password=options.strava_password,
-        )
 
     garmin_auth_domain = "CN" if options.is_cn else ""
     secret_string = options.secret_string
     if not secret_string:
-        print("Secret string is not provided, trying to load from env")
+        logger.info("Secret string is not provided, trying to load from env")
         env_config = load_env_config()
         if env_config:
             secret_string = (
@@ -169,23 +149,21 @@ if __name__ == "__main__":
 
     try:
         garmin_client = Garmin(secret_string, garmin_auth_domain)
-        loop = asyncio.get_event_loop()
-        future = asyncio.ensure_future(
-            upload_to_activities(
-                garmin_client,
-                strava_client,
-                strava_web_client,
-                DataFormat.ORIGINAL,
-                options.use_fake_garmin_device,
-            )
+        await upload_to_activities(
+            garmin_client,
+            strava_client,
+            options.use_fake_garmin_device,
         )
-        loop.run_until_complete(future)
     except Exception as err:
-        print(err)
+        logger.error(f"An error occurred during the sync process: {err}", exc_info=True)
 
     # Run the strava sync
     run_strava_sync(
-        options.strava_client_id,
-        options.strava_client_secret,
-        options.strava_refresh_token,
+        client_id,
+        client_secret,
+        refresh_token,
     )
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
