@@ -211,7 +211,7 @@ def get_dataframe_from_strava_activities(activities):
             "moving_time": activity.moving_time.total_seconds(),
             "elapsed_time": activity.elapsed_time.total_seconds(),
             "type": activity.type,
-            "subtype": str(activity.subtype),
+            "subtype": str(getattr(activity, "subtype", "")),
             "start_date": activity.start_date,
             "start_date_local": activity.start_date_local,
             "location_country": getattr(activity, "location_country", ""),
