@@ -56,7 +56,7 @@ async def upload_to_activities(
                 i.id, types=stream_types, resolution="high"
             )
 
-            if not streams.get("latlng") or not streams.get("time"):
+            if not streams or not streams.get("latlng") or not streams.get("time"):
                 logger.warning(
                     f"Skipping activity {i.id} due to missing essential streams."
                 )
