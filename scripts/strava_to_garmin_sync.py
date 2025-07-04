@@ -18,6 +18,7 @@ async def upload_to_activities(
     garmin_client,
     strava_client,
     use_fake_garmin_device,
+    fix_hr,
 ):
     last_activity = await garmin_client.get_activities(0, 1)
     if not last_activity:
@@ -68,7 +69,7 @@ async def upload_to_activities(
             logger.error(f"Failed to process activity {i.id}: {ex}", exc_info=True)
 
     await garmin_client.upload_activities_original_from_strava(
-        files_list, use_fake_garmin_device
+        files_list, use_fake_garmin_device, fix_hr
     )
     return files_list
 
@@ -94,10 +95,17 @@ async def main():
         help="if garmin account is cn",
     )
     parser.add_argument(
-        "--use_fake_garmin_device",
+        "--use-fake-garmin-device",
+        dest="use_fake_garmin_device",
         action="store_true",
         default=False,
         help="whether to use a faked Garmin device",
+    )
+    parser.add_argument(
+        "--fix-hr",
+        dest="fix_hr",
+        action="store_true",
+        help="fix heart rate in fit file",
     )
     options = parser.parse_args()
 
@@ -147,6 +155,7 @@ async def main():
             garmin_client,
             strava_client,
             options.use_fake_garmin_device,
+            options.fix_hr,
         )
     except Exception as err:
         logger.error(f"An error occurred during the sync process: {err}", exc_info=True)

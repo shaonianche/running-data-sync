@@ -103,7 +103,7 @@ jobs:
 
       - name: Fit to garmin sync
         if: env.RUN_TYPE == 'strava'
-        run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET }}'
+        run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET }}' --use-fake-garmin-device
 
       - name: Run sync Only GPX script
         if: env.RUN_TYPE == 'only_gpx'

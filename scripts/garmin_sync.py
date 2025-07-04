@@ -14,6 +14,7 @@ import aiofiles
 import garth
 import httpx
 from config import FOLDER_DICT, JSON_FILE, SQL_FILE
+from garmin_device_adaptor import add_fake_device_info, fix_heart_rate
 from lxml import etree
 
 from utils import get_logger, load_env_config, make_activities_file
@@ -122,17 +123,22 @@ class Garmin:
         return response.read()
 
     async def upload_activities_original_from_strava(
-        self, datas, use_fake_garmin_device=False
+        self, datas, use_fake_garmin_device=False, fix_hr=False
     ):
         logger.info(
-            "Start uploading %d activities to Garmin. use_fake_garmin_device: %s",
+            "Start uploading %d activities to Garmin. use_fake_garmin_device: %s, fix_hr: %s",
             len(datas),
             use_fake_garmin_device,
+            fix_hr,
         )
         for data in datas:
             try:
                 # Process content in memory
                 file_content = b"".join(data.content)
+                if use_fake_garmin_device:
+                    file_content = add_fake_device_info(file_content)
+                if fix_hr:
+                    file_content = fix_heart_rate(file_content)
                 files = {"file": (os.path.basename(data.filename), file_content)}
 
                 res = await self.req.post(

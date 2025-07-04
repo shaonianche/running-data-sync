@@ -1,5 +1,3 @@
-from io import BytesIO
-
 from fit_tool.fit_file import FitFile
 from fit_tool.fit_file_builder import FitFileBuilder
 from fit_tool.profile.messages.device_info_message import DeviceInfoMessage
@@ -27,22 +25,32 @@ def is_fit_file(file):
     return header == b".FIT"
 
 
-def process_garmin_data(origin_file, use_fake_garmin_device):
-    try:
-        origin_file_content = origin_file.read()
-        # if origin file is not fit format, skip
-        if not is_fit_file(origin_file):
-            return BytesIO(origin_file_content)
-
-        return do_process_garmin_data(origin_file_content, use_fake_garmin_device)
-    except Exception:
-        logger.error("process garmin data failed, will use origin file", exc_info=True)
-        return BytesIO(origin_file.read())
-
-
-def do_process_garmin_data(file_content, use_fake_garmin_device):
+def add_fake_device_info(file_content):
     """
-    Process garmin data, fix heart rate data and add fake garmin device info to fit file
+    add fake garmin device info to fit file
+    """
+    fit_file = FitFile.from_bytes(file_content)
+    builder = FitFileBuilder(auto_define=True)
+
+    for record in fit_file.records:
+        message = record.message
+        if message.global_id == DeviceInfoMessage.ID:
+            # ignore file device info, like WorkoutDoors APP
+            continue
+        builder.add(message)
+
+    # Add device info
+    device_info_message = get_device_info_message()
+    builder.add(device_info_message)
+
+    modified_file = builder.build()
+    logger.info("add garmin device info success")
+    return modified_file.to_bytes()
+
+
+def fix_heart_rate(file_content):
+    """
+    Process garmin data, fix heart rate data
     """
     fit_file = FitFile.from_bytes(file_content)
     builder = FitFileBuilder(auto_define=True)
@@ -51,18 +59,10 @@ def do_process_garmin_data(file_content, use_fake_garmin_device):
 
     for record in fit_file.records:
         message = record.message
-        if use_fake_garmin_device and message.global_id == DeviceInfoMessage.ID:
-            # ignore file device info, like WorkoutDoors APP
-            continue
-        elif not isinstance(message, RecordMessage):
+        if not isinstance(message, RecordMessage):
             builder.add(message)
         else:
             record_messages.append(message)
-
-    # Add device info if needed
-    if use_fake_garmin_device:
-        device_info_message = get_device_info_message()
-        builder.add(device_info_message)
 
     # Process and add heart rate data
     for message in get_processed_heart_rate_message(record_messages):
