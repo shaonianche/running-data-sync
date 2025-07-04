@@ -145,6 +145,12 @@ if __name__ == "__main__":
         "secret_string", nargs="?", help="secret_string fro get_garmin_secret.py"
     )
     parser.add_argument(
+        "--is-cn",
+        dest="is_cn",
+        action="store_true",
+        help="if garmin account is cn",
+    )
+    parser.add_argument(
         "--use-fake-garmin-device",
         dest="use_fake_garmin_device",
         action="store_true",
