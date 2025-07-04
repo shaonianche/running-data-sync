@@ -8,7 +8,6 @@ from datetime import datetime, timezone
 
 import httpx
 from config import FIT_FOLDER
-from garmin_device_adaptor import add_fake_device_info, fix_heart_rate, is_fit_file
 from garmin_fit_sdk import Decoder, Stream
 from garmin_sync import Garmin
 
@@ -23,18 +22,12 @@ class FitToGarmin(Garmin):
     def __init__(self, secret_string, garmin_auth_domain):
         super().__init__(secret_string, garmin_auth_domain)
 
-    async def upload_activities_fit(self, files, use_fake_garmin_device, fix_hr):
+    async def upload_activities_fit(self, files):
         logger.info(f"Start uploading {len(files)} FIT files to Garmin...")
         for fit_file_path in files:
             logger.info(f"Uploading {fit_file_path}")
             with open(fit_file_path, "rb") as f:
-                if not is_fit_file(f):
-                    continue
                 file_body = f.read()
-            if use_fake_garmin_device:
-                file_body = add_fake_device_info(file_body)
-            if fix_hr:
-                file_body = fix_heart_rate(file_body)
             upload_data = {"file": (os.path.basename(fit_file_path), file_body)}
 
             try:
@@ -102,7 +95,7 @@ def get_fit_files():
     return files
 
 
-async def main(secret_string, garmin_auth_domain, use_fake_garmin_device, fix_hr):
+async def main(secret_string, garmin_auth_domain):
     garmin_client = FitToGarmin(secret_string, garmin_auth_domain)
     try:
         last_activity = await garmin_client.get_activities(0, 1)
@@ -132,9 +125,7 @@ async def main(secret_string, garmin_auth_domain, use_fake_garmin_device, fix_hr
         # The files are currently sorted from newest to oldest.
         # Reversing to upload from oldest to newest.
         upload_files.reverse()
-        await garmin_client.upload_activities_fit(
-            upload_files, use_fake_garmin_device, fix_hr
-        )
+        await garmin_client.upload_activities_fit(upload_files)
     else:
         logger.info("No new activities to upload.")
 
@@ -149,19 +140,6 @@ if __name__ == "__main__":
         dest="is_cn",
         action="store_true",
         help="if garmin account is cn",
-    )
-    parser.add_argument(
-        "--use-fake-garmin-device",
-        dest="use_fake_garmin_device",
-        action="store_true",
-        default=False,
-        help="whether to use a faked Garmin device",
-    )
-    parser.add_argument(
-        "--fix-hr",
-        dest="fix_hr",
-        action="store_true",
-        help="fix heart rate in fit file",
     )
     options = parser.parse_args()
     secret_string = options.secret_string
@@ -179,14 +157,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
     try:
-        asyncio.run(
-            main(
-                secret_string,
-                garmin_auth_domain,
-                options.use_fake_garmin_device,
-                options.fix_hr,
-            )
-        )
+        asyncio.run(main(secret_string, garmin_auth_domain))
     except Exception as e:
         logger.error(f"An unexpected error occurred in main execution: {e}")
         sys.exit(1)
