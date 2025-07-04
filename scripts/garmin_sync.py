@@ -9,13 +9,11 @@ import os
 import sys
 import time
 import zipfile
-from io import BytesIO
 
 import aiofiles
 import garth
 import httpx
 from config import FOLDER_DICT, JSON_FILE, SQL_FILE
-from garmin_device_adaptor import process_garmin_data
 from lxml import etree
 
 from utils import get_logger, load_env_config, make_activities_file
@@ -135,17 +133,30 @@ class Garmin:
             try:
                 # Process content in memory
                 file_content = b"".join(data.content)
-                processed_body = process_garmin_data(
-                    BytesIO(file_content), use_fake_garmin_device
-                )
-                files = {"file": (os.path.basename(data.filename), processed_body)}
+                files = {"file": (os.path.basename(data.filename), file_content)}
 
                 res = await self.req.post(
                     self.upload_url, files=files, headers=self.headers
                 )
                 res.raise_for_status()
-                resp = res.json()["detailedImportResult"]
-                logger.info("Garmin upload success: %s", resp)
+
+                # Handle successful upload with no content response
+                if res.status_code == 204:
+                    logger.info(
+                        "Garmin upload for %s success with status 204.", data.filename
+                    )
+                    continue
+
+                try:
+                    resp = res.json()["detailedImportResult"]
+                    logger.info("Garmin upload success: %s", resp)
+                except Exception as e:
+                    logger.error(
+                        "Failed to parse Garmin response, status: %d, response: %s",
+                        res.status_code,
+                        res.text,
+                    )
+                    raise e
             except Exception as e:
                 logger.exception("Garmin upload for %s failed: %s", data.filename, e)
                 continue

@@ -56,14 +56,8 @@ async def upload_to_activities(
                 i.id, types=stream_types, resolution="high"
             )
 
-            if not streams or not streams.get("latlng") or not streams.get("time"):
-                logger.warning(
-                    f"Skipping activity {i.id} due to missing essential streams."
-                )
-                continue
-
             dataframes = get_dataframes_for_fit_tables(i, streams)
-            fit_bytes = generator._build_fit_file_from_dataframes(dataframes)
+            fit_bytes = generator.build_fit_file_from_dataframes(dataframes)
 
             file_to_upload = FitFile(filename=f"{i.id}.fit", content=[fit_bytes])
             files_list.append(file_to_upload)

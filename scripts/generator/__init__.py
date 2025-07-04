@@ -419,8 +419,8 @@ class Generator:
             try:
                 # Double-check if FIT data for this activity already exists
                 existing_fit_record = self.db_connection.execute(
-                    "SELECT activity_id FROM fit_file_id WHERE activity_id = ?",
-                    (activity.id,),
+                    "SELECT serial_number FROM fit_file_id WHERE serial_number = ?",
+                    (str(activity.id),),
                 ).fetchone()
 
                 if existing_fit_record and not force:
@@ -445,12 +445,9 @@ class Generator:
                     activity.id, types=stream_types, resolution="high"
                 )
 
-                if not streams.get("latlng") or not streams.get("time"):
-                    self.logger.warning(
-                        f"Skipping activity {activity.id} due to missing essential streams."
-                    )
-                    continue
-
+                # We have enhanced get_dataframes_for_fit_tables to handle cases
+                # where streams are None or missing essential keys.
+                # Thus, we can proceed without this check.
                 dataframes = get_dataframes_for_fit_tables(activity, streams)
                 # Assuming write_fit_dataframes handles upsert logic or we rely on the check above
                 write_fit_dataframes(self.db_connection, dataframes)

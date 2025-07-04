@@ -1,10 +1,14 @@
-import traceback
 from io import BytesIO
 
 from fit_tool.fit_file import FitFile
 from fit_tool.fit_file_builder import FitFileBuilder
 from fit_tool.profile.messages.device_info_message import DeviceInfoMessage
 from fit_tool.profile.messages.record_message import RecordMessage
+
+from utils import get_logger
+
+logger = get_logger(__name__)
+
 
 # the device manufacturer and product info can be found in github,
 # https://github.com/garmin/fit-python-sdk/blob/main/garmin_fit_sdk/profile.py
@@ -32,8 +36,7 @@ def process_garmin_data(origin_file, use_fake_garmin_device):
 
         return do_process_garmin_data(origin_file_content, use_fake_garmin_device)
     except Exception:
-        print("process garmin data failed, will use origin file")
-        traceback.print_exc()
+        logger.error("process garmin data failed, will use origin file", exc_info=True)
         return BytesIO(origin_file.read())
 
 
@@ -66,7 +69,7 @@ def do_process_garmin_data(file_content, use_fake_garmin_device):
         builder.add(message)
 
     modified_file = builder.build()
-    print("process garmin data success")
+    logger.info("process garmin data success")
     return modified_file.to_bytes()
 
 
@@ -116,7 +119,7 @@ def get_processed_heart_rate_message(record_messages):
         else:
             processed_messages.append(message)
 
-    print("process heart rate data success")
+    logger.info("process heart rate data success")
     return processed_messages
 
 
@@ -136,5 +139,5 @@ def get_device_info_message():
     message.source_type = 5
     message.product = GARMIN_DEVICE_PRODUCT_ID
 
-    print("add garmin device info success")
+    logger.info("add garmin device info success")
     return message

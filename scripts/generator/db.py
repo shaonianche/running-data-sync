@@ -9,6 +9,9 @@ import pandas as pd
 from fit_tool.profile.profile_type import Sport
 from geopy.geocoders import Nominatim
 
+from utils import get_logger
+
+logger = get_logger(__name__)
 geopy.geocoders.options.default_user_agent = "running-data-sync"
 # reverse the location (lat, lon) -> location detail
 ctx = ssl.create_default_context(cafile=certifi.where())
@@ -103,17 +106,17 @@ def _migrate_schema(db_connection):
         columns_to_add = canonical_columns - db_columns
 
         if columns_to_add:
-            print(f"Found missing columns, adding: {', '.join(columns_to_add)}")
+            logger.info(f"Found missing columns, adding: {', '.join(columns_to_add)}")
             for col_name in columns_to_add:
                 col_type = ACTIVITIES_SCHEMA[col_name]
                 db_connection.execute(
                     f"ALTER TABLE activities ADD COLUMN {col_name} {col_type}"
                 )
-            print("Schema migration completed.")
+            logger.info("Schema migration completed.")
     except Exception as e:
         # This might happen if the table does not exist yet, which is fine.
         # The subsequent CREATE TABLE will handle it.
-        print(f"Could not perform schema migration: {e}")
+        logger.warning(f"Could not perform schema migration: {e}")
 
 
 def init_db(db_path):
@@ -231,7 +234,7 @@ def get_dataframe_from_strava_activities(activities):
         df["location_country"] == "China"
     )
     if needs_geocoding_mask.any():
-        print("Performing reverse geocoding for missing locations...")
+        logger.info("Performing reverse geocoding for missing locations...")
 
         # Step 1: Identify unique, uncached coordinates that need to be fetched
         coords_to_fetch = (
@@ -253,7 +256,7 @@ def get_dataframe_from_strava_activities(activities):
 
         # Step 2: Concurrently fetch data for uncached coordinates
         if uncached_coords:
-            print(f"Fetching {len(uncached_coords)} unique new locations...")
+            logger.info(f"Fetching {len(uncached_coords)} unique new locations...")
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 # We just need to execute the tasks to populate the cache
                 list(
@@ -268,7 +271,7 @@ def get_dataframe_from_strava_activities(activities):
             axis=1,
         )
         df.loc[needs_geocoding_mask, "location_country"] = geocoded_countries
-        print("Geocoding complete.")
+        logger.info("Geocoding complete.")
 
     # Drop temporary lat/lon columns before returning
     df = df.drop(columns=["start_lat", "start_lon"], errors="ignore")
@@ -301,27 +304,35 @@ def get_dataframes_for_fit_tables(activity, streams):
     }
     dataframes["fit_file_id"] = pd.DataFrame(file_id_data)
 
-    # Create fit_record DataFrame
-    time_stream_data = streams.get("time").data
-    record_data = {
-        "activity_id": [activity.id] * len(time_stream_data),
-        "timestamp": [
-            pd.to_datetime(activity.start_date) + datetime.timedelta(seconds=s)
-            for s in time_stream_data
-        ],
-        "position_lat": [latlng[0] for latlng in streams.get("latlng").data],
-        "position_long": [latlng[1] for latlng in streams.get("latlng").data],
-        "distance": streams.get("distance").data if streams.get("distance") else None,
-        "altitude": streams.get("altitude").data if streams.get("altitude") else None,
-        "speed": streams.get("velocity_smooth").data
-        if streams.get("velocity_smooth")
-        else None,
-        "heart_rate": streams.get("heartrate").data
-        if streams.get("heartrate")
-        else None,
-        "cadence": streams.get("cadence").data if streams.get("cadence") else None,
-    }
-    dataframes["fit_record"] = pd.DataFrame(record_data)
+    # Create fit_record DataFrame only if essential streams are available
+    if streams and streams.get("time") and streams.get("latlng"):
+        time_stream_data = streams.get("time").data
+        record_data = {
+            "activity_id": [activity.id] * len(time_stream_data),
+            "timestamp": [
+                pd.to_datetime(activity.start_date) + datetime.timedelta(seconds=s)
+                for s in time_stream_data
+            ],
+            "position_lat": [latlng[0] for latlng in streams.get("latlng").data],
+            "position_long": [latlng[1] for latlng in streams.get("latlng").data],
+            "distance": streams.get("distance").data
+            if streams.get("distance")
+            else None,
+            "altitude": streams.get("altitude").data
+            if streams.get("altitude")
+            else None,
+            "speed": streams.get("velocity_smooth").data
+            if streams.get("velocity_smooth")
+            else None,
+            "heart_rate": streams.get("heartrate").data
+            if streams.get("heartrate")
+            else None,
+            "cadence": streams.get("cadence").data if streams.get("cadence") else None,
+        }
+        dataframes["fit_record"] = pd.DataFrame(record_data)
+    else:
+        # For activities without GPS/time streams (e.g., indoor), create an empty record table
+        dataframes["fit_record"] = pd.DataFrame(columns=FIT_RECORD_SCHEMA.keys())
 
     # Create fit_lap and fit_session DataFrames
     sport_map = {
@@ -377,7 +388,9 @@ def write_fit_dataframes(db_connection, dataframes):
 
         schema = schemas.get(table_name)
         if not schema:
-            print(f"Warning: No schema defined for table {table_name}. Skipping.")
+            logger.warning(
+                f"Warning: No schema defined for table {table_name}. Skipping."
+            )
             continue
 
         try:
@@ -407,7 +420,9 @@ def write_fit_dataframes(db_connection, dataframes):
             # 4. Unregister the virtual table to clean up.
             db_connection.unregister(f"temp_{table_name}")
 
-            print(f"Successfully saved {len(df)} records to table '{table_name}'.")
+            logger.info(
+                f"Successfully saved {len(df)} records to table '{table_name}'."
+            )
 
         except Exception as e:
-            print(f"Failed to save DataFrame to table '{table_name}': {e}")
+            logger.error(f"Failed to save DataFrame to table '{table_name}': {e}")
