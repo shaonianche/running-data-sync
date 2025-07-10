@@ -33,13 +33,16 @@ class GithubDrawer(TracksDrawer):
             start_date_weekday, _ = calendar.monthrange(year, 1)
             github_rect_first_day = datetime.date(year, 1, 1)
 
-            # default GitHub svg style:  the start day of each year always aligns with first day.
+            # default GitHub svg style:
+            # the start day of each year always aligns with first day.
             github_rect_day = github_rect_first_day
             first_day_weekday = github_rect_first_day.weekday()
 
             if is_align_monday:
-                # This is an earlier GitHub style: the start day of each year always aligns with Monday.
-                # If you want to use this, please add the command-line argument "--github-style align-monday" .
+                # This is an earlier GitHub style:
+                # the start day of each year always aligns with Monday.
+                # If you want to use this, please add the command-line argument
+                #  "--github-style align-monday" .
                 github_rect_day = github_rect_first_day + datetime.timedelta(
                     -start_date_weekday
                 )
@@ -107,7 +110,8 @@ class GithubDrawer(TracksDrawer):
                     style=year_length_style,
                 )
             )
-            # add month name up to the poster one by one because of svg text auto trim the spaces.
+            # add month name up to the poster one
+            # by one because of svg text auto trim the spaces.
             for num, name in enumerate(month_names):
                 dr.add(
                     dr.text(
