@@ -149,9 +149,9 @@ def update_or_create_activities(db_connection, activities_df):
     db_connection.register("temp_activities_df", activities_df)
 
     # Use a single SQL query to insert new activities and update existing ones
-    update_cols = ", ".join([
-        f"{col} = excluded.{col}" for col in ordered_columns if col != "run_id"
-    ])
+    update_cols = ", ".join(
+        [f"{col} = excluded.{col}" for col in ordered_columns if col != "run_id"]
+    )
     query = f"""
     INSERT INTO activities
     SELECT * FROM temp_activities_df

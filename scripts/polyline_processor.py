@@ -16,9 +16,7 @@ except Exception:
 
 try:
     IGNORE_RANGE = int(os.getenv("IGNORE_RANGE", "0")) / 1000
-    IGNORE_START_END_RANGE = (
-        int(os.getenv("IGNORE_START_END_RANGE", "0")) / 1000
-    )
+    IGNORE_START_END_RANGE = int(os.getenv("IGNORE_START_END_RANGE", "0")) / 1000
 except ValueError:
     print("IGNORE_RANGE or IGNORE_START_END_RANGE is not a number")
     exit(1)
@@ -46,9 +44,7 @@ def range_hiding(
     ]
 
 
-def start_end_hiding(
-    polyline: List[Tuple[float]], distance: int
-) -> List[Tuple[float]]:
+def start_end_hiding(polyline: List[Tuple[float]], distance: int) -> List[Tuple[float]]:
     start_index, end_index = 0, len(polyline) - 1
 
     starting_distance = 0

@@ -118,7 +118,7 @@ class Generator:
         root.attrib = {
             "xmlns": "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "xsi:schemaLocation": "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",
+            "xsi:schemaLocation": "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",  # noqa: E501
         }
 
         activities_node = SubElement(root, "Activities")
@@ -244,7 +244,8 @@ class Generator:
 
                 if not streams.get("latlng") or not streams.get("time"):
                     self.logger.warning(
-                        f"Skipping activity {activity.id} due to missing latlng or time streams."
+                        f"Skipping activity {activity.id}"
+                        "due to missing latlng or time streams."
                     )
                     continue
 
@@ -365,7 +366,7 @@ class Generator:
         try:
             return (
                 self.db_connection.execute(
-                    "SELECT start_date_local FROM activities ORDER BY start_date_local DESC"
+                    "SELECT start_date_local FROM activities ORDER BY start_date_local DESC"  # noqa: E501
                 )
                 .fetchdf()["start_date_local"]
                 .astype(str)
@@ -386,7 +387,6 @@ class Generator:
         filters = {}
         if not force:
             try:
-                # Get the start_time of the last processed activity from fit_session table
                 last_fit_time_result = self.db_connection.execute(
                     "SELECT MAX(start_time) FROM fit_session"
                 ).fetchone()
@@ -405,7 +405,8 @@ class Generator:
                     self.logger.info("No FIT data found in DB. Syncing all activities.")
             except Exception as e:
                 self.logger.warning(
-                    f"Could not query last FIT time from DB, syncing all activities. Error: {e}"
+                    f"Could not query last FIT time from DB, syncing all activities."
+                    f"Error: {e}"
                 )
 
         activities = list(self.client.get_activities(**filters))
@@ -425,7 +426,8 @@ class Generator:
 
                 if existing_fit_record and not force:
                     self.logger.info(
-                        f"Skipping activity {activity.id}, FIT data already exists in DB."
+                        f"Skipping activity {activity.id},"
+                        f"FIT data already exists in DB."
                     )
                     continue
 
@@ -449,7 +451,6 @@ class Generator:
                 # where streams are None or missing essential keys.
                 # Thus, we can proceed without this check.
                 dataframes = get_dataframes_for_fit_tables(activity, streams)
-                # Assuming write_fit_dataframes handles upsert logic or we rely on the check above
                 write_fit_dataframes(self.db_connection, dataframes)
                 fit_byte_data = self.build_fit_file_from_dataframes(dataframes)
 
@@ -469,7 +470,8 @@ class Generator:
 
     def build_fit_file_from_dataframes(self, dataframes):
         """
-        Builds a FIT file from a dictionary of DataFrames, following the official example's logic.
+        Builds a FIT file from a dictionary of DataFrames,
+        following the official example's logic.
         """
         builder = FitFileBuilder(auto_define=True)
 
