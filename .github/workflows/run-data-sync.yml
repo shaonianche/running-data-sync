@@ -92,18 +92,18 @@ jobs:
         if: env.RUN_TYPE == 'strava'
         run: python scripts/strava_sync.py --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
 
-      - name: Run strava_to_garmin_sync script
-        if: env.RUN_TYPE == 'strava'
-        continue-on-error: true
-        run: python scripts/strava_to_garmin_sync.py --is-cn '${{ secrets.GARMIN_SECRET_CN }}' --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
+      # - name: Run strava_to_garmin_sync script
+      #   if: env.RUN_TYPE == 'strava'
+      #   continue-on-error: true
+      #   run: python scripts/strava_to_garmin_sync.py --is-cn '${{ secrets.GARMIN_SECRET_CN }}' --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
 
       # - name: Fit to garmin cn sync
       #   if: env.RUN_TYPE == 'strava'
       #   run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET_CN }}' --is-cn
 
-      - name: Fit to garmin sync
-        if: env.RUN_TYPE == 'strava'
-        run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET }}'
+      # - name: Fit to garmin sync
+      #   if: env.RUN_TYPE == 'strava'
+      #   run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET }}'
 
       - name: Run sync Only GPX script
         if: env.RUN_TYPE == 'only_gpx'

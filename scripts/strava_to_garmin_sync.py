@@ -115,18 +115,21 @@ async def main():
     refresh_token = options.refresh_token
 
     if not all([client_id, client_secret, refresh_token]):
-        logger.info("Strava credentials not provided via args, trying to load from env")
         env_config = load_env_config()
-        if env_config:
-            client_id = client_id or env_config.get("strava_client_id")
-            client_secret = client_secret or env_config.get("strava_client_secret")
-            refresh_token = refresh_token or env_config.get("strava_refresh_token")
-
-    if not all([client_id, client_secret, refresh_token]):
-        raise Exception(
-            "Missing Strava credentials. "
-            "Please provide them as arguments or in .env.local file"
-        )
+        if (
+            env_config
+            and env_config.get("strava_client_id")
+            and env_config.get("strava_client_secret")
+            and env_config.get("strava_refresh_token")
+        ):
+            client_id = env_config["strava_client_id"]
+            client_secret = env_config["strava_client_secret"]
+            refresh_token = env_config["strava_refresh_token"]
+        else:
+            raise Exception(
+                "Missing Strava credentials. "
+                "Please provide them as arguments or in .env.local file"
+            )
 
     strava_client = make_strava_client(
         client_id,
