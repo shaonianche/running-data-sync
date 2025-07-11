@@ -47,6 +47,7 @@ def load_env_config():
         "strava_client_id": config.get("STRAVA_CLIENT_ID"),
         "strava_client_secret": config.get("STRAVA_CLIENT_SECRET"),
         "strava_refresh_token": config.get("STRAVA_REFRESH_TOKEN"),
+        "strava_jwt": config.get("STRAVA_JWT"),
         "garmin_email": config.get("GARMIN_EMAIL"),
         "garmin_password": config.get("GARMIN_PASSWORD"),
         "garmin_is_cn": config.get("GARMIN_IS_CN"),
