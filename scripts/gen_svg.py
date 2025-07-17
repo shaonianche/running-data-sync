@@ -77,8 +77,7 @@ def main():
         metavar="FILE",
         action="append",
         default=[],
-        help="Mark track file from the GPX directory as special;"
-        "use multiple times to mark multiple tracks.",
+        help="Mark track file from the GPX directory as special;use multiple times to mark multiple tracks.",
     )
     types = '", "'.join(drawers.keys())
     args_parser.add_argument(
@@ -192,8 +191,7 @@ def main():
         metavar="GITHUB_STYLE",
         type=str,
         default="align-firstday",
-        help="github svg style; "
-        '"align-firstday", "align-monday" (default: "align-firstday").',
+        help='github svg style; "align-firstday", "align-monday" (default: "align-firstday").',
     )
 
     args_parser.add_argument(
@@ -262,8 +260,7 @@ def main():
 
     if not is_circular and not is_mol:
         print(
-            f"Creating poster of type {args.type} with {len(tracks)} tracks "
-            f"and storing it in file {args.output}..."
+            f"Creating poster of type {args.type} with {len(tracks)} tracks and storing it in file {args.output}..."
         )
     p.set_language(args.language)
     p.athlete = args.athlete

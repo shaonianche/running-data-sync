@@ -32,8 +32,7 @@ def run_strava_sync(
             refresh_token = env_config["strava_refresh_token"]
         else:
             raise ValueError(
-                "Missing Strava credentials. "
-                "Please provide them as arguments or in .env.local file"
+                "Missing Strava credentials. Please provide them as arguments or in .env.local file"
             )
 
     logger = get_logger("strava_sync_runner")

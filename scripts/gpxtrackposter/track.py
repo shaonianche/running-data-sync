@@ -218,11 +218,13 @@ class Track:
                         for p in s.points
                         if p.extensions
                     ]
-                    heart_rate_list.extend([
-                        int(p["hr"]) if p.__contains__("hr") else None
-                        for p in extensions
-                        if extensions
-                    ])
+                    heart_rate_list.extend(
+                        [
+                            int(p["hr"]) if p.__contains__("hr") else None
+                            for p in extensions
+                            if extensions
+                        ]
+                    )
                     heart_rate_list = list(filter(None, heart_rate_list))
                 except lxml.etree.XMLSyntaxError:
                     # Ignore XML syntax errors in extensions

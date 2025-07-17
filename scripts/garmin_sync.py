@@ -438,8 +438,7 @@ async def main():
         secret_string = env_config.get(secret_key.lower())
         if not secret_string:
             logger.error(
-                f"Missing Garmin secret string. Please provide it as an "
-                f"argument or set {secret_key} in .env.local"
+                f"Missing Garmin secret string. Please provide it as an argument or set {secret_key} in .env.local"
             )
             sys.exit(1)
 

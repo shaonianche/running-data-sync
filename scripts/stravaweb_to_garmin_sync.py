@@ -105,8 +105,7 @@ if __name__ == "__main__":
 
         if not all([client_id, client_secret, refresh_token]):
             raise Exception(
-                "Missing required Strava credentials. "
-                "Please provide them as arguments or in .env.local file"
+                "Missing required Strava credentials. Please provide them as arguments or in .env.local file"
             )
 
     strava_client = make_strava_client(
@@ -129,8 +128,7 @@ if __name__ == "__main__":
         )
     else:
         raise Exception(
-            "Missing Strava web authentication. "
-            "Please provide either strava_jwt or strava_email/password"
+            "Missing Strava web authentication. Please provide either strava_jwt or strava_email/password"
         )
 
     garmin_auth_domain = "CN" if options.is_cn else ""

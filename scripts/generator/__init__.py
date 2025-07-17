@@ -33,7 +33,9 @@ from .db import (
     get_dataframes_for_fit_tables,
     init_db,
     update_or_create_activities,
-    write_fit_dataframes,
+)
+from .db import (
+    write_fit_dataframes as write_fit_dataframes,
 )
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
@@ -244,8 +246,7 @@ class Generator:
 
                 if not streams.get("latlng") or not streams.get("time"):
                     self.logger.warning(
-                        f"Skipping activity {activity.id}"
-                        "due to missing latlng or time streams."
+                        f"Skipping activity {activity.id}due to missing latlng or time streams."
                     )
                     continue
 
@@ -330,7 +331,9 @@ class Generator:
         activities_df = activities_df.sort_values("start_date_local_date")
         # Get the difference in days between consecutive runs
         activities_df["date_diff"] = (
-            activities_df["start_date_local_date"].diff().dt.days
+            activities_df["start_date_local_date"]
+            .diff()
+            .apply(lambda x: x.days if pd.notna(x) else None)
         )
         # Identify the start of a new streak
         activities_df["new_streak"] = (activities_df["date_diff"] != 1).cumsum()
@@ -378,56 +381,52 @@ class Generator:
 
     def sync_and_generate_fit(self, force=False):
         """
-        Syncs new activities from Strava, saves their FIT data to DuckDB,
-        and generates FIT files. This method only handles FIT-related tables.
+        Syncs new activities from Strava and generates FIT files.
+        This method only generates FIT files without writing to database tables.
         """
         self.check_access()
         self.logger.info("Starting FIT file generation process.")
 
         filters = {}
         if not force:
+            # Check existing FIT files instead of database records
             try:
-                last_fit_time_result = self.db_connection.execute(
-                    "SELECT MAX(start_time) FROM fit_session"
-                ).fetchone()
-                last_fit_time = (
-                    last_fit_time_result[0] if last_fit_time_result else None
-                )
+                existing_fit_files = set()
+                if os.path.exists("FIT_OUT"):
+                    existing_fit_files = {
+                        f.replace(".fit", "")
+                        for f in os.listdir("FIT_OUT")
+                        if f.endswith(".fit")
+                    }
 
-                if last_fit_time:
-                    last_fit_time = arrow.get(last_fit_time).datetime
+                if existing_fit_files:
                     self.logger.info(
-                        f"Last FIT-processed activity time: {last_fit_time}. "
-                        "Fetching activities after this time."
+                        f"Found {len(existing_fit_files)} existing FIT files. "
+                        "Will skip activities that already have FIT files."
                     )
-                    filters = {"after": last_fit_time}
                 else:
-                    self.logger.info("No FIT data found in DB. Syncing all activities.")
+                    self.logger.info(
+                        "No existing FIT files found. Processing all activities."
+                    )
             except Exception as e:
                 self.logger.warning(
-                    f"Could not query last FIT time from DB, syncing all activities."
-                    f"Error: {e}"
+                    f"Could not check existing FIT files, processing all activities. Error: {e}"
                 )
+                existing_fit_files = set()
 
         activities = list(self.client.get_activities(**filters))
         if not activities:
-            self.logger.info("No new activities to generate FIT file for.")
+            self.logger.info("No activities found to generate FIT files for.")
             return []
 
-        self.logger.info(f"Found {len(activities)} new activities for FIT processing.")
+        self.logger.info(f"Found {len(activities)} activities for FIT processing.")
         fit_files_generated = []
         for activity in activities:
             try:
-                # Double-check if FIT data for this activity already exists
-                existing_fit_record = self.db_connection.execute(
-                    "SELECT serial_number FROM fit_file_id WHERE serial_number = ?",
-                    (str(activity.id),),
-                ).fetchone()
-
-                if existing_fit_record and not force:
+                # Check if FIT file already exists (instead of checking database)
+                if not force and str(activity.id) in existing_fit_files:
                     self.logger.info(
-                        f"Skipping activity {activity.id},"
-                        f"FIT data already exists in DB."
+                        f"Skipping activity {activity.id}, FIT file already exists."
                     )
                     continue
 
@@ -447,11 +446,9 @@ class Generator:
                     activity.id, types=stream_types, resolution="high"
                 )
 
-                # We have enhanced get_dataframes_for_fit_tables to handle cases
-                # where streams are None or missing essential keys.
-                # Thus, we can proceed without this check.
+                # Generate FIT data without writing to database
                 dataframes = get_dataframes_for_fit_tables(activity, streams)
-                write_fit_dataframes(self.db_connection, dataframes)
+                # write_fit_dataframes(self.db_connection, dataframes)  # Commented out - no DB write
                 fit_byte_data = self.build_fit_file_from_dataframes(dataframes)
 
                 filename = f"{activity.id}.fit"
