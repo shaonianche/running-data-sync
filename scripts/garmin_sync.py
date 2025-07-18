@@ -60,7 +60,7 @@ class Garmin:
             garth.client.refresh_oauth2()
 
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",  # noqa: E501
             "origin": self.URL_DICT.get("SSO_URL_ORIGIN"),
             "nk": "NT",
             "Authorization": str(garth.client.oauth2_token),
@@ -87,7 +87,6 @@ class Garmin:
                 raise GarminConnectConnectionError("Error connecting") from err
             else:
                 logger.debug("Session may have expired, trying to relogin: %s", err)
-                # Assuming token refresh is handled by garth automatically on next request
                 # Forcing a refresh here if needed:
                 # garth.client.refresh_oauth2()
                 # self.headers["Authorization"] = str(garth.client.oauth2_token)
@@ -100,7 +99,7 @@ class Garmin:
         """
         Fetch available activities
         """
-        url = f"{self.modern_url}/activitylist-service/activities/search/activities?start={start}&limit={limit}"
+        url = f"{self.modern_url}/activitylist-service/activities/search/activities?start={start}&limit={limit}"  # noqa: E501
         if self.is_only_running:
             url += "&activityType=running"
         return await self.fetch_data(url)
@@ -116,7 +115,7 @@ class Garmin:
         if file_type == "fit":
             url = f"{self.modern_url}/download-service/files/activity/{activity_id}"
         else:
-            url = f"{self.modern_url}/download-service/export/{file_type}/activity/{activity_id}"
+            url = f"{self.modern_url}/download-service/export/{file_type}/activity/{activity_id}"  # noqa: E501
         logger.info(f"Download activity from {url}")
         response = await self.req.get(url, headers=self.headers)
         response.raise_for_status()
@@ -125,8 +124,9 @@ class Garmin:
     async def upload_activities_original_from_strava(
         self, datas, use_fake_garmin_device=False, fix_hr=False
     ):
-        logger.info(
-            "Start uploading %d activities to Garmin. use_fake_garmin_device: %s, fix_hr: %s",
+        logger.info(/
+            "Start uploading %d activities to Garmin. "
+            "use_fake_garmin_device: %s, fix_hr: %s",
             len(datas),
             use_fake_garmin_device,
             fix_hr,
@@ -438,7 +438,8 @@ async def main():
         secret_string = env_config.get(secret_key.lower())
         if not secret_string:
             logger.error(
-                f"Missing Garmin secret string. Please provide it as an argument or set {secret_key} in .env.local"
+                f"Missing Garmin secret string. "
+                f"Please provide it as an argument or set {secret_key} in .env.local"
             )
             sys.exit(1)
 

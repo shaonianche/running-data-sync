@@ -17,11 +17,7 @@ from fit_tool.profile.messages.file_id_message import FileIdMessage
 from fit_tool.profile.messages.lap_message import LapMessage
 from fit_tool.profile.messages.record_message import RecordMessage
 from fit_tool.profile.messages.session_message import SessionMessage
-from fit_tool.profile.profile_type import (
-    Event,
-    EventType,
-    FileType,
-)
+from fit_tool.profile.profile_type import Event, EventType, FileType
 from geopy.geocoders import Nominatim
 from gpxtrackposter import track_loader
 from polyline_processor import filter_out
@@ -29,14 +25,14 @@ from polyline_processor import filter_out
 from utils import get_logger
 
 from .db import (
+    convert_streams_to_flyby_dataframe,
     get_dataframe_from_strava_activities,
     get_dataframes_for_fit_tables,
     init_db,
+    store_flyby_data,
     update_or_create_activities,
 )
-from .db import (
-    write_fit_dataframes as write_fit_dataframes,
-)
+from .db import write_fit_dataframes as write_fit_dataframes
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
 
@@ -113,6 +109,22 @@ class Generator:
         activities_df = get_dataframe_from_strava_activities(strava_activities)
         updated_count = update_or_create_activities(self.db_connection, activities_df)
         self.logger.info(f"Synced {updated_count} activities to the database.")
+
+        try:
+            self.logger.info(
+                "Starting flyby data synchronization as part of main sync..."
+            )
+            flyby_records = self.sync_flyby_data()
+            if flyby_records > 0:
+                self.logger.info(f"Successfully synced {flyby_records} flyby records.")
+            else:
+                self.logger.info("No new flyby data to sync.")
+        except Exception as e:
+            # 确保 flyby 处理失败不中断主同步流程
+            self.logger.warning(
+                f"Flyby data synchronization failed: {e},"
+                "but main sync completed successfully."
+            )
 
     def _make_tcx_from_streams(self, activity, streams):
         # TCX XML structure
@@ -246,7 +258,8 @@ class Generator:
 
                 if not streams.get("latlng") or not streams.get("time"):
                     self.logger.warning(
-                        f"Skipping activity {activity.id}due to missing latlng or time streams."
+                        f"Skipping activity {activity.id} "
+                        "due to missing latlng or time streams."
                     )
                     continue
 
@@ -379,6 +392,177 @@ class Generator:
             self.logger.error(f"Something wrong with get_old_tracks_dates: {str(e)}")
             return []
 
+    def _get_latest_gps_activity(self):
+        """
+        获取最近一次包含 GPS 数据的活动
+        返回：Activity 对象或 None
+        """
+        try:
+            activities = list(self.client.get_activities(limit=30))
+
+            if not activities:
+                self.logger.info("No activities found from Strava API.")
+                return None
+
+            self.logger.info(
+                f"Checking {len(activities)} recent activities for GPS data."
+            )
+
+            # Check each activity for GPS data (latlng stream)
+            for activity in activities:
+                try:
+                    # Get available stream types for this activity
+                    stream_types = ["latlng"]
+                    streams = self.client.get_activity_streams(
+                        activity.id, types=stream_types, resolution="low"
+                    )
+
+                    # Check if latlng stream exists and has data
+                    if streams.get("latlng") and streams["latlng"].data:
+                        self.logger.info(
+                            f"Found GPS-enabled activity:"
+                            f" {activity.name} ({activity.id}) "
+                            f"from {activity.start_date}"
+                        )
+                        return activity
+
+                    # Rate limiting to avoid hitting API limits
+                    time.sleep(0.5)
+
+                except Exception as e:
+                    self.logger.warning(
+                        f"Failed to check streams for activity {activity.id}: {e}"
+                    )
+                    continue
+
+            self.logger.info("No GPS-enabled activities found in recent activities.")
+            return None
+
+        except Exception as e:
+            self.logger.error(f"Failed to get latest GPS activity: {e}", exc_info=True)
+            return None
+
+    def sync_flyby_data(self):
+        """
+        获取最近一次 GPS 活动的 flyby 数据并存储到数据库
+        """
+        try:
+            self.check_access()
+            self.logger.info("Starting flyby data synchronization...")
+
+            # 获取最新的 GPS 活动
+            latest_gps_activity = self._get_latest_gps_activity()
+            if not latest_gps_activity:
+                self.logger.info(
+                    "No GPS-enabled activities found, skipping flyby sync."
+                )
+                return 0
+
+            self.logger.info(
+                f"Processing flyby data for activity: {latest_gps_activity.name} "
+                f"({latest_gps_activity.id})"
+            )
+
+            # 检查是否已经处理过这个活动的 flyby 数据
+            try:
+                existing_count = self.db_connection.execute(
+                    "SELECT COUNT(*) FROM activities_flyby WHERE activity_id = ?",
+                    [latest_gps_activity.id],
+                ).fetchone()
+
+                if existing_count and existing_count[0] > 0:
+                    self.logger.info(
+                        f"Flyby data for activity {latest_gps_activity.id}"
+                        " already exists "
+                        f"({existing_count[0]} records), skipping."
+                    )
+                    return existing_count[0]
+            except Exception as e:
+                self.logger.warning(f"Could not check existing flyby data: {e}")
+
+            # 获取活动的详细流数据
+            stream_types = [
+                "time",
+                "latlng",
+                "altitude",
+                "heartrate",
+                "distance",
+                "velocity_smooth",
+            ]
+
+            self.logger.info(
+                f"Fetching stream data for activity {latest_gps_activity.id}..."
+            )
+            streams = self.client.get_activity_streams(
+                latest_gps_activity.id, types=stream_types, resolution="high"
+            )
+
+            # 验证必需的流数据
+            if not streams.get("time") or not streams.get("latlng"):
+                self.logger.warning(
+                    f"Activity {latest_gps_activity.id} missing essential streams "
+                    "(time/latlng), skipping flyby processing."
+                )
+                return 0
+
+            self.logger.info(
+                f"Retrieved streams: {list(streams.keys())}"
+                f"for activity {latest_gps_activity.id}"
+            )
+
+            flyby_df = convert_streams_to_flyby_dataframe(latest_gps_activity, streams)
+
+            if flyby_df.empty:
+                self.logger.warning(
+                    f"No flyby data generated for activity {latest_gps_activity.id}"
+                )
+                return 0
+
+            # 存储 flyby 数据到数据库
+            records_stored = store_flyby_data(self.db_connection, flyby_df)
+
+            if records_stored > 0:
+                self.logger.info(
+                    f"Successfully synchronized {records_stored} flyby records "
+                    f"for activity {latest_gps_activity.id}"
+                )
+            else:
+                self.logger.warning(
+                    f"No flyby records were stored for "
+                    f"activity {latest_gps_activity.id}"
+                )
+
+            return records_stored
+
+        except stravalib.exc.RateLimitExceeded as e:
+            self.logger.warning(
+                f"Strava API rate limit exceeded during flyby sync: {e}"
+            )
+            retry_after = getattr(e, "retry_after", 60)
+            self.logger.info(f"Waiting {retry_after} seconds before retrying...")
+            time.sleep(retry_after)
+
+            # 单次重试
+            try:
+                self.logger.info(
+                    "Retrying flyby data synchronization after rate limit..."
+                )
+                return self.sync_flyby_data()
+            except Exception as retry_e:
+                self.logger.error(f"Retry failed for flyby sync: {retry_e}")
+                return 0
+
+        except stravalib.exc.ActivityUploadFailed as e:
+            self.logger.error(f"Strava activity access failed during flyby sync: {e}")
+            return 0
+
+        except Exception as e:
+            self.logger.error(
+                f"Unexpected error during flyby data synchronization: {e}",
+                exc_info=True,
+            )
+            return 0
+
     def sync_and_generate_fit(self, force=False):
         """
         Syncs new activities from Strava and generates FIT files.
@@ -408,9 +592,10 @@ class Generator:
                     self.logger.info(
                         "No existing FIT files found. Processing all activities."
                     )
-            except Exception as e:
+            except Exception:
                 self.logger.warning(
-                    f"Could not check existing FIT files, processing all activities. Error: {e}"
+                    "Could not check existing FIT files, "
+                    "processing all activities. Error: {e}"
                 )
                 existing_fit_files = set()
 
@@ -448,7 +633,6 @@ class Generator:
 
                 # Generate FIT data without writing to database
                 dataframes = get_dataframes_for_fit_tables(activity, streams)
-                # write_fit_dataframes(self.db_connection, dataframes)  # Commented out - no DB write
                 fit_byte_data = self.build_fit_file_from_dataframes(dataframes)
 
                 filename = f"{activity.id}.fit"

@@ -151,7 +151,8 @@ if __name__ == "__main__":
             secret_string = env_config[secret_key.lower()]
         else:
             logger.error(
-                f"Missing Garmin secret string. Please provide it as an argument or set {secret_key} in .env.local"
+                f"Missing Garmin secret string. "
+                f"Please provide it as an argument or set {secret_key} in .env.local"
             )
             sys.exit(1)
 

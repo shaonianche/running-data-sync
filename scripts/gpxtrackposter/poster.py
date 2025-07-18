@@ -136,7 +136,10 @@ class Poster:
         return "mi"
 
     def format_distance(self, d: float) -> str:
-        """Formats a distance using the locale specific float format and the selected unit."""
+        """
+        Formats a distance using the locale specific
+        float format and the selected unit.
+        """
         return format_float(self.m2u(d)) + " " + self.u()
 
     def __draw_tracks(self, d, size: XY, offset: XY):

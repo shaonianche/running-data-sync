@@ -110,7 +110,8 @@ def to_date(ts):
             return datetime.strptime(ts, ts_fmt)
         except ValueError:
             print(
-                f"Warning: Can not execute strptime {ts} with ts_fmt {ts_fmt},try next one..."
+                f"Warning: Can not execute strptime {ts} with ts_fmt {ts_fmt},"
+                f"try next one..."
             )
             pass
 
@@ -194,5 +195,6 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
             else:
                 r = client.upload_activity(activity_file=f, data_type=data_type)
         print(
-            f"Uploading {data_type} file: {file_name} to strava, upload_id: {r.upload_id}."
+            f"Uploading {data_type} file: {file_name} to strava, "
+            f"upload_id: {r.upload_id}."
         )

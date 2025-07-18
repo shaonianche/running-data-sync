@@ -127,7 +127,8 @@ async def main():
             refresh_token = env_config["strava_refresh_token"]
         else:
             raise Exception(
-                "Missing Strava credentials. Please provide them as arguments or in .env.local file"
+                "Missing Strava credentials. "
+                "Please provide them as arguments or in .env.local file"
             )
 
     strava_client = make_strava_client(

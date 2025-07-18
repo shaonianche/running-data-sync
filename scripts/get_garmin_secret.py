@@ -19,7 +19,8 @@ def get_garmin_secret(email=None, password=None, is_cn=False):
                 is_cn = env_config["garmin_is_cn"].lower() == "true"
         else:
             raise ValueError(
-                "Missing Garmin credentials. Please provide them as arguments or in .env.local file"
+                "Missing Garmin credentials. "
+                "Please provide them as arguments or in .env.local file"
             )
 
     if is_cn:
