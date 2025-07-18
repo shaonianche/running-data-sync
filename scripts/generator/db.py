@@ -106,9 +106,7 @@ def _migrate_schema(db_connection):
     """
     try:
         # Get current schema from the database
-        db_columns_df = db_connection.execute(
-            "PRAGMA table_info('activities')"
-        ).fetchdf()
+        db_columns_df = db_connection.execute("PRAGMA table_info('activities')").fetchdf()
         db_columns = set(db_columns_df["name"]) if not db_columns_df.empty else set()
 
         # Get canonical schema from the code
@@ -121,9 +119,7 @@ def _migrate_schema(db_connection):
             logger.info(f"Found missing columns, adding: {', '.join(columns_to_add)}")
             for col_name in columns_to_add:
                 col_type = ACTIVITIES_SCHEMA[col_name]
-                db_connection.execute(
-                    f"ALTER TABLE activities ADD COLUMN {col_name} {col_type}"
-                )
+                db_connection.execute(f"ALTER TABLE activities ADD COLUMN {col_name} {col_type}")
             logger.info("Schema migration completed.")
     except Exception as e:
         # This might happen if the table does not exist yet, which is fine.
@@ -222,9 +218,7 @@ def update_or_create_activities(db_connection, activities_df):
     db_connection.register("temp_activities_df", activities_df)
 
     # Use a single SQL query to insert new activities and update existing ones
-    update_cols = ", ".join([
-        f"{col} = excluded.{col}" for col in ordered_columns if col != "run_id"
-    ])
+    update_cols = ", ".join([f"{col} = excluded.{col}" for col in ordered_columns if col != "run_id"])
     query = f"""
     INSERT INTO activities
     SELECT * FROM temp_activities_df
@@ -303,40 +297,25 @@ def get_dataframe_from_strava_activities(activities):
     df = pd.DataFrame(activities_data)
 
     # Identify rows that need geocoding
-    needs_geocoding_mask = (df["location_country"] == "") | (
-        df["location_country"] == "China"
-    )
+    needs_geocoding_mask = (df["location_country"] == "") | (df["location_country"] == "China")
     if needs_geocoding_mask.any():
         logger.info("Performing reverse geocoding for missing locations...")
 
         # Step 1: Identify unique, uncached coordinates that need to be fetched
-        coords_to_fetch = (
-            df.loc[needs_geocoding_mask, ["start_lat", "start_lon"]]
-            .dropna()
-            .drop_duplicates()
-        )
+        coords_to_fetch = df.loc[needs_geocoding_mask, ["start_lat", "start_lon"]].dropna().drop_duplicates()
 
         # Convert to tuples for caching and processing
-        unique_coords = [
-            (round(row.start_lat, 4), round(row.start_lon, 4))
-            for row in coords_to_fetch.itertuples()
-        ]
+        unique_coords = [(round(row.start_lat, 4), round(row.start_lon, 4)) for row in coords_to_fetch.itertuples()]
 
         # Filter out coordinates that are already in the cache
-        uncached_coords = [
-            coord for coord in unique_coords if coord not in _geocode_cache
-        ]
+        uncached_coords = [coord for coord in unique_coords if coord not in _geocode_cache]
 
         # Step 2: Concurrently fetch data for uncached coordinates
         if uncached_coords:
             logger.info(f"Fetching {len(uncached_coords)} unique new locations...")
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 # We just need to execute the tasks to populate the cache
-                list(
-                    executor.map(
-                        lambda p: _get_location_country(p[0], p[1]), uncached_coords
-                    )
-                )
+                list(executor.map(lambda p: _get_location_country(p[0], p[1]), uncached_coords))
 
         # Step 3: Apply the now-cached results to the DataFrame
         geocoded_countries = df.loc[needs_geocoding_mask].apply(
@@ -383,23 +362,14 @@ def get_dataframes_for_fit_tables(activity, streams):
         record_data = {
             "activity_id": [activity.id] * len(time_stream_data),
             "timestamp": [
-                pd.to_datetime(activity.start_date) + datetime.timedelta(seconds=s)
-                for s in time_stream_data
+                pd.to_datetime(activity.start_date) + datetime.timedelta(seconds=s) for s in time_stream_data
             ],
             "position_lat": [latlng[0] for latlng in streams.get("latlng").data],
             "position_long": [latlng[1] for latlng in streams.get("latlng").data],
-            "distance": streams.get("distance").data
-            if streams.get("distance")
-            else None,
-            "altitude": streams.get("altitude").data
-            if streams.get("altitude")
-            else None,
-            "speed": streams.get("velocity_smooth").data
-            if streams.get("velocity_smooth")
-            else None,
-            "heart_rate": streams.get("heartrate").data
-            if streams.get("heartrate")
-            else None,
+            "distance": streams.get("distance").data if streams.get("distance") else None,
+            "altitude": streams.get("altitude").data if streams.get("altitude") else None,
+            "speed": streams.get("velocity_smooth").data if streams.get("velocity_smooth") else None,
+            "heart_rate": streams.get("heartrate").data if streams.get("heartrate") else None,
             "cadence": streams.get("cadence").data if streams.get("cadence") else None,
         }
         dataframes["fit_record"] = pd.DataFrame(record_data)
@@ -451,9 +421,7 @@ def convert_streams_to_flyby_dataframe(activity, streams):
         pandas.DataFrame: 符合 ACTIVITIES_FLYBY_SCHEMA 的 DataFrame
     """
     if not streams or not streams.get("time") or not streams.get("latlng"):
-        logger.warning(
-            f"Activity {activity.id} missing essential streams (time/latlng)"
-        )
+        logger.warning(f"Activity {activity.id} missing essential streams (time/latlng)")
         return pd.DataFrame()
 
     try:
@@ -463,9 +431,7 @@ def convert_streams_to_flyby_dataframe(activity, streams):
 
         # 确保时间和位置数据长度一致
         if len(time_data) != len(latlng_data):
-            logger.warning(
-                f"Activity {activity.id} has mismatched time/latlng data lengths"
-            )
+            logger.warning(f"Activity {activity.id} has mismatched time/latlng data lengths")
             min_length = min(len(time_data), len(latlng_data))
             time_data = time_data[:min_length]
             latlng_data = latlng_data[:min_length]
@@ -474,14 +440,8 @@ def convert_streams_to_flyby_dataframe(activity, streams):
         flyby_data = {
             "activity_id": [activity.id] * len(time_data),
             "time_offset": time_data,  # 时间偏移（秒）
-            "lat": [
-                round(float(latlng[0]), 6) if latlng[0] is not None else None
-                for latlng in latlng_data
-            ],
-            "lng": [
-                round(float(latlng[1]), 6) if latlng[1] is not None else None
-                for latlng in latlng_data
-            ],
+            "lat": [round(float(latlng[0]), 6) if latlng[0] is not None else None for latlng in latlng_data],
+            "lng": [round(float(latlng[1]), 6) if latlng[1] is not None else None for latlng in latlng_data],
         }
 
         # 处理海拔数据
@@ -494,10 +454,7 @@ def convert_streams_to_flyby_dataframe(activity, streams):
             elif len(alt_data) > len(time_data):
                 alt_data = alt_data[: len(time_data)]
 
-            flyby_data["alt"] = [
-                int(alt) if alt is not None and not pd.isna(alt) else None
-                for alt in alt_data
-            ]
+            flyby_data["alt"] = [int(alt) if alt is not None and not pd.isna(alt) else None for alt in alt_data]
         else:
             flyby_data["alt"] = [None] * len(time_data)
 
@@ -540,10 +497,7 @@ def convert_streams_to_flyby_dataframe(activity, streams):
 
             # 转换为 TINYINT 范围（0-255），心率通常在 40-220 之间
             flyby_data["hr"] = [
-                int(hr)
-                if hr is not None and not pd.isna(hr) and 0 <= hr <= 255
-                else None
-                for hr in hr_data
+                int(hr) if hr is not None and not pd.isna(hr) and 0 <= hr <= 255 else None for hr in hr_data
             ]
         else:
             flyby_data["hr"] = [None] * len(time_data)
@@ -560,8 +514,7 @@ def convert_streams_to_flyby_dataframe(activity, streams):
 
             # 转换为 INTEGER（米）
             flyby_data["distance"] = [
-                int(dist) if dist is not None and not pd.isna(dist) else None
-                for dist in dist_data
+                int(dist) if dist is not None and not pd.isna(dist) else None for dist in dist_data
             ]
         else:
             flyby_data["distance"] = [None] * len(time_data)
@@ -573,16 +526,11 @@ def convert_streams_to_flyby_dataframe(activity, streams):
         flyby_df["activity_id"] = flyby_df["activity_id"].astype("int64")
         flyby_df["time_offset"] = flyby_df["time_offset"].astype("int32")
 
-        logger.info(
-            f"Converted {len(flyby_df)} flyby records for activity {activity.id}"
-        )
+        logger.info(f"Converted {len(flyby_df)} flyby records for activity {activity.id}")
         return flyby_df
 
     except Exception as e:
-        logger.error(
-            f"Error converting streams to flyby dataframe"
-            f"for activity {activity.id}: {e}"
-        )
+        logger.error(f"Error converting streams to flyby dataframefor activity {activity.id}: {e}")
         return pd.DataFrame()
 
 
@@ -611,63 +559,41 @@ def store_flyby_data(db_connection, flyby_df):
 
         if not expected_columns.issubset(df_columns):
             missing_columns = expected_columns - df_columns
-            logger.error(
-                f"Missing required columns in flyby DataFrame: {missing_columns}"
-            )
+            logger.error(f"Missing required columns in flyby DataFrame: {missing_columns}")
             return 0
 
         # 选择符合 schema 的列，确保顺序正确
-        ordered_columns = [
-            col for col in ACTIVITIES_FLYBY_SCHEMA.keys() if col in flyby_df.columns
-        ]
+        ordered_columns = [col for col in ACTIVITIES_FLYBY_SCHEMA.keys() if col in flyby_df.columns]
         flyby_df_ordered = flyby_df[ordered_columns].copy()
 
         # 数据类型验证和转换
         try:
             # 确保 activity_id 和 time_offset 不为空（主键字段）
-            flyby_df_ordered = flyby_df_ordered.dropna(
-                subset=["activity_id", "time_offset"]
-            )
+            flyby_df_ordered = flyby_df_ordered.dropna(subset=["activity_id", "time_offset"])
 
             if flyby_df_ordered.empty:
-                logger.warning(
-                    "No valid flyby records after removing null primary key values"
-                )
+                logger.warning("No valid flyby records after removing null primary key values")
                 return 0
 
             # 转换数据类型以匹配 schema
-            flyby_df_ordered["activity_id"] = flyby_df_ordered["activity_id"].astype(
-                "int64"
-            )
-            flyby_df_ordered["time_offset"] = flyby_df_ordered["time_offset"].astype(
-                "int32"
-            )
+            flyby_df_ordered["activity_id"] = flyby_df_ordered["activity_id"].astype("int64")
+            flyby_df_ordered["time_offset"] = flyby_df_ordered["time_offset"].astype("int32")
 
             # 处理可选字段的数据类型
             if "lat" in flyby_df_ordered.columns:
-                flyby_df_ordered["lat"] = pd.to_numeric(
-                    flyby_df_ordered["lat"], errors="coerce"
-                )
+                flyby_df_ordered["lat"] = pd.to_numeric(flyby_df_ordered["lat"], errors="coerce")
             if "lng" in flyby_df_ordered.columns:
-                flyby_df_ordered["lng"] = pd.to_numeric(
-                    flyby_df_ordered["lng"], errors="coerce"
-                )
+                flyby_df_ordered["lng"] = pd.to_numeric(flyby_df_ordered["lng"], errors="coerce")
             if "alt" in flyby_df_ordered.columns:
-                flyby_df_ordered["alt"] = pd.to_numeric(
-                    flyby_df_ordered["alt"], errors="coerce"
-                ).astype("Int16")
+                flyby_df_ordered["alt"] = pd.to_numeric(flyby_df_ordered["alt"], errors="coerce").astype("Int16")
             if "pace" in flyby_df_ordered.columns:
-                flyby_df_ordered["pace"] = pd.to_numeric(
-                    flyby_df_ordered["pace"], errors="coerce"
-                )
+                flyby_df_ordered["pace"] = pd.to_numeric(flyby_df_ordered["pace"], errors="coerce")
             if "hr" in flyby_df_ordered.columns:
-                flyby_df_ordered["hr"] = pd.to_numeric(
-                    flyby_df_ordered["hr"], errors="coerce"
-                ).astype("Int8")
+                flyby_df_ordered["hr"] = pd.to_numeric(flyby_df_ordered["hr"], errors="coerce").astype("Int8")
             if "distance" in flyby_df_ordered.columns:
-                flyby_df_ordered["distance"] = pd.to_numeric(
-                    flyby_df_ordered["distance"], errors="coerce"
-                ).astype("Int32")
+                flyby_df_ordered["distance"] = pd.to_numeric(flyby_df_ordered["distance"], errors="coerce").astype(
+                    "Int32"
+                )
 
         except Exception as e:
             logger.error(f"Error converting flyby data types: {e}")
@@ -684,14 +610,8 @@ def store_flyby_data(db_connection, flyby_df):
             values_list = ", ".join([f"temp.{col}" for col in ordered_columns])
 
             # 构建 UPDATE SET 子句，排除主键字段
-            non_pk_columns = [
-                col
-                for col in ordered_columns
-                if col not in ["activity_id", "time_offset"]
-            ]
-            update_set_clause = ", ".join([
-                f"{col} = temp.{col}" for col in non_pk_columns
-            ])
+            non_pk_columns = [col for col in ordered_columns if col not in ["activity_id", "time_offset"]]
+            update_set_clause = ", ".join([f"{col} = temp.{col}" for col in non_pk_columns])
 
             if update_set_clause:
                 upsert_sql = f"""
@@ -766,9 +686,7 @@ def write_fit_dataframes(db_connection, dataframes):
 
         schema = schemas.get(table_name)
         if not schema:
-            logger.warning(
-                f"Warning: No schema defined for table {table_name}. Skipping."
-            )
+            logger.warning(f"Warning: No schema defined for table {table_name}. Skipping.")
             continue
 
         try:
@@ -791,17 +709,12 @@ def write_fit_dataframes(db_connection, dataframes):
                     """
                 )
             else:
-                db_connection.execute(
-                    f"INSERT INTO {table_name} ({columns}) "
-                    f"SELECT {columns} FROM temp_{table_name}"
-                )
+                db_connection.execute(f"INSERT INTO {table_name} ({columns}) SELECT {columns} FROM temp_{table_name}")
 
             # 4. Unregister the virtual table to clean up.
             db_connection.unregister(f"temp_{table_name}")
 
-            logger.info(
-                f"Successfully saved {len(df)} records to table '{table_name}'."
-            )
+            logger.info(f"Successfully saved {len(df)} records to table '{table_name}'.")
 
         except Exception as e:
             logger.error(f"Failed to save DataFrame to table '{table_name}': {e}")

@@ -105,9 +105,7 @@ class TrackLoader:
             elif not t.start_time_local:
                 log.info(f"{file_name}: skipping track without start time")
             elif not self.year_range.contains(t.start_time_local):
-                log.info(
-                    f"{file_name}: skipping track with wrong year {t.start_time_local.year}"
-                )
+                log.info(f"{file_name}: skipping track with wrong year {t.start_time_local.year}")
             else:
                 t.special = file_name in self.special_file_names
                 filtered_tracks.append(t)
@@ -140,8 +138,7 @@ class TrackLoader:
         tracks = {}
         with concurrent.futures.ProcessPoolExecutor() as executor:
             future_to_file_name = {
-                executor.submit(load_func, file_name, activity_title_dict): file_name
-                for file_name in file_names
+                executor.submit(load_func, file_name, activity_title_dict): file_name for file_name in file_names
             }
         for future in concurrent.futures.as_completed(future_to_file_name):
             file_name = future_to_file_name[future]

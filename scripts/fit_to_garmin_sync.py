@@ -31,40 +31,29 @@ class FitToGarmin(Garmin):
             upload_data = {"file": (os.path.basename(fit_file_path), file_body)}
 
             try:
-                res = await self.req.post(
-                    self.upload_url, files=upload_data, headers=self.headers
-                )
+                res = await self.req.post(self.upload_url, files=upload_data, headers=self.headers)
                 res.raise_for_status()
                 resp_json = res.json()
                 detailed_import_result = resp_json.get("detailedImportResult", {})
                 if detailed_import_result:
                     logger.info(f"Garmin upload success: {detailed_import_result}")
                 else:
-                    logger.warning(
-                        f"Garmin upload response missing details: {resp_json}"
-                    )
+                    logger.warning(f"Garmin upload response missing details: {resp_json}")
 
             except httpx.HTTPStatusError as e:
                 logger.error(f"HTTP error while uploading {fit_file_path}: {e}")
                 try:
                     # Try to parse the error response from Garmin
                     error_json = e.response.json()
-                    if any(
-                        "Duplicate Activity" in msg.get("content", "")
-                        for msg in error_json.get("messages", [])
-                    ):
+                    if any("Duplicate Activity" in msg.get("content", "") for msg in error_json.get("messages", [])):
                         logger.warning(f"Skipping duplicate activity: {fit_file_path}")
                         continue  # Skip to the next file
                 except json.JSONDecodeError:
                     logger.error("Could not decode error response.")
             except (json.JSONDecodeError, KeyError) as e:
-                logger.error(
-                    f"Failed to parse Garmin's response for {fit_file_path}: {e}"
-                )
+                logger.error(f"Failed to parse Garmin's response for {fit_file_path}: {e}")
             except Exception as e:
-                logger.error(
-                    f"An unexpected error occurred while uploading {fit_file_path}: {e}"
-                )
+                logger.error(f"An unexpected error occurred while uploading {fit_file_path}: {e}")
 
         await self.req.aclose()
 
@@ -77,9 +66,7 @@ def get_fit_files():
             fit_files.append(filename)
 
     fit_files_sorted = sorted(fit_files, reverse=True)
-    fit_files_fullpath = [
-        os.path.join(FIT_FOLDER, filename) for filename in fit_files_sorted
-    ]
+    fit_files_fullpath = [os.path.join(FIT_FOLDER, filename) for filename in fit_files_sorted]
     files = []
     for file_path in fit_files_fullpath:
         stream = Stream.from_file(file_path)
@@ -87,11 +74,7 @@ def get_fit_files():
         messages, errors = decoder.read()
         time_created = messages["file_id_mesgs"][0]["time_created"]
         # Assume the time in FIT file is UTC
-        files.append(
-            FitFile(
-                path=file_path, time_created=time_created.replace(tzinfo=timezone.utc)
-            )
-        )
+        files.append(FitFile(path=file_path, time_created=time_created.replace(tzinfo=timezone.utc)))
     return files
 
 
@@ -110,9 +93,7 @@ async def main(secret_string, garmin_auth_domain):
         upload_files = [f.path for f in all_fit_files]
     else:
         after_datetime_str = last_activity[0]["startTimeGMT"]
-        after_datetime = datetime.strptime(after_datetime_str, DATE_FORMAT).replace(
-            tzinfo=timezone.utc
-        )
+        after_datetime = datetime.strptime(after_datetime_str, DATE_FORMAT).replace(tzinfo=timezone.utc)
         logger.info(f"Garmin's last activity date: {after_datetime}")
         for fit_file in all_fit_files:
             if after_datetime >= fit_file.time_created:
@@ -132,9 +113,7 @@ async def main(secret_string, garmin_auth_domain):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "secret_string", nargs="?", help="secret_string fro get_garmin_secret.py"
-    )
+    parser.add_argument("secret_string", nargs="?", help="secret_string fro get_garmin_secret.py")
     parser.add_argument(
         "--is-cn",
         dest="is_cn",
@@ -151,8 +130,7 @@ if __name__ == "__main__":
             secret_string = env_config[secret_key.lower()]
         else:
             logger.error(
-                f"Missing Garmin secret string. "
-                f"Please provide it as an argument or set {secret_key} in .env.local"
+                f"Missing Garmin secret string. Please provide it as an argument or set {secret_key} in .env.local"
             )
             sys.exit(1)
 

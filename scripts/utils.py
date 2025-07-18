@@ -22,9 +22,7 @@ def get_logger(name):
     if not logger.handlers:  # Avoid adding handlers multiple times
         logger.setLevel(logging.INFO)
         handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         handler.setFormatter(formatter)
         logger.addHandler(handler)
     return logger
@@ -109,18 +107,13 @@ def to_date(ts):
             # shouldn't be an issue since it's an offline cmdline tool
             return datetime.strptime(ts, ts_fmt)
         except ValueError:
-            print(
-                f"Warning: Can not execute strptime {ts} with ts_fmt {ts_fmt},"
-                f"try next one..."
-            )
+            print(f"Warning: Can not execute strptime {ts} with ts_fmt {ts_fmt},try next one...")
             pass
 
     raise ValueError(f"cannot parse timestamp {ts} into date with fmts: {ts_fmts}")
 
 
-def make_activities_file(
-    sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict={}
-):
+def make_activities_file(sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict={}):
     from generator import Generator
 
     generator = Generator(sql_file)
@@ -176,9 +169,7 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
     with open(file_name, "rb") as f:
         try:
             if force_to_run:
-                r = client.upload_activity(
-                    activity_file=f, data_type=data_type, activity_type="run"
-                )
+                r = client.upload_activity(activity_file=f, data_type=data_type, activity_type="run")
             else:
                 r = client.upload_activity(activity_file=f, data_type=data_type)
 
@@ -189,12 +180,7 @@ def upload_file_to_strava(client, file_name, data_type, force_to_run=True):
             print()
             time.sleep(timeout)
             if force_to_run:
-                r = client.upload_activity(
-                    activity_file=f, data_type=data_type, activity_type="run"
-                )
+                r = client.upload_activity(activity_file=f, data_type=data_type, activity_type="run")
             else:
                 r = client.upload_activity(activity_file=f, data_type=data_type)
-        print(
-            f"Uploading {data_type} file: {file_name} to strava, "
-            f"upload_id: {r.upload_id}."
-        )
+        print(f"Uploading {data_type} file: {file_name} to strava, upload_id: {r.upload_id}.")

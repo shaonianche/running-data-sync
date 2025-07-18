@@ -43,24 +43,16 @@ async def upload_to_activities(
             files_list.append(data)
         except Exception as ex:
             print("get strava data error: ", ex)
-    await garmin_client.upload_activities_original_from_strava(
-        files_list, use_fake_garmin_device, fix_hr
-    )
+    await garmin_client.upload_activities_original_from_strava(files_list, use_fake_garmin_device, fix_hr)
     return files_list
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--client-id", dest="client_id", help="strava client id")
-    parser.add_argument(
-        "--client-secret", dest="client_secret", help="strava client secret"
-    )
-    parser.add_argument(
-        "--refresh-token", dest="refresh_token", help="strava refresh token"
-    )
-    parser.add_argument(
-        "secret_string", nargs="?", help="secret_string for get_garmin_secret.py"
-    )
+    parser.add_argument("--client-secret", dest="client_secret", help="strava client secret")
+    parser.add_argument("--refresh-token", dest="refresh_token", help="strava refresh token")
+    parser.add_argument("secret_string", nargs="?", help="secret_string for get_garmin_secret.py")
     parser.add_argument("strava_jwt", nargs="?", help="jwt token of strava")
     parser.add_argument("strava_email", nargs="?", help="email of strava")
     parser.add_argument("strava_password", nargs="?", help="password of strava")
@@ -127,9 +119,7 @@ if __name__ == "__main__":
             password=strava_password,
         )
     else:
-        raise Exception(
-            "Missing Strava web authentication. Please provide either strava_jwt or strava_email/password"
-        )
+        raise Exception("Missing Strava web authentication. Please provide either strava_jwt or strava_email/password")
 
     garmin_auth_domain = "CN" if options.is_cn else ""
     secret_string = options.secret_string
@@ -137,11 +127,7 @@ if __name__ == "__main__":
         logger.info("Secret string is not provided, trying to load from env")
         env_config = load_env_config()
         if env_config:
-            secret_string = (
-                env_config.get("garmin_secret_cn")
-                if options.is_cn
-                else env_config.get("garmin_secret")
-            )
+            secret_string = env_config.get("garmin_secret_cn") if options.is_cn else env_config.get("garmin_secret")
 
     if not secret_string:
         raise Exception("Missing garmin secret string")

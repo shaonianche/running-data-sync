@@ -70,9 +70,7 @@ class Poster:
 
         # Fall-back to NullTranslations, if the specified language translation cannot be found.
         if language:
-            lang = gettext.translation(
-                "gpxposter", localedir="locale", languages=[language], fallback=True
-            )
+            lang = gettext.translation("gpxposter", localedir="locale", languages=[language], fallback=True)
         else:
             lang = gettext.NullTranslations()
         self.trans = lang.gettext
@@ -193,9 +191,7 @@ class Poster:
                 )
             )
 
-            d.add(
-                d.rect((65, self.height - 17), (2.6, 2.6), fill=self.colors["special"])
-            )
+            d.add(d.rect((65, self.height - 17), (2.6, 2.6), fill=self.colors["special"]))
 
             d.add(
                 d.text(
@@ -206,9 +202,7 @@ class Poster:
                 )
             )
 
-            d.add(
-                d.rect((65, self.height - 13), (2.6, 2.6), fill=self.colors["special2"])
-            )
+            d.add(d.rect((65, self.height - 13), (2.6, 2.6), fill=self.colors["special2"]))
 
             d.add(
                 d.text(

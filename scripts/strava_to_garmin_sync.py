@@ -53,9 +53,7 @@ async def upload_to_activities(
                 "velocity_smooth",
                 "distance",
             ]
-            streams = strava_client.get_activity_streams(
-                i.id, types=stream_types, resolution="high"
-            )
+            streams = strava_client.get_activity_streams(i.id, types=stream_types, resolution="high")
 
             dataframes = get_dataframes_for_fit_tables(i, streams)
             fit_bytes = generator.build_fit_file_from_dataframes(dataframes)
@@ -68,21 +66,15 @@ async def upload_to_activities(
         except Exception as ex:
             logger.error(f"Failed to process activity {i.id}: {ex}", exc_info=True)
 
-    await garmin_client.upload_activities_original_from_strava(
-        files_list, use_fake_garmin_device, fix_hr
-    )
+    await garmin_client.upload_activities_original_from_strava(files_list, use_fake_garmin_device, fix_hr)
     return files_list
 
 
 async def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--client-id", dest="client_id", help="strava client id")
-    parser.add_argument(
-        "--client-secret", dest="client_secret", help="strava client secret"
-    )
-    parser.add_argument(
-        "--refresh-token", dest="refresh_token", help="strava refresh token"
-    )
+    parser.add_argument("--client-secret", dest="client_secret", help="strava client secret")
+    parser.add_argument("--refresh-token", dest="refresh_token", help="strava refresh token")
     parser.add_argument(
         "secret_string",
         nargs="?",
@@ -126,10 +118,7 @@ async def main():
             client_secret = env_config["strava_client_secret"]
             refresh_token = env_config["strava_refresh_token"]
         else:
-            raise Exception(
-                "Missing Strava credentials. "
-                "Please provide them as arguments or in .env.local file"
-            )
+            raise Exception("Missing Strava credentials. Please provide them as arguments or in .env.local file")
 
     strava_client = make_strava_client(
         client_id,
@@ -143,11 +132,7 @@ async def main():
         logger.info("Secret string is not provided, trying to load from env")
         env_config = load_env_config()
         if env_config:
-            secret_string = (
-                env_config.get("garmin_secret_cn")
-                if options.is_cn
-                else env_config.get("garmin_secret")
-            )
+            secret_string = env_config.get("garmin_secret_cn") if options.is_cn else env_config.get("garmin_secret")
 
     if not secret_string:
         raise Exception("Missing garmin secret string")

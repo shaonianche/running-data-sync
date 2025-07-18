@@ -32,9 +32,7 @@ class MonthOfLifeDrawer(TracksDrawer):
         # Parse birth date
         if args.type == "monthoflife":
             if not args.birth:
-                raise PosterError(
-                    "Birth date parameter --birth is required in format YYYY-MM"
-                )
+                raise PosterError("Birth date parameter --birth is required in format YYYY-MM")
             try:
                 parts = args.birth.split("-")
                 self.birth_year = int(parts[0])
@@ -88,9 +86,7 @@ class MonthOfLifeDrawer(TracksDrawer):
                 if sd1 < dist_km < sd2:
                     color = self.color(self.poster.length_range_by_date, dist, True)
                 elif dist_km >= sd2:
-                    color = self.poster.colors.get(
-                        "special2"
-                    ) or self.poster.colors.get("special")
+                    color = self.poster.colors.get("special2") or self.poster.colors.get("special")
                 else:
                     color = self.color(self.poster.length_range_by_date, dist, False)
                 val = format_float(self.poster.m2u(dist))

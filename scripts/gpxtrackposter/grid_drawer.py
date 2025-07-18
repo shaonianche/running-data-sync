@@ -33,18 +33,12 @@ class GridDrawer(TracksDrawer):
         if cell_size is None or counts is None:
             raise PosterError("Unable to compute grid.")
         count_x, count_y = counts[0], counts[1]
-        spacing_x = (
-            0 if count_x <= 1 else (size.x - cell_size * count_x) / (count_x - 1)
-        )
-        spacing_y = (
-            0 if count_y <= 1 else (size.y - cell_size * count_y) / (count_y - 1)
-        )
+        spacing_x = 0 if count_x <= 1 else (size.x - cell_size * count_x) / (count_x - 1)
+        spacing_y = 0 if count_y <= 1 else (size.y - cell_size * count_y) / (count_y - 1)
         offset.x += (size.x - count_x * cell_size - (count_x - 1) * spacing_x) / 2
         offset.y += (size.y - count_y * cell_size - (count_y - 1) * spacing_y) / 2
         for index, tr in enumerate(self.poster.tracks[::-1]):
-            p = XY(index % count_x, index // count_x) * XY(
-                cell_size + spacing_x, cell_size + spacing_y
-            )
+            p = XY(index % count_x, index // count_x) * XY(cell_size + spacing_x, cell_size + spacing_y)
             self._draw_track(
                 dr,
                 tr,
@@ -64,9 +58,7 @@ class GridDrawer(TracksDrawer):
             has_special = distance1 < tr.length / 1000 < distance2
             color = self.color(self.poster.length_range_by_date, tr.length, has_special)  # type: ignore
             if tr.length / 1000 >= distance2:
-                color = self.poster.colors.get("special2") or self.poster.colors.get(
-                    "special"
-                )
+                color = self.poster.colors.get("special2") or self.poster.colors.get("special")
             polyline = dr.polyline(
                 points=line,
                 stroke=color,

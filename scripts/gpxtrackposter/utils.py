@@ -85,9 +85,7 @@ def compute_bounds_xy(lines: List[List[XY]]) -> Tuple[ValueRange, ValueRange]:
     return range_x, range_y
 
 
-def compute_grid(
-    count: int, dimensions: XY
-) -> Tuple[Optional[float], Optional[Tuple[int, int]]]:
+def compute_grid(count: int, dimensions: XY) -> Tuple[Optional[float], Optional[Tuple[int, int]]]:
     # this is somehow suboptimal O(count^2). I guess it's possible in O(count)
     min_waste = -1.0
     best_size = None
@@ -145,12 +143,8 @@ def parse_datetime_to_local(start_time, end_time, point):
     try:
         tz = ZoneInfo(timezone)
         # Calculate offset based on the actual start_time (assuming it's naive UTC)
-        start_tc_offset = (
-            start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
-        )
-        end_tc_offset = (
-            end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
-        )
+        start_tc_offset = start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
+        end_tc_offset = end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
         return start_time + start_tc_offset, end_time + end_tc_offset
     except Exception:
         # Fallback for safety

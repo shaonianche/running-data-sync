@@ -84,12 +84,8 @@ class Generator:
             filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
         else:
             # Use a raw SQL query to get the last activity's start_date
-            last_activity_date_result = self.db_connection.execute(
-                "SELECT MAX(start_date) FROM activities"
-            ).fetchone()
-            last_activity_date = (
-                last_activity_date_result[0] if last_activity_date_result else None
-            )
+            last_activity_date_result = self.db_connection.execute("SELECT MAX(start_date) FROM activities").fetchone()
+            last_activity_date = last_activity_date_result[0] if last_activity_date_result else None
 
             if last_activity_date:
                 # The date from DB is timezone-aware, so we can parse it directly.
@@ -111,9 +107,7 @@ class Generator:
         self.logger.info(f"Synced {updated_count} activities to the database.")
 
         try:
-            self.logger.info(
-                "Starting flyby data synchronization as part of main sync..."
-            )
+            self.logger.info("Starting flyby data synchronization as part of main sync...")
             flyby_records = self.sync_flyby_data()
             if flyby_records > 0:
                 self.logger.info(f"Successfully synced {flyby_records} flyby records.")
@@ -121,10 +115,7 @@ class Generator:
                 self.logger.info("No new flyby data to sync.")
         except Exception as e:
             # 确保 flyby 处理失败不中断主同步流程
-            self.logger.warning(
-                f"Flyby data synchronization failed: {e},"
-                "but main sync completed successfully."
-            )
+            self.logger.warning(f"Flyby data synchronization failed: {e},but main sync completed successfully.")
 
     def _make_tcx_from_streams(self, activity, streams):
         # TCX XML structure
@@ -160,12 +151,7 @@ class Generator:
         if streams.get("heartrate"):
             avg_hr = SubElement(lap_node, "AverageHeartRateBpm")
             avg_hr_val = SubElement(avg_hr, "Value")
-            avg_hr_val.text = str(
-                int(
-                    sum(s for s in streams["heartrate"].data)
-                    / len(streams["heartrate"].data)
-                )
-            )
+            avg_hr_val.text = str(int(sum(s for s in streams["heartrate"].data) / len(streams["heartrate"].data)))
 
             max_hr = SubElement(lap_node, "MaximumHeartRateBpm")
             max_hr_val = SubElement(max_hr, "Value")
@@ -182,24 +168,14 @@ class Generator:
         # Trackpoints
         time_stream = streams.get("time").data if streams.get("time") else []
         latlng_stream = streams.get("latlng").data if streams.get("latlng") else []
-        alt_stream = (
-            streams.get("altitude").data
-            if streams.get("altitude")
-            else [0] * len(time_stream)
-        )
-        hr_stream = (
-            streams.get("heartrate").data
-            if streams.get("heartrate")
-            else [0] * len(time_stream)
-        )
+        alt_stream = streams.get("altitude").data if streams.get("altitude") else [0] * len(time_stream)
+        hr_stream = streams.get("heartrate").data if streams.get("heartrate") else [0] * len(time_stream)
 
         for i, time_offset in enumerate(time_stream):
             trackpoint_node = SubElement(track_node, "Trackpoint")
 
             time_node = SubElement(trackpoint_node, "Time")
-            time_node.text = (
-                activity.start_date + datetime.timedelta(seconds=time_offset)
-            ).isoformat()
+            time_node.text = (activity.start_date + datetime.timedelta(seconds=time_offset)).isoformat()
 
             if i < len(latlng_stream):
                 position_node = SubElement(trackpoint_node, "Position")
@@ -231,36 +207,23 @@ class Generator:
     def generate_missing_tcx(self, downloaded_ids):
         self.check_access()
 
-        self.logger.info(
-            "Fetching all activities from Strava to check for missing TCX files..."
-        )
+        self.logger.info("Fetching all activities from Strava to check for missing TCX files...")
         activities = self.client.get_activities()  # Fetch all activities
 
         tcx_files = []
 
-        activities_to_process = [
-            a for a in activities if str(a.id) not in downloaded_ids
-        ]
+        activities_to_process = [a for a in activities if str(a.id) not in downloaded_ids]
 
-        self.logger.info(
-            f"Found {len(activities_to_process)} new activities to generate TCX for."
-        )
+        self.logger.info(f"Found {len(activities_to_process)} new activities to generate TCX for.")
 
         for activity in activities_to_process:
             try:
-                self.logger.info(
-                    f"Processing activity: {activity.name} ({activity.id})"
-                )
+                self.logger.info(f"Processing activity: {activity.name} ({activity.id})")
                 stream_types = ["time", "latlng", "altitude", "heartrate"]
-                streams = self.client.get_activity_streams(
-                    activity.id, types=stream_types
-                )
+                streams = self.client.get_activity_streams(activity.id, types=stream_types)
 
                 if not streams.get("latlng") or not streams.get("time"):
-                    self.logger.warning(
-                        f"Skipping activity {activity.id} "
-                        "due to missing latlng or time streams."
-                    )
+                    self.logger.warning(f"Skipping activity {activity.id} due to missing latlng or time streams.")
                     continue
 
                 tcx_content = self._make_tcx_from_streams(activity, streams)
@@ -270,9 +233,7 @@ class Generator:
                 # Rate limiting
                 time.sleep(2)
             except Exception as e:
-                self.logger.error(
-                    f"Failed to process activity {activity.id}: {e}", exc_info=True
-                )
+                self.logger.error(f"Failed to process activity {activity.id}: {e}", exc_info=True)
 
         return tcx_files
 
@@ -306,12 +267,8 @@ class Generator:
                 "elapsed_time": track_data["elapsed_time"].total_seconds(),
                 "type": track_data["type"],
                 "subtype": track_data["subtype"],
-                "start_date": datetime.datetime.strptime(
-                    track_data["start_date"], "%Y-%m-%d %H:%M:%S"
-                ),
-                "start_date_local": datetime.datetime.strptime(
-                    track_data["start_date_local"], "%Y-%m-%d %H:%M:%S"
-                ),
+                "start_date": datetime.datetime.strptime(track_data["start_date"], "%Y-%m-%d %H:%M:%S"),
+                "start_date_local": datetime.datetime.strptime(track_data["start_date_local"], "%Y-%m-%d %H:%M:%S"),
                 "location_country": "",  # GPX/FIT files don't have this
                 "summary_polyline": track_data["map"].summary_polyline,
                 "average_heartrate": track_data["average_heartrate"],
@@ -338,15 +295,11 @@ class Generator:
             return []
 
         # Calculate streak
-        activities_df["start_date_local_date"] = pd.to_datetime(
-            activities_df["start_date_local"]
-        ).dt.date
+        activities_df["start_date_local_date"] = pd.to_datetime(activities_df["start_date_local"]).dt.date
         activities_df = activities_df.sort_values("start_date_local_date")
         # Get the difference in days between consecutive runs
         activities_df["date_diff"] = (
-            activities_df["start_date_local_date"]
-            .diff()
-            .apply(lambda x: x.days if pd.notna(x) else None)
+            activities_df["start_date_local_date"].diff().apply(lambda x: x.days if pd.notna(x) else None)
         )
         # Identify the start of a new streak
         activities_df["new_streak"] = (activities_df["date_diff"] != 1).cumsum()
@@ -354,26 +307,17 @@ class Generator:
         activities_df["streak"] = activities_df.groupby("new_streak").cumcount() + 1
 
         # Drop temporary columns
-        activities_df = activities_df.drop(
-            columns=["start_date_local_date", "date_diff", "new_streak"]
-        )
+        activities_df = activities_df.drop(columns=["start_date_local_date", "date_diff", "new_streak"])
 
         # Polyline filtering
         if not IGNORE_BEFORE_SAVING:
-            activities_df["summary_polyline"] = activities_df["summary_polyline"].apply(
-                filter_out
-            )
+            activities_df["summary_polyline"] = activities_df["summary_polyline"].apply(filter_out)
 
         return activities_df.to_dict("records")
 
     def get_old_tracks_ids(self):
         try:
-            return (
-                self.db_connection.execute("SELECT run_id FROM activities")
-                .fetchdf()["run_id"]
-                .astype(str)
-                .tolist()
-            )
+            return self.db_connection.execute("SELECT run_id FROM activities").fetchdf()["run_id"].astype(str).tolist()
         except Exception as e:
             self.logger.error(f"Something wrong with get_old_tracks_ids: {str(e)}")
             return []
@@ -404,25 +348,19 @@ class Generator:
                 self.logger.info("No activities found from Strava API.")
                 return None
 
-            self.logger.info(
-                f"Checking {len(activities)} recent activities for GPS data."
-            )
+            self.logger.info(f"Checking {len(activities)} recent activities for GPS data.")
 
             # Check each activity for GPS data (latlng stream)
             for activity in activities:
                 try:
                     # Get available stream types for this activity
                     stream_types = ["latlng"]
-                    streams = self.client.get_activity_streams(
-                        activity.id, types=stream_types, resolution="low"
-                    )
+                    streams = self.client.get_activity_streams(activity.id, types=stream_types, resolution="low")
 
                     # Check if latlng stream exists and has data
                     if streams.get("latlng") and streams["latlng"].data:
                         self.logger.info(
-                            f"Found GPS-enabled activity:"
-                            f" {activity.name} ({activity.id}) "
-                            f"from {activity.start_date}"
+                            f"Found GPS-enabled activity: {activity.name} ({activity.id}) from {activity.start_date}"
                         )
                         return activity
 
@@ -430,9 +368,7 @@ class Generator:
                     time.sleep(0.5)
 
                 except Exception as e:
-                    self.logger.warning(
-                        f"Failed to check streams for activity {activity.id}: {e}"
-                    )
+                    self.logger.warning(f"Failed to check streams for activity {activity.id}: {e}")
                     continue
 
             self.logger.info("No GPS-enabled activities found in recent activities.")
@@ -453,14 +389,11 @@ class Generator:
             # 获取最新的 GPS 活动
             latest_gps_activity = self._get_latest_gps_activity()
             if not latest_gps_activity:
-                self.logger.info(
-                    "No GPS-enabled activities found, skipping flyby sync."
-                )
+                self.logger.info("No GPS-enabled activities found, skipping flyby sync.")
                 return 0
 
             self.logger.info(
-                f"Processing flyby data for activity: {latest_gps_activity.name} "
-                f"({latest_gps_activity.id})"
+                f"Processing flyby data for activity: {latest_gps_activity.name} ({latest_gps_activity.id})"
             )
 
             # 检查是否已经处理过这个活动的 flyby 数据
@@ -490,12 +423,8 @@ class Generator:
                 "velocity_smooth",
             ]
 
-            self.logger.info(
-                f"Fetching stream data for activity {latest_gps_activity.id}..."
-            )
-            streams = self.client.get_activity_streams(
-                latest_gps_activity.id, types=stream_types, resolution="high"
-            )
+            self.logger.info(f"Fetching stream data for activity {latest_gps_activity.id}...")
+            streams = self.client.get_activity_streams(latest_gps_activity.id, types=stream_types, resolution="high")
 
             # 验证必需的流数据
             if not streams.get("time") or not streams.get("latlng"):
@@ -505,17 +434,12 @@ class Generator:
                 )
                 return 0
 
-            self.logger.info(
-                f"Retrieved streams: {list(streams.keys())}"
-                f"for activity {latest_gps_activity.id}"
-            )
+            self.logger.info(f"Retrieved streams: {list(streams.keys())}for activity {latest_gps_activity.id}")
 
             flyby_df = convert_streams_to_flyby_dataframe(latest_gps_activity, streams)
 
             if flyby_df.empty:
-                self.logger.warning(
-                    f"No flyby data generated for activity {latest_gps_activity.id}"
-                )
+                self.logger.warning(f"No flyby data generated for activity {latest_gps_activity.id}")
                 return 0
 
             # 存储 flyby 数据到数据库
@@ -523,30 +447,22 @@ class Generator:
 
             if records_stored > 0:
                 self.logger.info(
-                    f"Successfully synchronized {records_stored} flyby records "
-                    f"for activity {latest_gps_activity.id}"
+                    f"Successfully synchronized {records_stored} flyby records for activity {latest_gps_activity.id}"
                 )
             else:
-                self.logger.warning(
-                    f"No flyby records were stored for "
-                    f"activity {latest_gps_activity.id}"
-                )
+                self.logger.warning(f"No flyby records were stored for activity {latest_gps_activity.id}")
 
             return records_stored
 
         except stravalib.exc.RateLimitExceeded as e:
-            self.logger.warning(
-                f"Strava API rate limit exceeded during flyby sync: {e}"
-            )
+            self.logger.warning(f"Strava API rate limit exceeded during flyby sync: {e}")
             retry_after = getattr(e, "retry_after", 60)
             self.logger.info(f"Waiting {retry_after} seconds before retrying...")
             time.sleep(retry_after)
 
             # 单次重试
             try:
-                self.logger.info(
-                    "Retrying flyby data synchronization after rate limit..."
-                )
+                self.logger.info("Retrying flyby data synchronization after rate limit...")
                 return self.sync_flyby_data()
             except Exception as retry_e:
                 self.logger.error(f"Retry failed for flyby sync: {retry_e}")
@@ -577,11 +493,7 @@ class Generator:
             try:
                 existing_fit_files = set()
                 if os.path.exists("FIT_OUT"):
-                    existing_fit_files = {
-                        f.replace(".fit", "")
-                        for f in os.listdir("FIT_OUT")
-                        if f.endswith(".fit")
-                    }
+                    existing_fit_files = {f.replace(".fit", "") for f in os.listdir("FIT_OUT") if f.endswith(".fit")}
 
                 if existing_fit_files:
                     self.logger.info(
@@ -589,14 +501,9 @@ class Generator:
                         "Will skip activities that already have FIT files."
                     )
                 else:
-                    self.logger.info(
-                        "No existing FIT files found. Processing all activities."
-                    )
+                    self.logger.info("No existing FIT files found. Processing all activities.")
             except Exception:
-                self.logger.warning(
-                    "Could not check existing FIT files, "
-                    "processing all activities. Error: {e}"
-                )
+                self.logger.warning("Could not check existing FIT files, processing all activities. Error: {e}")
                 existing_fit_files = set()
 
         activities = list(self.client.get_activities(**filters))
@@ -610,14 +517,10 @@ class Generator:
             try:
                 # Check if FIT file already exists (instead of checking database)
                 if not force and str(activity.id) in existing_fit_files:
-                    self.logger.info(
-                        f"Skipping activity {activity.id}, FIT file already exists."
-                    )
+                    self.logger.info(f"Skipping activity {activity.id}, FIT file already exists.")
                     continue
 
-                self.logger.info(
-                    f"Processing activity for FIT: {activity.id} ({activity.name})"
-                )
+                self.logger.info(f"Processing activity for FIT: {activity.id} ({activity.name})")
                 stream_types = [
                     "time",
                     "latlng",
@@ -627,9 +530,7 @@ class Generator:
                     "velocity_smooth",
                     "distance",
                 ]
-                streams = self.client.get_activity_streams(
-                    activity.id, types=stream_types, resolution="high"
-                )
+                streams = self.client.get_activity_streams(activity.id, types=stream_types, resolution="high")
 
                 # Generate FIT data without writing to database
                 dataframes = get_dataframes_for_fit_tables(activity, streams)

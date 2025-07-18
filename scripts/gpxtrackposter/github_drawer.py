@@ -27,9 +27,7 @@ class GithubDrawer(TracksDrawer):
         total_length_year_dict = self.poster.total_length_year_dict
 
         is_align_monday = self.poster.github_style == "align-monday"
-        for year in range(self.poster.years.from_year, self.poster.years.to_year + 1)[
-            ::-1
-        ]:
+        for year in range(self.poster.years.from_year, self.poster.years.to_year + 1)[::-1]:
             start_date_weekday, _ = calendar.monthrange(year, 1)
             github_rect_first_day = datetime.date(year, 1, 1)
 
@@ -43,9 +41,7 @@ class GithubDrawer(TracksDrawer):
                 # the start day of each year always aligns with Monday.
                 # If you want to use this, please add the command-line argument
                 #  "--github-style align-monday" .
-                github_rect_day = github_rect_first_day + datetime.timedelta(
-                    -start_date_weekday
-                )
+                github_rect_day = github_rect_first_day + datetime.timedelta(-start_date_weekday)
                 first_day_weekday = 0
 
             year_length = total_length_year_dict.get(year, 0)
@@ -157,9 +153,7 @@ class GithubDrawer(TracksDrawer):
                             has_special,
                         )
                         if length / 1000 >= distance2:
-                            color = self.poster.colors.get(
-                                "special2"
-                            ) or self.poster.colors.get("special")
+                            color = self.poster.colors.get("special2") or self.poster.colors.get("special")
                         str_length = format_float(self.poster.m2u(length))
                         date_title = f"{date_title} {str_length} {km_or_mi}"
 

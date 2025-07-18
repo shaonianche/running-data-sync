@@ -143,13 +143,9 @@ class CircularDrawer(TracksDrawer):
                     fill="none",
                     stroke="none",
                 )
-                path.push(
-                    f"a{r3},{r3} 0 0,1 {r3 * (sin_a3 - sin_a1)},{r3 * (cos_a1 - cos_a3)}"
-                )
+                path.push(f"a{r3},{r3} 0 0,1 {r3 * (sin_a3 - sin_a1)},{r3 * (cos_a1 - cos_a3)}")
                 dr.add(path)
-                tpath = svgwrite.text.TextPath(
-                    path, date.strftime("%B"), startOffset=(0.5 * r3 * (a3 - a1))
-                )
+                tpath = svgwrite.text.TextPath(path, date.strftime("%B"), startOffset=(0.5 * r3 * (a3 - a1)))
                 text = dr.text(
                     "",
                     fill=self.poster.colors["text"],
@@ -195,10 +191,7 @@ class CircularDrawer(TracksDrawer):
             return
         distance = ring_distance
         while distance < length_range.upper():
-            radius = (
-                radius_range.lower()
-                + radius_range.diameter() * distance / length_range.upper()
-            )
+            radius = radius_range.lower() + radius_range.diameter() * distance / length_range.upper()
             dr.add(
                 dr.circle(
                     center=center.tuple(),
@@ -224,10 +217,7 @@ class CircularDrawer(TracksDrawer):
         has_special = len([t for t in tracks if t.special]) > 0
         color = self.color(self.poster.length_range_by_date, length, has_special)
         r1 = rr.lower()
-        r2 = (
-            rr.lower()
-            + rr.diameter() * length / self.poster.length_range_by_date.upper()
-        )
+        r2 = rr.lower() + rr.diameter() * length / self.poster.length_range_by_date.upper()
         sin_a1, cos_a1 = math.sin(a1), math.cos(a1)
         sin_a2, cos_a2 = math.sin(a2), math.cos(a2)
         path = dr.path(

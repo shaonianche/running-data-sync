@@ -121,12 +121,9 @@ class Garmin:
         response.raise_for_status()
         return response.read()
 
-    async def upload_activities_original_from_strava(
-        self, datas, use_fake_garmin_device=False, fix_hr=False
-    ):
-        logger.info(/
-            "Start uploading %d activities to Garmin. "
-            "use_fake_garmin_device: %s, fix_hr: %s",
+    async def upload_activities_original_from_strava(self, datas, use_fake_garmin_device=False, fix_hr=False):
+        logger.info(
+            "Start uploading %d activities to Garmin. use_fake_garmin_device: %s, fix_hr: %s",
             len(datas),
             use_fake_garmin_device,
             fix_hr,
@@ -141,16 +138,12 @@ class Garmin:
                     file_content = fix_heart_rate(file_content)
                 files = {"file": (os.path.basename(data.filename), file_content)}
 
-                res = await self.req.post(
-                    self.upload_url, files=files, headers=self.headers
-                )
+                res = await self.req.post(self.upload_url, files=files, headers=self.headers)
                 res.raise_for_status()
 
                 # Handle successful upload with no content response
                 if res.status_code == 204:
-                    logger.info(
-                        "Garmin upload for %s success with status 204.", data.filename
-                    )
+                    logger.info("Garmin upload for %s success with status 204.", data.filename)
                     continue
 
                 try:
@@ -175,9 +168,7 @@ class Garmin:
                 file_body = await f.read()
 
             files = {"file": (os.path.basename(file_path), file_body)}
-            res = await self.req.post(
-                self.upload_url, files=files, headers=self.headers
-            )
+            res = await self.req.post(self.upload_url, files=files, headers=self.headers)
             res.raise_for_status()
             resp = res.json()["detailedImportResult"]
             logger.info("Garmin upload success: %s", resp)
@@ -251,9 +242,7 @@ def add_summary_info(file_data, summary_infos, fields=None):
     return file_data
 
 
-async def download_garmin_data(
-    client, activity_id, file_type="gpx", summary_infos=None
-):
+async def download_garmin_data(client, activity_id, file_type="gpx", summary_infos=None):
     folder = FOLDER_DICT.get(file_type, "gpx")
     try:
         file_data = await client.download_activity(activity_id, file_type=file_type)
@@ -274,9 +263,7 @@ async def download_garmin_data(
                     zip_ref.extract(file_info, folder)
                     extracted_path = os.path.join(folder, file_info.filename)
                     if file_info.filename.endswith(".fit"):
-                        os.rename(
-                            extracted_path, os.path.join(folder, f"{activity_id}.fit")
-                        )
+                        os.rename(extracted_path, os.path.join(folder, f"{activity_id}.fit"))
                     elif file_info.filename.endswith(".gpx"):
                         os.rename(
                             extracted_path,
@@ -368,9 +355,7 @@ async def download_new_activities(
         activity_id = to_generate_garmin_ids[i]
         if summary:
             to_generate_garmin_id2title[activity_id] = summary.get("activityName", "")
-            garmin_summary_infos_dict[activity_id] = get_garmin_summary_infos(
-                summary, activity_id
-            )
+            garmin_summary_infos_dict[activity_id] = get_garmin_summary_infos(summary, activity_id)
         else:
             logger.warning("Could not retrieve summary for activity %s", activity_id)
 
@@ -438,8 +423,7 @@ async def main():
         secret_string = env_config.get(secret_key.lower())
         if not secret_string:
             logger.error(
-                f"Missing Garmin secret string. "
-                f"Please provide it as an argument or set {secret_key} in .env.local"
+                f"Missing Garmin secret string. Please provide it as an argument or set {secret_key} in .env.local"
             )
             sys.exit(1)
 
