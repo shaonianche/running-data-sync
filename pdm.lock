@@ -1025,7 +1025,7 @@ files = [
 
 [[package]]
 name = "timezonefinder"
-version = "6.6.0"
+version = "6.6.2"
 requires_python = "<4,>=3.9"
 summary = "python package for finding the timezone of any point on earth (coordinates) offline"
 groups = ["default"]
@@ -1036,11 +1036,11 @@ dependencies = [
     "numpy<3,>=1.23; python_version >= \"3.9\"",
 ]
 files = [
-    {file = "timezonefinder-6.6.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:faa4c656abb4d87a014fbc381756655e84d90c4441749b7a3bd41240b94770ac"},
-    {file = "timezonefinder-6.6.0-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:97d9d988f2e8df689597d18f914c2d1726e659238de266b13114994825db5de8"},
-    {file = "timezonefinder-6.6.0-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b539588a531b6d277d19f006e1781184cfa16b043c8bf5239dc05b6c5960339b"},
-    {file = "timezonefinder-6.6.0-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:f59d0072569577e002cd85fffaff10a0d2921d0ccd123f8d165f1fb6e6f639ba"},
-    {file = "timezonefinder-6.6.0.tar.gz", hash = "sha256:a7d9c60125ea6e7df24b1772401a317175bb64e202afd69e2acbd2863880cebc"},
+    {file = "timezonefinder-6.6.2-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5c99facb681309b89b78e680d87ddf32e9887c146b5ebc7ffe644a0517eb3578"},
+    {file = "timezonefinder-6.6.2-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:38d77912320352dd021b988d5007226c5127ed085fb84964b813078d7c3120c3"},
+    {file = "timezonefinder-6.6.2-cp313-cp313-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:491c81f06354a0f76453464932d87f09bc2af2e79c6304d503065e618b1b161c"},
+    {file = "timezonefinder-6.6.2-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:b40eb1281aafd27d2058a8ae1885fefa2ffb9e6c8ff30f207a0ccfb1338cb582"},
+    {file = "timezonefinder-6.6.2.tar.gz", hash = "sha256:95767a349abe906fca565cf8409d90c0f31e23326d3bc2ea596729ad9e41d8ba"},
 ]
 
 [[package]]
