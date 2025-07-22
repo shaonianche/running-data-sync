@@ -114,7 +114,6 @@ class Generator:
             else:
                 self.logger.info("No new flyby data to sync.")
         except Exception as e:
-            # 确保 flyby 处理失败不中断主同步流程
             self.logger.warning(f"Flyby data synchronization failed: {e},but main sync completed successfully.")
 
     def _make_tcx_from_streams(self, activity, streams):
@@ -338,8 +337,8 @@ class Generator:
 
     def _get_latest_gps_activity(self):
         """
-        获取最近一次包含 GPS 数据的活动
-        返回：Activity 对象或 None
+        get the latest activity with GPS data from Strava API
+        Returns: Activity object or None if no GPS activity found
         """
         try:
             activities = list(self.client.get_activities(limit=30))
@@ -380,13 +379,12 @@ class Generator:
 
     def sync_flyby_data(self):
         """
-        获取最近一次 GPS 活动的 flyby 数据并存储到数据库
+        get the flyby data for the latest GPS activity and store it in the database.
         """
         try:
-            self.check_access()
             self.logger.info("Starting flyby data synchronization...")
 
-            # 获取最新的 GPS 活动
+            # get the latest GPS activity
             latest_gps_activity = self._get_latest_gps_activity()
             if not latest_gps_activity:
                 self.logger.info("No GPS-enabled activities found, skipping flyby sync.")
@@ -396,7 +394,7 @@ class Generator:
                 f"Processing flyby data for activity: {latest_gps_activity.name} ({latest_gps_activity.id})"
             )
 
-            # 检查是否已经处理过这个活动的 flyby 数据
+            # check if flyby data for this activity already exists
             try:
                 existing_count = self.db_connection.execute(
                     "SELECT COUNT(*) FROM activities_flyby WHERE activity_id = ?",
@@ -413,7 +411,7 @@ class Generator:
             except Exception as e:
                 self.logger.warning(f"Could not check existing flyby data: {e}")
 
-            # 获取活动的详细流数据
+            # get the streams for the latest GPS activity
             stream_types = [
                 "time",
                 "latlng",
@@ -426,7 +424,7 @@ class Generator:
             self.logger.info(f"Fetching stream data for activity {latest_gps_activity.id}...")
             streams = self.client.get_activity_streams(latest_gps_activity.id, types=stream_types, resolution="high")
 
-            # 验证必需的流数据
+            # check if the essential streams are present
             if not streams.get("time") or not streams.get("latlng"):
                 self.logger.warning(
                     f"Activity {latest_gps_activity.id} missing essential streams "
@@ -442,7 +440,6 @@ class Generator:
                 self.logger.warning(f"No flyby data generated for activity {latest_gps_activity.id}")
                 return 0
 
-            # 存储 flyby 数据到数据库
             records_stored = store_flyby_data(self.db_connection, flyby_df)
 
             if records_stored > 0:
@@ -460,7 +457,6 @@ class Generator:
             self.logger.info(f"Waiting {retry_after} seconds before retrying...")
             time.sleep(retry_after)
 
-            # 单次重试
             try:
                 self.logger.info("Retrying flyby data synchronization after rate limit...")
                 return self.sync_flyby_data()

@@ -44,7 +44,7 @@ ACTIVITIES_FLYBY_SCHEMA = {
     "lng": "DECIMAL(9, 6)",
     "alt": "SMALLINT",
     "pace": "DECIMAL(5, 2)",
-    "hr": "TINYINT",
+    "hr": "SMALLINT",
     "distance": "INTEGER",
 }
 
@@ -150,18 +150,10 @@ def _create_activities_flyby_table(db_connection):
     """
     Creates the activities_flyby table with proper primary key constraint.
     """
+    # DuckDB supports FOREIGN KEY constraints but not ON DELETE CASCADE.
+    # We define the table with the constraint and let the application handle
+    # cascading deletes if necessary.
     try:
-        # Check if table exists
-        table_exists = db_connection.execute("""
-            SELECT COUNT(*) as count FROM information_schema.tables 
-            WHERE table_name = 'activities_flyby'
-        """).fetchone()
-
-        if table_exists and table_exists[0] > 0:
-            logger.info("activities_flyby table already exists")
-            return
-
-        # Create table with composite primary key
         create_table_sql = """
         CREATE TABLE IF NOT EXISTS activities_flyby (
             activity_id BIGINT NOT NULL,
@@ -170,37 +162,15 @@ def _create_activities_flyby_table(db_connection):
             lng DECIMAL(9, 6),
             alt SMALLINT,
             pace DECIMAL(5, 2),
-            hr TINYINT,
+            hr SMALLINT,
             distance INTEGER,
             PRIMARY KEY (activity_id, time_offset),
-            FOREIGN KEY (activity_id) REFERENCES activities(run_id) ON DELETE CASCADE
+            FOREIGN KEY (activity_id) REFERENCES activities(run_id)
         );
         """
-
         db_connection.execute(create_table_sql)
-        logger.info("Created activities_flyby table successfully")
-
     except Exception as e:
-        logger.warning(f"Could not create activities_flyby table: {e}")
-        # Fallback to simple table creation without foreign key
-        try:
-            simple_create_sql = """
-            CREATE TABLE IF NOT EXISTS activities_flyby (
-                activity_id BIGINT NOT NULL,
-                time_offset INTEGER NOT NULL,
-                lat DECIMAL(9, 6),
-                lng DECIMAL(9, 6),
-                alt SMALLINT,
-                pace DECIMAL(5, 2),
-                hr TINYINT,
-                distance INTEGER,
-                PRIMARY KEY (activity_id, time_offset)
-            );
-            """
-            db_connection.execute(simple_create_sql)
-            logger.info("Created activities_flyby table without foreign key constraint")
-        except Exception as e2:
-            logger.error(f"Failed to create activities_flyby table: {e2}")
+        logger.error(f"Failed to create or verify activities_flyby table: {e}")
 
 
 def update_or_create_activities(db_connection, activities_df):
@@ -411,44 +381,32 @@ def get_dataframes_for_fit_tables(activity, streams):
 
 def convert_streams_to_flyby_dataframe(activity, streams):
     """
-    将 Strava 流数据转换为 flyby DataFrame 格式
-
-    参数：
-        activity: Strava 活动对象
-        streams: Strava 流数据字典
-
-    返回：
-        pandas.DataFrame: 符合 ACTIVITIES_FLYBY_SCHEMA 的 DataFrame
+    Convert the Strava activity streams into a DataFrame
     """
     if not streams or not streams.get("time") or not streams.get("latlng"):
         logger.warning(f"Activity {activity.id} missing essential streams (time/latlng)")
         return pd.DataFrame()
 
     try:
-        # 获取基础流数据
         time_data = streams.get("time").data
         latlng_data = streams.get("latlng").data
 
-        # 确保时间和位置数据长度一致
         if len(time_data) != len(latlng_data):
             logger.warning(f"Activity {activity.id} has mismatched time/latlng data lengths")
             min_length = min(len(time_data), len(latlng_data))
             time_data = time_data[:min_length]
             latlng_data = latlng_data[:min_length]
 
-        # 构建基础数据
         flyby_data = {
             "activity_id": [activity.id] * len(time_data),
-            "time_offset": time_data,  # 时间偏移（秒）
+            "time_offset": time_data,
             "lat": [round(float(latlng[0]), 6) if latlng[0] is not None else None for latlng in latlng_data],
             "lng": [round(float(latlng[1]), 6) if latlng[1] is not None else None for latlng in latlng_data],
         }
 
-        # 处理海拔数据
         altitude_stream = streams.get("altitude")
         if altitude_stream and altitude_stream.data:
             alt_data = altitude_stream.data
-            # 确保长度匹配，截断或填充 None
             if len(alt_data) < len(time_data):
                 alt_data.extend([None] * (len(time_data) - len(alt_data)))
             elif len(alt_data) > len(time_data):
@@ -458,23 +416,18 @@ def convert_streams_to_flyby_dataframe(activity, streams):
         else:
             flyby_data["alt"] = [None] * len(time_data)
 
-        # 处理配速数据（从 velocity_smooth 计算）
         velocity_stream = streams.get("velocity_smooth")
         if velocity_stream and velocity_stream.data:
             velocity_data = velocity_stream.data
-            # 确保长度匹配
             if len(velocity_data) < len(time_data):
                 velocity_data.extend([None] * (len(time_data) - len(velocity_data)))
             elif len(velocity_data) > len(time_data):
                 velocity_data = velocity_data[: len(time_data)]
 
-            # 计算配速：(1000.0 / 60.0) * (1.0 / 速度) 分钟/公里
-            # 速度单位：米/秒，配速单位：分钟/公里
             pace_data = []
             for velocity in velocity_data:
                 if velocity is not None and not pd.isna(velocity) and velocity > 0:
                     pace = (1000.0 / 60.0) / velocity
-                    # 限制配速在合理范围内（1-30 分钟/公里）
                     if 1.0 <= pace <= 30.0:
                         pace_data.append(round(pace, 2))
                     else:
@@ -485,44 +438,36 @@ def convert_streams_to_flyby_dataframe(activity, streams):
         else:
             flyby_data["pace"] = [None] * len(time_data)
 
-        # 处理心率数据
         heartrate_stream = streams.get("heartrate")
         if heartrate_stream and heartrate_stream.data:
             hr_data = heartrate_stream.data
-            # 确保长度匹配
             if len(hr_data) < len(time_data):
                 hr_data.extend([None] * (len(time_data) - len(hr_data)))
             elif len(hr_data) > len(time_data):
                 hr_data = hr_data[: len(time_data)]
 
-            # 转换为 TINYINT 范围（0-255），心率通常在 40-220 之间
             flyby_data["hr"] = [
                 int(hr) if hr is not None and not pd.isna(hr) and 0 <= hr <= 255 else None for hr in hr_data
             ]
         else:
             flyby_data["hr"] = [None] * len(time_data)
 
-        # 处理距离数据
         distance_stream = streams.get("distance")
         if distance_stream and distance_stream.data:
             dist_data = distance_stream.data
-            # 确保长度匹配
             if len(dist_data) < len(time_data):
                 dist_data.extend([None] * (len(time_data) - len(dist_data)))
             elif len(dist_data) > len(time_data):
                 dist_data = dist_data[: len(time_data)]
 
-            # 转换为 INTEGER（米）
             flyby_data["distance"] = [
                 int(dist) if dist is not None and not pd.isna(dist) else None for dist in dist_data
             ]
         else:
             flyby_data["distance"] = [None] * len(time_data)
 
-        # 创建 DataFrame
         flyby_df = pd.DataFrame(flyby_data)
 
-        # 确保数据类型符合 schema 要求
         flyby_df["activity_id"] = flyby_df["activity_id"].astype("int64")
         flyby_df["time_offset"] = flyby_df["time_offset"].astype("int32")
 
@@ -535,25 +480,13 @@ def convert_streams_to_flyby_dataframe(activity, streams):
 
 
 def store_flyby_data(db_connection, flyby_df):
-    """
-    将 flyby 数据存储到 activities_flyby 表
-
-    参数：
-        db_connection: 数据库连接
-        flyby_df: flyby 数据 DataFrame
-
-    返回：
-        int: 存储的记录数量
-    """
     if flyby_df.empty:
         logger.info("No flyby data to store")
         return 0
 
     try:
-        # 确保 activities_flyby 表存在
         _create_activities_flyby_table(db_connection)
 
-        # 验证 DataFrame 列是否符合 schema
         expected_columns = set(ACTIVITIES_FLYBY_SCHEMA.keys())
         df_columns = set(flyby_df.columns)
 
@@ -562,24 +495,19 @@ def store_flyby_data(db_connection, flyby_df):
             logger.error(f"Missing required columns in flyby DataFrame: {missing_columns}")
             return 0
 
-        # 选择符合 schema 的列，确保顺序正确
         ordered_columns = [col for col in ACTIVITIES_FLYBY_SCHEMA.keys() if col in flyby_df.columns]
         flyby_df_ordered = flyby_df[ordered_columns].copy()
 
-        # 数据类型验证和转换
         try:
-            # 确保 activity_id 和 time_offset 不为空（主键字段）
             flyby_df_ordered = flyby_df_ordered.dropna(subset=["activity_id", "time_offset"])
 
             if flyby_df_ordered.empty:
                 logger.warning("No valid flyby records after removing null primary key values")
                 return 0
 
-            # 转换数据类型以匹配 schema
             flyby_df_ordered["activity_id"] = flyby_df_ordered["activity_id"].astype("int64")
             flyby_df_ordered["time_offset"] = flyby_df_ordered["time_offset"].astype("int32")
 
-            # 处理可选字段的数据类型
             if "lat" in flyby_df_ordered.columns:
                 flyby_df_ordered["lat"] = pd.to_numeric(flyby_df_ordered["lat"], errors="coerce")
             if "lng" in flyby_df_ordered.columns:
@@ -589,7 +517,7 @@ def store_flyby_data(db_connection, flyby_df):
             if "pace" in flyby_df_ordered.columns:
                 flyby_df_ordered["pace"] = pd.to_numeric(flyby_df_ordered["pace"], errors="coerce")
             if "hr" in flyby_df_ordered.columns:
-                flyby_df_ordered["hr"] = pd.to_numeric(flyby_df_ordered["hr"], errors="coerce").astype("Int8")
+                flyby_df_ordered["hr"] = pd.to_numeric(flyby_df_ordered["hr"], errors="coerce").astype("Int16")
             if "distance" in flyby_df_ordered.columns:
                 flyby_df_ordered["distance"] = pd.to_numeric(flyby_df_ordered["distance"], errors="coerce").astype(
                     "Int32"
@@ -599,19 +527,15 @@ def store_flyby_data(db_connection, flyby_df):
             logger.error(f"Error converting flyby data types: {e}")
             return 0
 
-        # 注册 DataFrame 为临时表
         temp_table_name = "temp_flyby_data"
         db_connection.register(temp_table_name, flyby_df_ordered)
 
         try:
-            # 使用 UPSERT 操作处理重复数据
-            # DuckDB 支持 ON CONFLICT DO UPDATE 语法
             columns_list = ", ".join(ordered_columns)
             values_list = ", ".join([f"temp.{col}" for col in ordered_columns])
 
-            # 构建 UPDATE SET 子句，排除主键字段
             non_pk_columns = [col for col in ordered_columns if col not in ["activity_id", "time_offset"]]
-            update_set_clause = ", ".join([f"{col} = temp.{col}" for col in non_pk_columns])
+            update_set_clause = ", ".join([f"{col} = excluded.{col}" for col in non_pk_columns])
 
             if update_set_clause:
                 upsert_sql = f"""
@@ -620,17 +544,14 @@ def store_flyby_data(db_connection, flyby_df):
                 ON CONFLICT (activity_id, time_offset) DO UPDATE SET {update_set_clause}
                 """
             else:
-                # 如果没有非主键列需要更新，使用 DO NOTHING
                 upsert_sql = f"""
                 INSERT INTO activities_flyby ({columns_list})
                 SELECT {values_list} FROM {temp_table_name} temp
                 ON CONFLICT (activity_id, time_offset) DO NOTHING
                 """
 
-            # 执行 UPSERT 操作
             db_connection.execute(upsert_sql)
 
-            # 获取实际插入/更新的记录数
             records_processed = len(flyby_df_ordered)
 
             logger.info(f"Successfully processed {records_processed} flyby records")
@@ -638,7 +559,6 @@ def store_flyby_data(db_connection, flyby_df):
 
         except Exception as e:
             logger.error(f"Error executing flyby data UPSERT: {e}")
-            # 尝试简单的 INSERT 操作作为 fallback
             try:
                 logger.info("Attempting fallback INSERT operation...")
                 insert_sql = f"""
@@ -654,11 +574,10 @@ def store_flyby_data(db_connection, flyby_df):
                 return 0
 
         finally:
-            # 清理临时表
             try:
                 db_connection.unregister(temp_table_name)
             except Exception:
-                pass  # 忽略清理错误
+                pass
 
     except Exception as e:
         logger.error(f"Unexpected error in store_flyby_data: {e}")
