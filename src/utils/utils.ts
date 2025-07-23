@@ -387,7 +387,7 @@ function getBoundsForGeoData(geoData: FeatureCollection<LineString>): IViewState
     }
   }
   if (points.length === 2 && String(points[0]) === String(points[1])) {
-    return { longitude: points[0][0], latitude: points[0][1], zoom: 9 }
+    return { longitude: points[0][0], latitude: points[0][1], zoom: 10 }
   }
   // Calculate corner values of bounds
   const pointsLong = points.map(point => point[0]) as number[]
@@ -398,11 +398,11 @@ function getBoundsForGeoData(geoData: FeatureCollection<LineString>): IViewState
   ]
   const viewState = new WebMercatorViewport({
     width: 800,
-    height: 600,
-  }).fitBounds(cornersLongLat, { padding: 200 })
+    height: 500,
+  }).fitBounds(cornersLongLat, { padding: 100 })
   let { longitude, latitude, zoom } = viewState
   if (features.length > 1) {
-    zoom = 11.5
+    zoom = 13
   }
   return { longitude, latitude, zoom }
 }

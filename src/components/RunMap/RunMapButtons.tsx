@@ -48,7 +48,7 @@ function RunMapButtons({
               onToggleMapVisible()
           }}
         >
-          <span
+          {/* <span
             className={
               styles.mapVisibleArrow + (isMapVisible ? ` ${styles.open}` : '')
             }
@@ -60,7 +60,7 @@ function RunMapButtons({
           </span>
           <span className={styles.mapVisibleText}>
             {isMapVisible ? '收起地图' : '展开地图'}
-          </span>
+          </span> */}
         </div>
       )}
     </>

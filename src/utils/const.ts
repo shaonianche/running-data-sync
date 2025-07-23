@@ -30,16 +30,17 @@ const MAP_LAYER_LIST = [
 const USE_GOOGLE_ANALYTICS = true
 const GOOGLE_ANALYTICS_TRACKING_ID = 'G-W2EVGZBMZR'
 
-const DISABLE_MAP = true
-const DISABLE_CHART = false
+const DISABLE_MAP = false
+const DISABLE_CHART = true
+const DISABLE_FLYBY = false
 // styling: set to `true` if you want dash-line route
-const USE_DASH_LINE = true
+const USE_DASH_LINE = false
 // styling: route line opacity: [0, 1]
 const LINE_OPACITY = 0.4
 // styling: map height
 const MAP_HEIGHT = 500
 // set to `false` if you want to hide the road label characters
-const ROAD_LABEL_DISPLAY = true
+const ROAD_LABEL_DISPLAY = false
 // update for now 2024/11/17 the privacy mode is true
 // set to `true` if you want to display only the routes without showing the map.
 const PRIVACY_MODE = false
@@ -117,6 +118,7 @@ export {
   CHINESE_LOCATION_INFO_MESSAGE_SECOND,
   CYCLING_TITLES,
   DISABLE_CHART,
+  DISABLE_FLYBY,
   DISABLE_MAP,
   GOOGLE_ANALYTICS_TRACKING_ID,
   INFO_MESSAGE,
@@ -136,7 +138,7 @@ export {
   USE_GOOGLE_ANALYTICS,
 }
 
-const nike = '#9f9f9f' // if you want change the main color change here src/styles/variables.scss
+const nike = '#47b8e0' // if you want change the main color change here src/styles/variables.scss
 const dark_vanilla = 'rgb(228,212,220)'
 
 // If your map has an offset please change this line

@@ -61,7 +61,7 @@ function RunMap({
     const theme = document.documentElement.getAttribute('data-theme')
     return theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
   })
-  const [isMapVisible, setIsMapVisible] = useState(false)
+  const [isMapVisible, setIsMapVisible] = useState(true)
 
   useEffect(() => {
     const updateTheme = () => {
@@ -225,7 +225,7 @@ function RunMap({
                       type="line"
                       paint={{
                         'line-color': ['get', 'color'],
-                        'line-width': isBigMap && lights ? 1 : 2,
+                        'line-width': isBigMap && lights ? 4 : 5,
                         'line-dasharray': dash,
                         'line-opacity':
                           isSingleRun || isBigMap || !lights ? 1 : LINE_OPACITY,
