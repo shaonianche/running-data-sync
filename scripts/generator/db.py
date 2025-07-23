@@ -43,7 +43,7 @@ ACTIVITIES_FLYBY_SCHEMA = {
     "lat": "DECIMAL(9, 6)",
     "lng": "DECIMAL(9, 6)",
     "alt": "SMALLINT",
-    "pace": "DECIMAL(5, 2)",
+    "pace": "DECIMAL(5, 2) NOT NULL DEFAULT 0.0",
     "hr": "SMALLINT",
     "distance": "INTEGER",
 }
@@ -150,25 +150,16 @@ def _create_activities_flyby_table(db_connection):
     """
     Creates the activities_flyby table with proper primary key constraint.
     """
+    columns_def = ", ".join([f"{name} {dtype}" for name, dtype in ACTIVITIES_FLYBY_SCHEMA.items()])
+    # Add composite primary key and foreign key constraints.
     # DuckDB supports FOREIGN KEY constraints but not ON DELETE CASCADE.
     # We define the table with the constraint and let the application handle
     # cascading deletes if necessary.
+    constraints = ", PRIMARY KEY (activity_id, time_offset), FOREIGN KEY (activity_id) REFERENCES activities(run_id)"
+    create_sql = f"CREATE TABLE IF NOT EXISTS activities_flyby ({columns_def}{constraints});"
+
     try:
-        create_table_sql = """
-        CREATE TABLE IF NOT EXISTS activities_flyby (
-            activity_id BIGINT NOT NULL,
-            time_offset INTEGER NOT NULL,
-            lat DECIMAL(9, 6),
-            lng DECIMAL(9, 6),
-            alt SMALLINT,
-            pace DECIMAL(5, 2),
-            hr SMALLINT,
-            distance INTEGER,
-            PRIMARY KEY (activity_id, time_offset),
-            FOREIGN KEY (activity_id) REFERENCES activities(run_id)
-        );
-        """
-        db_connection.execute(create_table_sql)
+        db_connection.execute(create_sql)
     except Exception as e:
         logger.error(f"Failed to create or verify activities_flyby table: {e}")
 
@@ -425,18 +416,22 @@ def convert_streams_to_flyby_dataframe(activity, streams):
                 velocity_data = velocity_data[: len(time_data)]
 
             pace_data = []
-            for velocity in velocity_data:
+            for i, velocity in enumerate(velocity_data):
+                # Handle the case where time_offset is 0, setting pace to 0.0.
+                if time_data[i] == 0:
+                    pace_data.append(0.0)
+                    continue
                 if velocity is not None and not pd.isna(velocity) and velocity > 0:
                     pace = (1000.0 / 60.0) / velocity
                     if 1.0 <= pace <= 30.0:
                         pace_data.append(round(pace, 2))
                     else:
-                        pace_data.append(None)
+                        pace_data.append(0.0)
                 else:
-                    pace_data.append(None)
+                    pace_data.append(0.0)
             flyby_data["pace"] = pace_data
         else:
-            flyby_data["pace"] = [None] * len(time_data)
+            flyby_data["pace"] = [0.0] * len(time_data)
 
         heartrate_stream = streams.get("heartrate")
         if heartrate_stream and heartrate_stream.data:
@@ -499,29 +494,16 @@ def store_flyby_data(db_connection, flyby_df):
         flyby_df_ordered = flyby_df[ordered_columns].copy()
 
         try:
-            flyby_df_ordered = flyby_df_ordered.dropna(subset=["activity_id", "time_offset"])
-
-            if flyby_df_ordered.empty:
-                logger.warning("No valid flyby records after removing null primary key values")
-                return 0
-
+            # Clean and convert data types in a more streamlined way
+            flyby_df_ordered.dropna(subset=["activity_id", "time_offset"], inplace=True)
             flyby_df_ordered["activity_id"] = flyby_df_ordered["activity_id"].astype("int64")
             flyby_df_ordered["time_offset"] = flyby_df_ordered["time_offset"].astype("int32")
-
-            if "lat" in flyby_df_ordered.columns:
-                flyby_df_ordered["lat"] = pd.to_numeric(flyby_df_ordered["lat"], errors="coerce")
-            if "lng" in flyby_df_ordered.columns:
-                flyby_df_ordered["lng"] = pd.to_numeric(flyby_df_ordered["lng"], errors="coerce")
-            if "alt" in flyby_df_ordered.columns:
-                flyby_df_ordered["alt"] = pd.to_numeric(flyby_df_ordered["alt"], errors="coerce").astype("Int16")
-            if "pace" in flyby_df_ordered.columns:
-                flyby_df_ordered["pace"] = pd.to_numeric(flyby_df_ordered["pace"], errors="coerce")
-            if "hr" in flyby_df_ordered.columns:
-                flyby_df_ordered["hr"] = pd.to_numeric(flyby_df_ordered["hr"], errors="coerce").astype("Int16")
-            if "distance" in flyby_df_ordered.columns:
-                flyby_df_ordered["distance"] = pd.to_numeric(flyby_df_ordered["distance"], errors="coerce").astype(
-                    "Int32"
-                )
+            flyby_df_ordered["lat"] = pd.to_numeric(flyby_df_ordered["lat"], errors="coerce")
+            flyby_df_ordered["lng"] = pd.to_numeric(flyby_df_ordered["lng"], errors="coerce")
+            flyby_df_ordered["alt"] = pd.to_numeric(flyby_df_ordered["alt"], errors="coerce").astype("Int16")
+            flyby_df_ordered["pace"] = pd.to_numeric(flyby_df_ordered["pace"], errors="coerce").fillna(0.0)
+            flyby_df_ordered["hr"] = pd.to_numeric(flyby_df_ordered["hr"], errors="coerce").astype("Int16")
+            flyby_df_ordered["distance"] = pd.to_numeric(flyby_df_ordered["distance"], errors="coerce").astype("Int32")
 
         except Exception as e:
             logger.error(f"Error converting flyby data types: {e}")
