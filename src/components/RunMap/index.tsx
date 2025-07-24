@@ -241,6 +241,7 @@ function RunMap({
                       startLon={startLon}
                       endLat={endLat}
                       endLon={endLon}
+                      coordinates={geoData.features[0].geometry.coordinates}
                     />
                   )}
                   <FullscreenControl style={fullscreenButton} />
