@@ -11,7 +11,6 @@ import { chinaGeojson } from '@/static/run_countries'
 import {
   ACTIVITY_TYPES,
   CYCLING_TITLES,
-  MAIN_COLOR,
   MUNICIPALITY_CITIES_ARR,
   NEED_FIX_MAP,
   RICH_TITLE,
@@ -233,7 +232,7 @@ function geoJsonForRuns(runs: Activity[]): FeatureCollection<LineString> {
       return {
         type: 'Feature',
         properties: {
-          color: MAIN_COLOR,
+          color: getMainColor(),
         },
         geometry: {
           type: 'LineString',
@@ -476,6 +475,15 @@ async function loadDuckDBFile(db: duckdb.AsyncDuckDB, filePath: string = '/db/ac
   return conn
 }
 
+function getMainColor(): string {
+  if (typeof window !== 'undefined') {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue('--color-primary')
+      .trim() || '#47b8e0'
+  }
+  return '#47b8e0'
+}
+
 export {
   filterAndSortRuns,
   filterCityRuns,
@@ -487,6 +495,7 @@ export {
   geoJsonForRuns,
   getBoundsForGeoData,
   getDuckDBConnection,
+  getMainColor,
   initDuckDB,
   intComma,
   loadDuckDBFile,

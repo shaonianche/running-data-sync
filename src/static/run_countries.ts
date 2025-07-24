@@ -1,5 +1,7 @@
 import type { FeatureCollection, LineString, MultiPolygon, Polygon } from 'geojson'
-import { MAIN_COLOR } from '@/utils/const'
+import { getMainColor } from '@/utils/utils'
+
+const MAIN_COLOR = getMainColor()
 
 export type RPGeometry = LineString | Polygon | MultiPolygon
 

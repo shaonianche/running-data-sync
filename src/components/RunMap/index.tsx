@@ -16,7 +16,6 @@ import Map, {
 import LightsControl from '@/components/RunMap/LightsControl'
 import getActivities from '@/hooks/useActivities'
 import {
-  COUNTRY_FILL_COLOR,
   DISABLE_CHART,
   DISABLE_MAP,
   IS_CHINESE,
@@ -26,16 +25,17 @@ import {
   MAP_LAYER_LIST,
   MAPBOX_TOKEN,
   PRIVACY_MODE,
-  PROVINCE_FILL_COLOR,
   ROAD_LABEL_DISPLAY,
   USE_DASH_LINE,
 } from '@/utils/const'
-import { geoJsonForMap } from '@/utils/utils'
+import { geoJsonForMap, getMainColor } from '@/utils/utils'
 import ActivityChart from './ActivityChart'
 import RunMapButtons from './RunMapButtons'
 import RunMarker from './RunMarker'
-import styles from './style.module.css'
 import './mapbox.css'
+
+const PROVINCE_FILL_COLOR = getMainColor()
+const COUNTRY_FILL_COLOR = getMainColor()
 
 interface IRunMapProps {
   title: string
@@ -47,7 +47,6 @@ interface IRunMapProps {
 }
 
 function RunMap({
-  title,
   viewState,
   setViewState,
   changeYear,
@@ -227,8 +226,7 @@ function RunMap({
                         'line-color': ['get', 'color'],
                         'line-width': isBigMap && lights ? 4 : 5,
                         'line-dasharray': dash,
-                        'line-opacity':
-                          isSingleRun || isBigMap || !lights ? 1 : LINE_OPACITY,
+                        'line-opacity': LINE_OPACITY,
                         'line-blur': 1,
                       }}
                       layout={{
@@ -245,7 +243,6 @@ function RunMap({
                       endLon={endLon}
                     />
                   )}
-                  <span className={styles.runTitle}>{title}</span>
                   <FullscreenControl style={fullscreenButton} />
                   {!PRIVACY_MODE && <LightsControl setLights={setLights} lights={lights} />}
                   <NavigationControl

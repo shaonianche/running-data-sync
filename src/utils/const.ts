@@ -36,7 +36,7 @@ const DISABLE_FLYBY = false
 // styling: set to `true` if you want dash-line route
 const USE_DASH_LINE = false
 // styling: route line opacity: [0, 1]
-const LINE_OPACITY = 0.4
+const LINE_OPACITY = 0.6
 // styling: map height
 const MAP_HEIGHT = 500
 // set to `false` if you want to hide the road label characters
@@ -138,12 +138,9 @@ export {
   USE_GOOGLE_ANALYTICS,
 }
 
-const nike = '#47b8e0' // if you want change the main color change here src/styles/variables.scss
-const dark_vanilla = 'rgb(228,212,220)'
+const dark_vanilla = '#E4D4DC'
+export const COUNTRY_FILL_COLOR = dark_vanilla
 
 // If your map has an offset please change this line
 // issues #92 and #198
 export const NEED_FIX_MAP = false
-export const MAIN_COLOR = nike
-export const PROVINCE_FILL_COLOR = '#47b8e0'
-export const COUNTRY_FILL_COLOR = dark_vanilla
