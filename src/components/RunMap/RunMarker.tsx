@@ -113,7 +113,7 @@ function RunMarker({
       anchor="center"
     >
       <div className={styles.markerStart}>
-        <img src="/images/logo.jpg" alt="Current Position" />
+        <img src="/images/marker_start.webp" alt="Current Position" />
       </div>
     </Marker>
   )
