@@ -196,7 +196,9 @@ function Index() {
             )}
       </div>
       <div className="w-full lg:w-2/3">
-        <div className="sticky top-0 z-10" style={{ background: 'var(--color-background)' }}>
+        <div className={`sticky top-0 z-10 bg-[var(--color-background)] ${
+          year === 'Total' ? '' : 'sticky top-0'}`}
+        >
           <RunMap
             title={title}
             viewState={viewState}
