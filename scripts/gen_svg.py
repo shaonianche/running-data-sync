@@ -297,7 +297,7 @@ def main():
             p.set_tracks(tracks)
             p.draw(
                 drawers[args.type],
-                os.path.join("assets", f"year_{str(y)}.svg"),
+                os.path.join("public", "assets", f"year_{str(y)}.svg"),
             )
     else:
         p.draw(drawers[args.type], args.output)
