@@ -35,7 +35,7 @@ function Index() {
   const [title, setTitle] = useState('')
   const [geoData, setGeoData] = useState(() => geoJsonForRuns(runs))
   const bounds = useMemo(() => getBoundsForGeoData(geoData), [geoData])
-  const intervalIdRef = useRef<number | undefined>()
+  const intervalIdRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const [viewState, setViewState] = useState<IViewState>({
     ...bounds,
@@ -66,7 +66,7 @@ function Index() {
     }
 
     changeByItem(y, 'Year', filterYearRuns)
-    if (intervalIdRef.current !== undefined) {
+    if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current)
     }
   }
@@ -97,7 +97,7 @@ function Index() {
     }
     setGeoData(() => geoJsonForRuns(selectedRuns))
     setTitle(titleForShow(lastRun))
-    if (intervalIdRef.current !== undefined) {
+    if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current)
     }
     scrollToMap()
@@ -196,14 +196,20 @@ function Index() {
             )}
       </div>
       <div className="w-full lg:w-2/3">
-        <RunMap
-          title={title}
-          viewState={viewState}
-          geoData={geoData}
-          setViewState={setViewState}
-          changeYear={changeYear}
-          thisYear={year}
-        />
+        <div
+          className={`z-10 bg-[var(--color-background)] ${
+            year === 'Total' ? '' : 'sticky top-0'
+          }`}
+        >
+          <RunMap
+            title={title}
+            viewState={viewState}
+            geoData={geoData}
+            setViewState={setViewState}
+            changeYear={changeYear}
+            thisYear={year}
+          />
+        </div>
         {year === 'Total'
           ? (
               <SVGStat />

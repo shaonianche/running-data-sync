@@ -59,7 +59,7 @@ jobs:
         with:
           path: |
             activities
-            assets
+            public
             GPX_OUT
             TCX_OUT
             FIT_OUT

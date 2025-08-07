@@ -164,10 +164,23 @@
 }
 
 .markerStart {
-  transform: translate(-50%, -6%);
   width: 32px;
   height: 32px;
   border-radius: 50%;
   border: 3px solid var(--color-primary);
   overflow: hidden;
+  left: 50%;
+  top: 50%;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: left, top;
+}
+
+.markerStart img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  user-select: none;
 }
