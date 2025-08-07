@@ -46,6 +46,7 @@ function RunRow({
     >
       <td>{titleForRun(run)}</td>
       <td>{distance}</td>
+      <td>{(run.elevation_gain ?? 0.0).toFixed(1)}</td>
       <td>{paceParts}</td>
       <td>{heartRate && heartRate.toFixed(0)}</td>
       <td>{runTime}</td>
