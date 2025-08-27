@@ -61,6 +61,10 @@ function RunMap({
     return theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
   })
   const [isMapVisible, setIsMapVisible] = useState(true)
+  const [isSmallScreen, setIsSmallScreen] = useState(() => window.matchMedia('(max-width: 768px)').matches)
+  const hasAppliedMobileDefaultZoom = useRef(false)
+  const lastFittedBoundsKey = useRef<string | null>(null)
+  const hasAppliedNoGpsMobileDefault = useRef(false)
 
   useEffect(() => {
     const updateTheme = () => {
@@ -78,11 +82,76 @@ function RunMap({
   }, [])
 
   useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsSmallScreen(mq.matches)
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  useEffect(() => {
     if (mapRef.current) {
       const map = mapRef.current.getMap()
       map.setStyle(isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10')
     }
   }, [isDarkMode])
+
+  // Ensure a comfortable default zoom on mobile to avoid overly-zoomed-in views
+  useEffect(() => {
+    if (isSmallScreen && !hasAppliedMobileDefaultZoom.current) {
+      const currentZoom = viewState.zoom ?? 0
+      if (currentZoom === 0 || currentZoom > 4) {
+        setViewState({ ...viewState, zoom: 3 })
+      }
+      hasAppliedMobileDefaultZoom.current = true
+    }
+  }, [isSmallScreen, setViewState, viewState])
+
+  // Detect if there are any line features (GPS tracks) in the provided geoData
+  const hasRunLines = useMemo(() => {
+    try {
+      return geoData.features?.some((f: any) => {
+        const t = f?.geometry?.type
+        return t === 'LineString' || t === 'MultiLineString'
+      }) ?? false
+    }
+    catch {
+      return false
+    }
+  }, [geoData])
+
+  // For activities without GPS on mobile, set a sane global default center/zoom once
+  useEffect(() => {
+    if (!isSmallScreen || hasRunLines || hasAppliedNoGpsMobileDefault.current)
+      return
+    const worldBounds = [
+      [-180, -60],
+      [180, 85],
+    ] as [[number, number], [number, number]]
+    const map = mapRef.current?.getMap()
+    if (map) {
+      try {
+        map.fitBounds(worldBounds, { padding: 16, duration: 0, maxZoom: 1.2 })
+        hasAppliedNoGpsMobileDefault.current = true
+        return
+      }
+      catch {}
+    }
+    const defaultCenter = IS_CHINESE ? { longitude: 104.0, latitude: 18.0 } : { longitude: 0, latitude: 12 }
+    const next = { ...viewState, ...defaultCenter, zoom: 1, bearing: 0, pitch: 0 }
+    setViewState(next)
+    hasAppliedNoGpsMobileDefault.current = true
+  }, [isSmallScreen, hasRunLines, viewState, setViewState])
+
+  // Listen for global year change from top mobile selector
+  useEffect(() => {
+    const onChangeYear = (e: any) => {
+      const y = e?.detail?.year
+      if (y)
+        changeYear(y)
+    }
+    window.addEventListener('app:changeYear' as any, onChangeYear)
+    return () => window.removeEventListener('app:changeYear' as any, onChangeYear)
+  }, [changeYear])
 
   const keepWhenLightsOff = useMemo(() => ['runs2'], [])
   const switchLayerVisibility = useCallback((map: MapInstance, lights: boolean) => {
@@ -150,6 +219,16 @@ function RunMap({
     [startLon, startLat] = points[0];
     [endLon, endLat] = points[points.length - 1]
   }
+  // Normalize GeoJSON coordinates (LineString | MultiLineString | MultiPolygon) to a flat number[][] for marker
+  const lineCoordinates: number[][] = useMemo(() => {
+    try {
+      const coordsAny: any = geoData.features[0]?.geometry?.coordinates
+      return Array.isArray(coordsAny?.[0]?.[0]) ? (coordsAny[0] as number[][]) : (coordsAny as number[][])
+    }
+    catch {
+      return []
+    }
+  }, [geoData])
   const dash = USE_DASH_LINE && !isSingleRun && !isBigMap ? [2, 2] : [2, 0]
   const onMove = React.useCallback(
     ({ viewState }: { viewState: IViewState }) => {
@@ -180,14 +259,48 @@ function RunMap({
     }
   }, [])
 
+  // When a single run is selected, fit bounds with mobile-friendly padding and capped zoom
+  useEffect(() => {
+    if (!mapRef.current || !isSingleRun || lineCoordinates.length === 0)
+      return
+    const longitudes = lineCoordinates.map(c => c[0])
+    const latitudes = lineCoordinates.map(c => c[1])
+    const minLon = Math.min(...longitudes)
+    const maxLon = Math.max(...longitudes)
+    const minLat = Math.min(...latitudes)
+    const maxLat = Math.max(...latitudes)
+    const boundsKey = `${minLon.toFixed(5)}:${minLat.toFixed(5)}:${maxLon.toFixed(5)}:${maxLat.toFixed(5)}:${isSmallScreen}`
+    if (lastFittedBoundsKey.current === boundsKey)
+      return
+    lastFittedBoundsKey.current = boundsKey
+    const map = mapRef.current.getMap()
+    try {
+      map.fitBounds(
+        [
+          [minLon, minLat],
+          [maxLon, maxLat],
+        ],
+        {
+          padding: isSmallScreen ? 40 : 80,
+          maxZoom: isSmallScreen ? 13 : 16,
+          duration: 0,
+        },
+      )
+    }
+    catch {}
+  }, [isSingleRun, isSmallScreen, lineCoordinates])
+
   return (
     <div>
-      <RunMapButtons
-        changeYear={changeYear}
-        thisYear={thisYear}
-        isMapVisible={isMapVisible}
-        onToggleMapVisible={() => setIsMapVisible(v => !v)}
-      />
+      {!isSmallScreen && (
+        <RunMapButtons
+          changeYear={changeYear}
+          thisYear={thisYear}
+          isMapVisible={isMapVisible}
+          onToggleMapVisible={() => setIsMapVisible(v => !v)}
+          showMapToggle={true}
+        />
+      )}
       {!DISABLE_CHART
         ? <ActivityChart thisYear={thisYear} />
         : (
@@ -200,6 +313,15 @@ function RunMap({
                   mapStyle={isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10'}
                   ref={mapRefCallback}
                   mapboxAccessToken={MAPBOX_TOKEN}
+                  doubleClickZoom={!isSmallScreen}
+                  scrollZoom={!isSmallScreen}
+                  keyboard={!isSmallScreen}
+                  touchZoomRotate={!isSmallScreen}
+                  touchPitch={!isSmallScreen}
+                  dragRotate={!isSmallScreen}
+                  pitchWithRotate={!isSmallScreen}
+                  minZoom={isSmallScreen ? 0.25 : 0}
+                  maxZoom={isSmallScreen ? 16 : 22}
                 >
                   <Source id="data" type="geojson" data={geoData}>
                     <Layer
@@ -241,7 +363,7 @@ function RunMap({
                       startLon={startLon}
                       endLat={endLat}
                       endLon={endLon}
-                      coordinates={geoData.features[0].geometry.coordinates}
+                      coordinates={lineCoordinates}
                     />
                   )}
                   <FullscreenControl style={fullscreenButton} />

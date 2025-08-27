@@ -19,7 +19,15 @@ function YearStat({
   // for hover
   const [hovered, eventHandlers] = useHover()
   // lazy Component
-  const YearSVG = lazy(() => loadSvgComponent(yearStats, `./year_${year}.svg`))
+  const YearSVG = lazy(async () => {
+    try {
+      return await loadSvgComponent(yearStats, `./year_${year}.svg`)
+    }
+    catch {
+      // fallback to an empty component when svg missing
+      return { default: () => null }
+    }
+  })
 
   if (years.includes(year)) {
     runs = runs.filter(run => run.start_date_local.slice(0, 4) === year)
@@ -58,7 +66,7 @@ function YearStat({
       {...(!disableClick && onClick ? { onClick: () => onClick(year) } : {})}
       {...eventHandlers}
     >
-      <section>
+      <section className="grid grid-cols-2 gap-x-6 gap-y-3 md:block text-sm md:text-base">
         <Stat value={year} description=" Journey" />
         <Stat value={runs.length} description=" Runs" />
         <Stat value={sumDistance} description=" KM" />
@@ -73,7 +81,7 @@ function YearStat({
           <YearSVG className="my-4 h-4/6 w-4/6 border-0 p-0" />
         </Suspense>
       )}
-      <hr />
+      <hr className="my-3 md:my-8" />
     </div>
   )
 }

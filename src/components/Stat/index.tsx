@@ -17,10 +17,10 @@ function Stat({
 }: IStatProperties) {
   return (
     <div className={`${className}`} onClick={onClick}>
-      <span className={`text-${citySize || 5}xl font-bold italic`}>
+      <span className={`font-bold italic text-3xl sm:text-4xl md:text-${citySize || 5}xl`}>
         {intComma(value.toString())}
       </span>
-      <span className="text-lg font-semibold italic">{description}</span>
+      <span className="font-semibold italic text-sm sm:text-base md:text-lg">{description}</span>
     </div>
   )
 }

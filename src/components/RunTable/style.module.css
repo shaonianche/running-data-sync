@@ -50,6 +50,13 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
+    &:last-child {
+      max-width: 240px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   &:hover {

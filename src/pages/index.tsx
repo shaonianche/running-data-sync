@@ -198,7 +198,7 @@ function Index() {
       <div className="w-full lg:w-2/3">
         <div
           className={`z-10 bg-[var(--color-background)] ${
-            year === 'Total' ? '' : 'sticky top-0'
+            year === 'Total' ? '' : 'lg:sticky lg:top-0'
           }`}
         >
           <RunMap

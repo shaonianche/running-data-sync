@@ -132,6 +132,67 @@
   transition: color 0.15s;
 }
 
+/* Mobile: horizontal scroll + scroll snap for year buttons */
+@media (max-width: 640px) {
+  .buttons {
+    gap: 0.5rem;
+    /* Fixed bottom nav style */
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    /* Match page container px-4 (1rem) for left alignment */
+    padding: 0.5rem 1rem calc(0.5rem + env(safe-area-inset-bottom)) 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    scroll-snap-type: x mandatory;
+    white-space: nowrap;
+    background: transparent; /* use pseudo-element for translucent themed bg */
+    border-top: 1px solid var(--color-border);
+    border-bottom: none;
+    backdrop-filter: saturate(120%) blur(14px);
+    -webkit-backdrop-filter: saturate(120%) blur(14px);
+  }
+  /* Translucent theme-aware background layer for blur */
+  .buttons::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-bg-secondary);
+    opacity: 0.82;
+    pointer-events: none;
+  }
+  /* Raise lights control above bottom nav on mobile */
+  .lights {
+    bottom: 120px;
+  }
+  .buttons::-webkit-scrollbar {
+    /* WebKit */
+    display: none;
+  }
+  .button {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
+}
+
+/* Spacer to avoid content being overlapped by fixed bottom nav on mobile */
+.mobileBottomSpacer {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .mobileBottomSpacer {
+    display: block;
+    height: calc(56px + env(safe-area-inset-bottom));
+    width: 100%;
+  }
+}
+
 .chartContainer {
   padding: 20px;
   background-color: var(--color-svg-background);

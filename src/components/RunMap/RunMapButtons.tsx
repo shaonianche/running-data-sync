@@ -7,6 +7,7 @@ interface RunMapButtonsProps {
   thisYear: string
   isMapVisible: boolean
   onToggleMapVisible: () => void
+  showMapToggle?: boolean
 }
 
 function RunMapButtons({
@@ -14,6 +15,7 @@ function RunMapButtons({
   thisYear,
   isMapVisible,
   onToggleMapVisible,
+  showMapToggle = true,
 }: RunMapButtonsProps) {
   const { years } = getActivities()
   const yearsButtons = years.slice()
@@ -36,7 +38,7 @@ function RunMapButtons({
           </li>
         ))}
       </ul>
-      {!DISABLE_MAP && (
+      {!DISABLE_MAP && showMapToggle && (
         <div
           className={styles.mapVisibleBar}
           tabIndex={0}
