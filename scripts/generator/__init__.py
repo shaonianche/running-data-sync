@@ -8,6 +8,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 
 import arrow
 import certifi
+import duckdb
 import geopy
 import pandas as pd
 import stravalib
@@ -47,7 +48,9 @@ g = Nominatim(user_agent="running-data-sync", timeout=10)
 class Generator:
     def __init__(self, db_path):
         self.client = stravalib.Client()
-        self.db_connection = init_db(db_path)
+        # Lazy-init DB to avoid unnecessary writes; hold path and connect only when needed
+        self.db_path = db_path
+        self.db_connection = None
         self.logger = get_logger(self.__class__.__name__)
 
         self.client_id = ""
@@ -83,26 +86,51 @@ class Generator:
         if force:
             filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
         else:
-            # Use a raw SQL query to get the last activity's start_date
-            last_activity_date_result = self.db_connection.execute("SELECT MAX(start_date) FROM activities").fetchone()
-            last_activity_date = last_activity_date_result[0] if last_activity_date_result else None
+            # Use a read-only connection to avoid writes when probing state
+            last_activity_date = None
+            try:
+                ro_con = duckdb.connect(database=self.db_path, read_only=True)
+                last_activity_date_result = ro_con.execute("SELECT MAX(start_date) FROM activities").fetchone()
+                ro_con.close()
+                last_activity_date = last_activity_date_result[0] if last_activity_date_result else None
+            except Exception:
+                # Table may not exist yet; treat as no data
+                last_activity_date = None
 
             if last_activity_date:
-                # The date from DB is timezone-aware, so we can parse it directly.
                 last_activity_date = arrow.get(last_activity_date).datetime
                 filters = {"after": last_activity_date}
             else:
                 filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
 
         strava_activities = list(self.client.get_activities(**filters))
-        self.logger.info(f"Found {len(strava_activities)} new activities from Strava.")
 
-        if not strava_activities:
+        # Filter out activities that already exist in DB by run_id using read-only connection
+        try:
+            ro_con = duckdb.connect(database=self.db_path, read_only=True)
+            try:
+                existing_ids_df = ro_con.execute("SELECT run_id FROM activities").fetchdf()
+                existing_ids = set(existing_ids_df["run_id"].astype(str).tolist())
+            except Exception:
+                existing_ids = set()
+            finally:
+                ro_con.close()
+        except Exception:
+            existing_ids = set()
+        activities_to_process = [a for a in strava_activities if str(a.id) not in existing_ids]
+
+        self.logger.info(f"Found {len(activities_to_process)} new activities from Strava.")
+
+        if not activities_to_process:
             self.logger.info("No new activities to sync.")
             return
 
-        # Convert to DataFrame and upsert
-        activities_df = get_dataframe_from_strava_activities(strava_activities)
+        # Initialize DB (writable) only when we have new data to write
+        if self.db_connection is None:
+            self.db_connection = init_db(self.db_path)
+
+        # Convert to DataFrame and upsert only truly new activities
+        activities_df = get_dataframe_from_strava_activities(activities_to_process)
         updated_count = update_or_create_activities(self.db_connection, activities_df)
         self.logger.info(f"Synced {updated_count} activities to the database.")
 
@@ -285,7 +313,16 @@ class Generator:
         Loads activities from the database and calculates the running streak.
         """
         query = "SELECT * FROM activities ORDER BY start_date_local"
-        activities_df = self.db_connection.execute(query).fetchdf()
+        # Use existing writable connection if available, otherwise open a read-only one
+        if self.db_connection is not None:
+            activities_df = self.db_connection.execute(query).fetchdf()
+        else:
+            try:
+                ro_con = duckdb.connect(database=self.db_path, read_only=True)
+                activities_df = ro_con.execute(query).fetchdf()
+                ro_con.close()
+            except Exception:
+                return []
 
         if self.only_run:
             activities_df = activities_df[activities_df["type"] == "Run"].copy()
