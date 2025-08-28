@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
     commit-message:
       # Prefix all commit messages with "npm"
       prefix: npm
@@ -12,7 +12,7 @@ updates:
   - package-ecosystem: pip
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
     open-pull-requests-limit: 10
 
   - package-ecosystem: github-actions
@@ -20,7 +20,7 @@ updates:
     # default location of `.github/workflows`
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
     commit-message:
       # Prefix all commit messages with "npm"
       prefix: github-actions
