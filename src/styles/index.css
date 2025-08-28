@@ -3,7 +3,7 @@
 
 @import 'tailwindcss';
 
-@theme inline {
+:root {
   --color-primary: var(--color-brand);
   --color-background: var(--color-bg);
   --color-text-primary: var(--color-tx);
