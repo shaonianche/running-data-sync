@@ -245,3 +245,7 @@
   pointer-events: none;
   user-select: none;
 }
+
+.mapboxgl-canvas {
+  touch-action: pan-y !important;
+}

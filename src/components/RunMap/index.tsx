@@ -319,6 +319,7 @@ function RunMap({
                   touchZoomRotate={!isSmallScreen}
                   touchPitch={!isSmallScreen}
                   dragRotate={!isSmallScreen}
+                  dragPan={!isSmallScreen}
                   pitchWithRotate={!isSmallScreen}
                   minZoom={isSmallScreen ? 0.25 : 0}
                   maxZoom={isSmallScreen ? 16 : 22}
