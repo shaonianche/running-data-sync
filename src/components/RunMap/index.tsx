@@ -346,7 +346,7 @@ function RunMap({
                       id="runs2"
                       type="line"
                       paint={{
-                        'line-color': ['get', 'color'],
+                        'line-color': ['coalesce', ['get', 'color'], ['literal', getMainColor()]],
                         'line-width': isBigMap && lights ? 4 : 5,
                         'line-dasharray': dash,
                         'line-opacity': LINE_OPACITY,
