@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "1.29.1-dev132.0",
-    "@mapbox/mapbox-gl-language": "^1.0.1",
     "@mapbox/polyline": "^1.2.1",
     "@math.gl/web-mercator": "^4.1.0",
     "@surbowl/world-geo-json-zh": "^2.1.5",
@@ -39,7 +38,7 @@
     "@vitejs/plugin-react": "^5.0.2",
     "gcoord": "^1.0.7",
     "geojson": "^0.5.0",
-    "mapbox-gl": "^3.14.0",
+    "maplibre-gl": "^4.7.1",
     "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

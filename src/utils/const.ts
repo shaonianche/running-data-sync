@@ -1,9 +1,6 @@
-// const
-const MAPBOX_TOKEN
-  // For security reasons, please avoid using the default public token provided by Mapbox as much as possible.
-  // Instead, manually add a new token and apply URL restrictions.
-  // (please refer to https://github.com/yihong0618/running_page/issues/643#issuecomment-2042668580)
-  = 'pk.eyJ1IjoiY215a2ZlaSIsImEiOiJjbDQ5NTZ6aDAwMHkwM2psa3FiemNqMmw1In0.OfV3cpXB1TK6wHOaoWOiIQ'
+// MapLibre 免费地图样式 (OpenFreeMap)
+const MAPLIBRE_LIGHT_STYLE = 'https://tiles.openfreemap.org/styles/liberty'
+const MAPLIBRE_DARK_STYLE = 'https://tiles.openfreemap.org/styles/dark'
 const MUNICIPALITY_CITIES_ARR = [
   '北京市',
   '上海市',
@@ -12,19 +9,58 @@ const MUNICIPALITY_CITIES_ARR = [
   '香港特别行政区',
   '澳门特别行政区',
 ]
+// OpenFreeMap 图层名称 - 所有 symbol 类型的文字标签
+// 注意: liberty 和 dark 样式的图层名称不同，需要同时包含
 const MAP_LAYER_LIST = [
-  'road-label',
-  'waterway-label',
-  'natural-line-label',
-  'natural-point-label',
-  'water-line-label',
-  'water-point-label',
-  'poi-label',
-  'airport-label',
-  'settlement-subdivision-label',
-  'settlement-label',
-  'state-label',
-  'country-label',
+  // === Liberty 样式 ===
+  // 水域标签
+  'waterway_line_label',
+  'water_name_point_label',
+  'water_name_line_label',
+  // 道路名称
+  'highway-name-path',
+  'highway-name-minor',
+  'highway-name-major',
+  // 道路标识
+  'highway-shield-non-us',
+  'highway-shield-us-interstate',
+  'road_shield_us',
+  // POI 兴趣点标签
+  'poi_r1',
+  'poi_r7',
+  'poi_r20',
+  'poi_transit',
+  'airport',
+  // 地点标签
+  'label_other',
+  'label_village',
+  'label_town',
+  'label_state',
+  'label_city',
+  'label_city_capital',
+  // 国家标签
+  'label_country_3',
+  'label_country_2',
+  'label_country_1',
+
+  // === Dark 样式 ===
+  // 水域标签
+  'water_name',
+  // 道路名称
+  'highway_name_other',
+  'highway_name_motorway',
+  // 地点标签
+  'place_other',
+  'place_suburb',
+  'place_village',
+  'place_town',
+  'place_city',
+  'place_city_large',
+  'place_state',
+  // 国家标签
+  'place_country_other',
+  'place_country_minor',
+  'place_country_major',
 ]
 
 const USE_GOOGLE_ANALYTICS = true
@@ -41,12 +77,6 @@ const LINE_OPACITY = 0.6
 const MAP_HEIGHT = 500
 // set to `false` if you want to hide the road label characters
 const ROAD_LABEL_DISPLAY = false
-// update for now 2024/11/17 the privacy mode is true
-// set to `true` if you want to display only the routes without showing the map.
-const PRIVACY_MODE = false
-// update for now 2024/11/17 the lights on default is false
-// set to `false` if you want to make light off as default, only effect when `PRIVACY_MODE` = false
-const LIGHTS_ON = true
 // richer title for the activity types (like garmin style)
 const RICH_TITLE = true
 
@@ -123,13 +153,12 @@ export {
   GOOGLE_ANALYTICS_TRACKING_ID,
   INFO_MESSAGE,
   IS_CHINESE,
-  LIGHTS_ON,
   LINE_OPACITY,
   MAP_HEIGHT,
   MAP_LAYER_LIST,
-  MAPBOX_TOKEN,
+  MAPLIBRE_DARK_STYLE,
+  MAPLIBRE_LIGHT_STYLE,
   MUNICIPALITY_CITIES_ARR,
-  PRIVACY_MODE,
   RICH_TITLE,
   ROAD_LABEL_DISPLAY,
   RUN_TITLES,

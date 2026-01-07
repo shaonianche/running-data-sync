@@ -1,0 +1,11 @@
+/* Custom MapLibre GL overrides for this project */
+
+/* Hide fullscreen control */
+:global(.maplibregl-ctrl-fullscreen) {
+  display: none !important;
+}
+
+/* Canvas touch action for mobile scrolling */
+.maplibregl-canvas {
+  touch-action: pan-y !important;
+}

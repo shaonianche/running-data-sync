@@ -1,30 +1,28 @@
 import type { FeatureCollection } from 'geojson'
 import type {
   MapRef,
-} from 'react-map-gl'
-import type { MapInstance } from 'react-map-gl/src/types/lib'
+} from 'react-map-gl/maplibre'
 import type { RPGeometry } from '@/static/run_countries'
 import type { Coordinate, IViewState } from '@/utils/utils'
-import MapboxLanguage from '@mapbox/mapbox-gl-language'
+import type { Map as MaplibreMap } from 'maplibre-gl'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, {
   FullscreenControl,
   Layer,
   NavigationControl,
   Source,
-} from 'react-map-gl'
-import LightsControl from '@/components/RunMap/LightsControl'
+} from 'react-map-gl/maplibre'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import getActivities from '@/hooks/useActivities'
 import {
   DISABLE_CHART,
   DISABLE_MAP,
   IS_CHINESE,
-  LIGHTS_ON,
   LINE_OPACITY,
   MAP_HEIGHT,
   MAP_LAYER_LIST,
-  MAPBOX_TOKEN,
-  PRIVACY_MODE,
+  MAPLIBRE_DARK_STYLE,
+  MAPLIBRE_LIGHT_STYLE,
   ROAD_LABEL_DISPLAY,
   USE_DASH_LINE,
 } from '@/utils/const'
@@ -32,10 +30,21 @@ import { geoJsonForMap, getMainColor } from '@/utils/utils'
 import ActivityChart from './ActivityChart'
 import RunMapButtons from './RunMapButtons'
 import RunMarker from './RunMarker'
-import './mapbox.css'
+import './maplibre.css'
 
 const PROVINCE_FILL_COLOR = getMainColor()
 const COUNTRY_FILL_COLOR = getMainColor()
+
+// 隐藏地名标签图层
+function hideMapLabels(map: MaplibreMap) {
+  if (!ROAD_LABEL_DISPLAY) {
+    MAP_LAYER_LIST.forEach((layerId) => {
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', 'none')
+      }
+    })
+  }
+}
 
 interface IRunMapProps {
   title: string
@@ -55,7 +64,6 @@ function RunMap({
 }: IRunMapProps) {
   const { countries, provinces } = getActivities()
   const mapRef = useRef<MapRef | null>(null)
-  const [lights, setLights] = useState(PRIVACY_MODE ? false : LIGHTS_ON)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const theme = document.documentElement.getAttribute('data-theme')
     return theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -87,13 +95,6 @@ function RunMap({
     mq.addEventListener('change', update)
     return () => mq.removeEventListener('change', update)
   }, [])
-
-  useEffect(() => {
-    if (mapRef.current) {
-      const map = mapRef.current.getMap()
-      map.setStyle(isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10')
-    }
-  }, [isDarkMode])
 
   // Ensure a comfortable default zoom on mobile to avoid overly-zoomed-in views
   useEffect(() => {
@@ -153,43 +154,21 @@ function RunMap({
     return () => window.removeEventListener('app:changeYear' as any, onChangeYear)
   }, [changeYear])
 
-  const keepWhenLightsOff = useMemo(() => ['runs2'], [])
-  const switchLayerVisibility = useCallback((map: MapInstance, lights: boolean) => {
-    const styleJson = map.getStyle()
-    if (!styleJson || !Array.isArray(styleJson.layers))
-      return
-    styleJson.layers.forEach((it: { id: string }) => {
-      if (!keepWhenLightsOff.includes(it.id)) {
-        if (lights)
-          map.setLayoutProperty(it.id, 'visibility', 'visible')
-        else map.setLayoutProperty(it.id, 'visibility', 'none')
-      }
-    })
-  }, [keepWhenLightsOff])
-
   const mapRefCallback = useCallback(
     (ref: MapRef) => {
-      if (ref !== null) {
-        const map = ref.getMap() as MapInstance
-        if (map && IS_CHINESE) {
-          map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }) as any)
-        }
-        map.on('style.load', () => {
-          if (!ROAD_LABEL_DISPLAY) {
-            MAP_LAYER_LIST.forEach((layerId) => {
-              map.removeLayer(layerId)
-            })
-          }
-          mapRef.current = ref
-          switchLayerVisibility(map, lights)
+      if (ref !== null && mapRef.current !== ref) {
+        mapRef.current = ref
+        const map = ref.getMap() as MaplibreMap
+        // 监听样式加载并隐藏标签（包括初始化和主题切换）
+        map.on('styledata', () => {
+          // 使用 setTimeout 确保样式和图层完全加载
+          setTimeout(() => {
+            hideMapLabels(map)
+          }, 100)
         })
       }
-      if (mapRef.current) {
-        const map = mapRef.current.getMap() as MapInstance
-        switchLayerVisibility(map, lights)
-      }
     },
-    [mapRef, lights, switchLayerVisibility],
+    [],
   )
 
   const filterProvinces = provinces.slice()
@@ -310,9 +289,8 @@ function RunMap({
                   {...viewState}
                   onMove={onMove}
                   style={style}
-                  mapStyle={isDarkMode ? 'mapbox://styles/mapbox/dark-v10' : 'mapbox://styles/mapbox/light-v10'}
+                  mapStyle={isDarkMode ? MAPLIBRE_DARK_STYLE : MAPLIBRE_LIGHT_STYLE}
                   ref={mapRefCallback}
-                  mapboxAccessToken={MAPBOX_TOKEN}
                   doubleClickZoom={!isSmallScreen}
                   scrollZoom={!isSmallScreen}
                   keyboard={!isSmallScreen}
@@ -347,7 +325,7 @@ function RunMap({
                       type="line"
                       paint={{
                         'line-color': ['coalesce', ['get', 'color'], ['literal', getMainColor()]],
-                        'line-width': isBigMap && lights ? 4 : 5,
+                        'line-width': isBigMap ? 4 : 5,
                         'line-dasharray': dash,
                         'line-opacity': LINE_OPACITY,
                         'line-blur': 1,
@@ -368,7 +346,6 @@ function RunMap({
                     />
                   )}
                   <FullscreenControl style={fullscreenButton} />
-                  {!PRIVACY_MODE && <LightsControl setLights={setLights} lights={lights} />}
                   <NavigationControl
                     showCompass={false}
                     position="bottom-right"

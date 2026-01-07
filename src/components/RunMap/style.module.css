@@ -70,7 +70,7 @@
   opacity: 1;
 }
 
-:global(.mapboxgl-ctrl-fullscreen) {
+:global(.maplibregl-ctrl-fullscreen) {
   display: none !important;
 }
 
@@ -246,6 +246,6 @@
   user-select: none;
 }
 
-.mapboxgl-canvas {
+.maplibregl-canvas {
   touch-action: pan-y !important;
 }
