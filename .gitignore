@@ -6,6 +6,7 @@
 node_modules
 yarn-error.log
 /dist
+.claude
 
 # Build directory
 /build
