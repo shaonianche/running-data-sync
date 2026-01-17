@@ -1,7 +1,9 @@
+import type { KeyboardEvent } from 'react'
 import type {
   Activity,
   RunIds,
 } from '@/utils/utils'
+import React from 'react'
 import {
   formatPace,
   formatRunTime,
@@ -10,39 +12,48 @@ import {
 import styles from './style.module.css'
 
 interface IRunRowProperties {
-  elementIndex: number
+  isSelected: boolean
   locateActivity: (_runIds: RunIds) => void
   run: Activity
-  runIndex: number
-  setRunIndex: (_index: number) => void
+  onToggleSelect: () => void
 }
 
 function RunRow({
-  elementIndex,
+  isSelected,
   locateActivity,
   run,
-  runIndex,
-  setRunIndex,
+  onToggleSelect,
 }: IRunRowProperties) {
   const distance = ((run.distance || 0) / 1000.0).toFixed(2)
   const paceParts = formatPace(run.average_speed)
   const heartRate = run.average_heartrate
   const runTime = formatRunTime(run.moving_time)
+
   const handleClick = () => {
-    if (runIndex === elementIndex) {
-      setRunIndex(-1)
+    if (isSelected) {
+      onToggleSelect()
       locateActivity([])
       return
     }
-    setRunIndex(elementIndex)
+    onToggleSelect()
     locateActivity([run.run_id])
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      handleClick()
+    }
   }
 
   return (
     <tr
-      className={`${styles.runRow} ${runIndex === elementIndex ? styles.selected : ''}`}
-      key={run.start_date_local}
+      className={`${styles.runRow} ${isSelected ? styles.selected : ''}`}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="row"
+      aria-selected={isSelected}
     >
       <td>{titleForRun(run)}</td>
       <td>{distance}</td>
@@ -55,4 +66,4 @@ function RunRow({
   )
 }
 
-export default RunRow
+export default React.memo(RunRow)

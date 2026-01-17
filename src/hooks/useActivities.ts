@@ -1,7 +1,17 @@
 import activities from '@/static/activities.json'
 import { locationForRun, titleForRun } from '@/utils/utils'
 
-function getActivities() {
+interface ActivitiesData {
+  activities: typeof activities
+  years: string[]
+  countries: string[]
+  provinces: string[]
+  cities: Record<string, number>
+  runPeriod: Record<string, number>
+  thisYear: string
+}
+
+const activitiesData: ActivitiesData = (() => {
   const cities: Record<string, number> = {}
   const runPeriod: Record<string, number> = {}
   const provinces: Set<string> = new Set()
@@ -45,6 +55,6 @@ function getActivities() {
     runPeriod,
     thisYear,
   }
-}
+})()
 
-export default getActivities
+export default activitiesData

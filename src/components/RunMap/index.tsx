@@ -1,10 +1,10 @@
 import type { FeatureCollection } from 'geojson'
+import type { Map as MaplibreMap } from 'maplibre-gl'
 import type {
   MapRef,
 } from 'react-map-gl/maplibre'
 import type { RPGeometry } from '@/static/run_countries'
 import type { Coordinate, IViewState } from '@/utils/utils'
-import type { Map as MaplibreMap } from 'maplibre-gl'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, {
   FullscreenControl,
@@ -12,14 +12,14 @@ import Map, {
   NavigationControl,
   Source,
 } from 'react-map-gl/maplibre'
-import 'maplibre-gl/dist/maplibre-gl.css'
-import getActivities from '@/hooks/useActivities'
+import activitiesData from '@/hooks/useActivities'
 import {
   DISABLE_CHART,
   DISABLE_MAP,
   IS_CHINESE,
   LINE_OPACITY,
   MAP_HEIGHT,
+  MAP_HEIGHT_MOBILE,
   MAP_LAYER_LIST,
   MAPLIBRE_DARK_STYLE,
   MAPLIBRE_LIGHT_STYLE,
@@ -30,6 +30,7 @@ import { geoJsonForMap, getMainColor } from '@/utils/utils'
 import ActivityChart from './ActivityChart'
 import RunMapButtons from './RunMapButtons'
 import RunMarker from './RunMarker'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import './maplibre.css'
 
 const PROVINCE_FILL_COLOR = getMainColor()
@@ -62,11 +63,15 @@ function RunMap({
   geoData,
   thisYear,
 }: IRunMapProps) {
-  const { countries, provinces } = getActivities()
+  const { countries, provinces } = activitiesData
   const mapRef = useRef<MapRef | null>(null)
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const theme = document.documentElement.getAttribute('data-theme')
-    return theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme === 'dark')
+      return true
+    if (savedTheme === 'light')
+      return false
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
   })
   const [isMapVisible, setIsMapVisible] = useState(true)
   const [isSmallScreen, setIsSmallScreen] = useState(() => window.matchMedia('(max-width: 768px)').matches)
@@ -76,16 +81,26 @@ function RunMap({
 
   useEffect(() => {
     const updateTheme = () => {
-      const theme = document.documentElement.getAttribute('data-theme')
-      setIsDarkMode(theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches)
+      const savedTheme = localStorage.getItem('theme')
+      if (savedTheme === 'dark') {
+        setIsDarkMode(true)
+      }
+      else if (savedTheme === 'light') {
+        setIsDarkMode(false)
+      }
+      else {
+        setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches)
+      }
     }
     const mq = window.matchMedia('(prefers-color-scheme: dark)')
     mq.addEventListener('change', updateTheme)
     const observer = new MutationObserver(updateTheme)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    window.addEventListener('storage', updateTheme)
     return () => {
       mq.removeEventListener('change', updateTheme)
       observer.disconnect()
+      window.removeEventListener('storage', updateTheme)
     }
   }, [])
 
@@ -171,21 +186,20 @@ function RunMap({
     [],
   )
 
-  const filterProvinces = provinces.slice()
-  const filterCountries = countries.slice()
-  filterProvinces.unshift('in', 'name')
-  filterCountries.unshift('in', 'name')
-
-  const initGeoDataLength = geoData.features.length
   const isBigMap = (viewState.zoom ?? 0) <= 3
-  if (isBigMap && IS_CHINESE) {
-    if (geoData.features.length === initGeoDataLength) {
-      geoData = {
-        type: 'FeatureCollection',
-        features: geoData.features.concat(geoJsonForMap().features),
+
+  const filterProvinces = useMemo(() => ['in', 'name', ...provinces], [provinces])
+  const filterCountries = useMemo(() => ['in', 'name', ...countries], [countries])
+
+  const composedGeoData = useMemo(() => {
+    if (isBigMap && IS_CHINESE) {
+      return {
+        type: 'FeatureCollection' as const,
+        features: [...geoData.features, ...geoJsonForMap().features],
       }
     }
-  }
+    return geoData
+  }, [geoData, isBigMap])
 
   const isSingleRun
     = geoData.features.length === 1 && geoData.features[0].geometry.coordinates.length
@@ -215,9 +229,10 @@ function RunMap({
     },
     [setViewState],
   )
+  const mapHeight = isSmallScreen ? MAP_HEIGHT_MOBILE : MAP_HEIGHT
   const style: React.CSSProperties = {
     width: '100%',
-    height: MAP_HEIGHT,
+    height: mapHeight,
   }
   const fullscreenButton: React.CSSProperties = {
     position: 'absolute',
@@ -238,7 +253,7 @@ function RunMap({
     }
   }, [])
 
-  // When a single run is selected, fit bounds with mobile-friendly padding and capped zoom
+  // When a single run is selected, fit bounds with optimal padding and zoom
   useEffect(() => {
     if (!mapRef.current || !isSingleRun || lineCoordinates.length === 0)
       return
@@ -254,15 +269,19 @@ function RunMap({
     lastFittedBoundsKey.current = boundsKey
     const map = mapRef.current.getMap()
     try {
+      // Use percentage-based padding for consistent look across screen sizes
+      const padding = isSmallScreen
+        ? { top: 30, bottom: 30, left: 20, right: 20 }
+        : { top: 60, bottom: 60, left: 60, right: 60 }
       map.fitBounds(
         [
           [minLon, minLat],
           [maxLon, maxLat],
         ],
         {
-          padding: isSmallScreen ? 40 : 80,
-          maxZoom: isSmallScreen ? 13 : 16,
-          duration: 0,
+          padding,
+          maxZoom: isSmallScreen ? 14 : 15,
+          duration: 300,
         },
       )
     }
@@ -302,7 +321,7 @@ function RunMap({
                   minZoom={isSmallScreen ? 0.25 : 0}
                   maxZoom={isSmallScreen ? 16 : 22}
                 >
-                  <Source id="data" type="geojson" data={geoData}>
+                  <Source id="data" type="geojson" data={composedGeoData}>
                     <Layer
                       id="province"
                       type="fill"

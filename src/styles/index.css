@@ -122,3 +122,12 @@ hr {
   border-bottom: 1px solid var(--color-hr-primary);
   margin: 2rem 0;
 }
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

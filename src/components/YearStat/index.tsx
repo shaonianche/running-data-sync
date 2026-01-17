@@ -1,7 +1,7 @@
 import { yearStats } from '@assets/index'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
 import Stat from '@/components/Stat'
-import getActivities from '@/hooks/useActivities'
+import activitiesData from '@/hooks/useActivities'
 import useHover from '@/hooks/useHover'
 import { loadSvgComponent } from '@/utils/svgUtils'
 import { formatPace } from '@/utils/utils'
@@ -15,51 +15,67 @@ function YearStat({
   onClick?: (_year: string) => void
   disableClick?: boolean
 }) {
-  let { activities: runs, years } = getActivities()
+  const { activities: runs, years } = activitiesData
   // for hover
   const [hovered, eventHandlers] = useHover()
-  // lazy Component
-  const YearSVG = lazy(async () => {
-    try {
-      return await loadSvgComponent(yearStats, `./year_${year}.svg`)
-    }
-    catch {
-      // fallback to an empty component when svg missing
-      return { default: () => null }
-    }
-  })
 
-  if (years.includes(year)) {
-    runs = runs.filter(run => run.start_date_local.slice(0, 4) === year)
-  }
-  let sumDistance = 0
-  let streak = 0
-  let heartRate = 0
-  let heartRateNullCount = 0
-  let totalMetersAvail = 0
-  let totalSecondsAvail = 0
-  runs.forEach((run) => {
-    sumDistance += run.distance || 0
-    if (run.average_speed) {
-      totalMetersAvail += run.distance || 0
-      totalSecondsAvail += (run.distance || 0) / run.average_speed
-    }
-    if (run.average_heartrate) {
-      heartRate += run.average_heartrate
-    }
-    else {
-      heartRateNullCount++
-    }
-    if (run.streak) {
-      streak = Math.max(streak, run.streak)
-    }
-  })
-  sumDistance = Number.parseFloat((sumDistance / 1000.0).toFixed(1))
-  const avgPace = formatPace(totalMetersAvail / totalSecondsAvail)
-  const hasHeartRate = !(heartRate === 0)
-  const avgHeartRate = (heartRate / (runs.length - heartRateNullCount)).toFixed(
-    0,
+  // 缓存 lazy 组件类型
+  const YearSVG = useMemo(
+    () =>
+      lazy(async () => {
+        try {
+          return await loadSvgComponent(yearStats, `./year_${year}.svg`)
+        }
+        catch {
+          return { default: () => null }
+        }
+      }),
+    [year],
   )
+
+  // 缓存过滤后的 runs
+  const yearRuns = useMemo(() => {
+    if (years.includes(year)) {
+      return runs.filter(run => run.start_date_local.slice(0, 4) === year)
+    }
+    return runs
+  }, [runs, years, year])
+
+  // 缓存统计计算
+  const stats = useMemo(() => {
+    let sumDistance = 0
+    let streak = 0
+    let heartRate = 0
+    let heartRateNullCount = 0
+    let totalMetersAvail = 0
+    let totalSecondsAvail = 0
+
+    yearRuns.forEach((run) => {
+      sumDistance += run.distance || 0
+      if (run.average_speed) {
+        totalMetersAvail += run.distance || 0
+        totalSecondsAvail += (run.distance || 0) / run.average_speed
+      }
+      if (run.average_heartrate) {
+        heartRate += run.average_heartrate
+      }
+      else {
+        heartRateNullCount++
+      }
+      if (run.streak) {
+        streak = Math.max(streak, run.streak)
+      }
+    })
+
+    return {
+      sumDistance: Number.parseFloat((sumDistance / 1000.0).toFixed(1)),
+      avgPace: formatPace(totalMetersAvail / totalSecondsAvail),
+      hasHeartRate: heartRate !== 0,
+      avgHeartRate: (heartRate / (yearRuns.length - heartRateNullCount)).toFixed(0),
+      streak,
+      runsCount: yearRuns.length,
+    }
+  }, [yearRuns])
   return (
     <div
       className={`cursor-pointer${disableClick ? ' cursor-not-allowed opacity-80' : ''}`}
@@ -68,12 +84,12 @@ function YearStat({
     >
       <section className="grid grid-cols-2 gap-x-6 gap-y-3 md:block text-sm md:text-base">
         <Stat value={year} description=" Journey" />
-        <Stat value={runs.length} description=" Runs" />
-        <Stat value={sumDistance} description=" KM" />
-        <Stat value={avgPace} description=" Avg Pace" />
-        <Stat value={`${streak} day`} description=" Streak" />
-        {hasHeartRate && (
-          <Stat value={avgHeartRate} description=" Avg Heart Rate" />
+        <Stat value={stats.runsCount} description=" Runs" />
+        <Stat value={stats.sumDistance} description=" KM" />
+        <Stat value={stats.avgPace} description=" Avg Pace" />
+        <Stat value={`${stats.streak} day`} description=" Streak" />
+        {stats.hasHeartRate && (
+          <Stat value={stats.avgHeartRate} description=" Avg Heart Rate" />
         )}
       </section>
       {year !== 'Total' && hovered && !disableClick && (

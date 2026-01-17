@@ -73,8 +73,12 @@ const DISABLE_FLYBY = false
 const USE_DASH_LINE = false
 // styling: route line opacity: [0, 1]
 const LINE_OPACITY = 0.6
-// styling: map height
-const MAP_HEIGHT = 500
+// styling: map height (desktop)
+const MAP_HEIGHT = 600
+// styling: map height (mobile)
+const MAP_HEIGHT_MOBILE = 400
+// styling: map aspect ratio (width:height) - 16:9 is common for landscape maps
+const MAP_ASPECT_RATIO = 16 / 10
 // set to `false` if you want to hide the road label characters
 const ROAD_LABEL_DISPLAY = false
 // richer title for the activity types (like garmin style)
@@ -154,7 +158,9 @@ export {
   INFO_MESSAGE,
   IS_CHINESE,
   LINE_OPACITY,
+  MAP_ASPECT_RATIO,
   MAP_HEIGHT,
+  MAP_HEIGHT_MOBILE,
   MAP_LAYER_LIST,
   MAPLIBRE_DARK_STYLE,
   MAPLIBRE_LIGHT_STYLE,
