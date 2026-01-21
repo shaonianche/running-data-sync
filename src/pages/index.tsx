@@ -8,15 +8,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Layout from '@/components/Layout'
 import LocationStat from '@/components/LocationStat'
 import RunMap from '@/components/RunMap'
+import RunMapButtons from '@/components/RunMap/RunMapButtons'
 import RunTable from '@/components/RunTable'
 import SVGStat from '@/components/SVGStat'
+import { preloadTotalSvgs } from '@/components/SVGStat/preload'
 import YearsStat from '@/components/YearsStat'
-import getActivities from '@/hooks/useActivities'
+import activitiesData from '@/hooks/useActivities'
 import { IS_CHINESE } from '@/utils/const'
 import {
   filterAndSortRuns,
-  filterCityRuns,
-  filterTitleRuns,
   filterYearRuns,
   geoJsonForRuns,
   getBoundsForGeoData,
@@ -26,112 +26,136 @@ import {
 } from '@/utils/utils'
 
 function Index() {
-  const { activities, thisYear } = getActivities()
+  const { activities, thisYear } = activitiesData
   const [year, setYear] = useState(thisYear)
   const [runIndex, setRunIndex] = useState(-1)
-  const [runs, setActivity] = useState(() =>
-    filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc),
-  )
   const [title, setTitle] = useState('')
-  const [geoData, setGeoData] = useState(() => geoJsonForRuns(runs))
+  const [selectedRunIds, setSelectedRunIds] = useState<RunIds>([])
+  const [zoom, setZoom] = useState(0)
+  const [viewStateOverride, setViewStateOverride] = useState<IViewState | null>(null)
+  const prevYearRef = useRef(year)
+
+  useEffect(() => {
+    preloadTotalSvgs()
+  }, [])
+
+  const runs = useMemo(
+    () => filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc),
+    [activities, year],
+  )
+
+  const geoData = useMemo(() => {
+    if (year === 'Total') {
+      return { type: 'FeatureCollection' as const, features: [] }
+    }
+    if (selectedRunIds.length === 0) {
+      return geoJsonForRuns(runs)
+    }
+    const ids = new Set(selectedRunIds)
+    const selectedRuns = runs.filter((r: Activity) => ids.has(r.run_id))
+    return geoJsonForRuns(selectedRuns.length > 0 ? selectedRuns : runs)
+  }, [runs, selectedRunIds, year])
+
   const bounds = useMemo(() => getBoundsForGeoData(geoData), [geoData])
-  const intervalIdRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  const [viewState, setViewState] = useState<IViewState>({
-    ...bounds,
-  })
-
-  const changeByItem = (
-    item: string,
-    name: string,
-    func: (_run: Activity, _value: string) => boolean,
-  ) => {
-    scrollToMap()
-    if (name !== 'Year') {
-      setYear(thisYear)
+  const viewState = useMemo<IViewState>(() => {
+    if (viewStateOverride) {
+      return viewStateOverride
     }
-    setActivity(() => filterAndSortRuns(activities, item, func, sortDateFunc))
-    setRunIndex(-1)
-    setTitle(`${item} ${name} Running Heatmap`)
-  }
+    return { ...bounds }
+  }, [bounds, viewStateOverride])
 
-  const changeYear = (y: string) => {
-    // default year
-    setYear(y)
-
-    if ((viewState.zoom ?? 0) > 3 && bounds) {
-      setViewState({
-        ...bounds,
-      })
-    }
-
-    changeByItem(y, 'Year', filterYearRuns)
-    if (intervalIdRef.current) {
-      clearInterval(intervalIdRef.current)
-    }
-  }
-
-  const changeCity = (city: string) => {
-    changeByItem(city, 'City', filterCityRuns)
-  }
-
-  const changeTitle = (title: string) => {
-    changeByItem(title, 'Title', filterTitleRuns)
-  }
-
-  const locateActivity = useCallback((runIds: RunIds) => {
-    const ids = new Set(runIds)
-
-    const selectedRuns = !runIds.length
-      ? runs
-      : runs.filter((r: any) => ids.has(r.run_id))
-
-    if (!selectedRuns.length) {
-      return
-    }
-
-    const lastRun = selectedRuns.sort(sortDateFunc)[0]
-
-    if (!lastRun) {
-      return
-    }
-    setGeoData(() => geoJsonForRuns(selectedRuns))
-    setTitle(titleForShow(lastRun))
-    if (intervalIdRef.current) {
-      clearInterval(intervalIdRef.current)
-    }
-    scrollToMap()
-  }, [runs, setGeoData, setTitle])
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-    setViewState({
-      ...bounds,
-    })
-  }, [bounds])
-
-  useEffect(() => {
-    const runsNum = runs.length
-    const sliceNum = runsNum >= 20 ? runsNum / 20 : 1
-    let i = sliceNum
-
-    const id = setInterval(() => {
-      if (i >= runsNum) {
-        clearInterval(id)
+  const changeByItem = useCallback(
+    (item: string, name: string) => {
+      scrollToMap()
+      if (name !== 'Year') {
+        setYear(thisYear)
       }
-      else {
-        const tempRuns = runs.slice(0, i)
-        setGeoData(() => geoJsonForRuns(tempRuns))
-        i += sliceNum
+      setSelectedRunIds([])
+      setRunIndex(-1)
+      setTitle(`${item} ${name} Running Heatmap`)
+    },
+    [thisYear],
+  )
+
+  const changeYear = useCallback(
+    (y: string) => {
+      setYear(y)
+
+      if ((zoom ?? 0) > 3 && bounds) {
+        setViewStateOverride({
+          ...bounds,
+        })
       }
-    }, 100)
 
-    intervalIdRef.current = id
+      changeByItem(y, 'Year')
+    },
+    [zoom, bounds, changeByItem],
+  )
 
-    return () => {
-      clearInterval(id)
+  const changeCity = useCallback(
+    (city: string) => {
+      changeByItem(city, 'City')
+    },
+    [changeByItem],
+  )
+
+  const changeTitle = useCallback(
+    (title: string) => {
+      changeByItem(title, 'Title')
+    },
+    [changeByItem],
+  )
+
+  const locateActivity = useCallback(
+    (runIds: RunIds) => {
+      const ids = new Set(runIds)
+
+      const selectedRuns = !runIds.length
+        ? runs
+        : runs.filter((r: Activity) => ids.has(r.run_id))
+
+      if (!selectedRuns.length) {
+        return
+      }
+
+      const lastRun = selectedRuns.reduce((latest, cur) =>
+        new Date(cur.start_date_local) > new Date(latest.start_date_local) ? cur : latest,
+      )
+
+      if (!lastRun) {
+        return
+      }
+      setSelectedRunIds(runIds)
+      setViewStateOverride(null)
+      setTitle(titleForShow(lastRun))
+      scrollToMap()
+    },
+    [runs],
+  )
+
+  const handleViewStateChange = useCallback(
+    (newViewState: IViewState) => {
+      setViewStateOverride(newViewState)
+      if (newViewState.zoom !== undefined) {
+        setZoom(newViewState.zoom)
+      }
+    },
+    [],
+  )
+
+  if (prevYearRef.current !== year) {
+    prevYearRef.current = year
+    if (selectedRunIds.length > 0) {
+      setSelectedRunIds([])
     }
-  }, [runs, setGeoData])
+    if (title !== '') {
+      setTitle('')
+    }
+    if (viewStateOverride !== null) {
+      setViewStateOverride(null)
+    }
+  }
 
   useEffect(() => {
     if (year !== 'Total') {
@@ -146,10 +170,8 @@ function Index() {
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement
       if (target.tagName.toLowerCase() === 'path') {
-        // Use querySelector to get the <desc> element and the <title> element.
         const descEl = target.querySelector('desc')
         if (descEl) {
-          // If the runId exists in the <desc> element, it means that a running route has been clicked.
           const runId = Number(descEl.innerHTML)
           if (!runId) {
             return
@@ -160,7 +182,6 @@ function Index() {
 
         const titleEl = target.querySelector('title')
         if (titleEl) {
-          // If the runDate exists in the <title> element, it means that a date square has been clicked.
           const [runDate] = titleEl.innerHTML.match(
             /\d{4}-\d{1,2}-\d{1,2}/,
           ) || [`${+thisYear + 1}`]
@@ -196,32 +217,38 @@ function Index() {
             )}
       </div>
       <div className="w-full lg:w-2/3">
-        <div
-          className={`z-10 bg-[var(--color-background)] ${
-            year === 'Total' ? '' : 'lg:sticky lg:top-0'
-          }`}
-        >
-          <RunMap
-            title={title}
-            viewState={viewState}
-            geoData={geoData}
-            setViewState={setViewState}
-            changeYear={changeYear}
-            thisYear={year}
-          />
-        </div>
         {year === 'Total'
           ? (
-              <SVGStat />
+              <>
+                <RunMapButtons
+                  changeYear={changeYear}
+                  thisYear={year}
+                  isMapVisible={false}
+                  onToggleMapVisible={() => {}}
+                  showMapToggle={false}
+                />
+                <SVGStat />
+              </>
             )
           : (
-              <RunTable
-                runs={runs}
-                locateActivity={locateActivity}
-                setActivity={setActivity}
-                runIndex={runIndex}
-                setRunIndex={setRunIndex}
-              />
+              <>
+                <div className="z-10 bg-[var(--color-background)] lg:sticky lg:top-0">
+                  <RunMap
+                    title={title}
+                    viewState={viewState}
+                    geoData={geoData}
+                    setViewState={handleViewStateChange}
+                    changeYear={changeYear}
+                    thisYear={year}
+                  />
+                </div>
+                <RunTable
+                  runs={runs}
+                  locateActivity={locateActivity}
+                  runIndex={runIndex}
+                  setRunIndex={setRunIndex}
+                />
+              </>
             )}
       </div>
       {/* Enable Audiences in Vercel Analytics: https://vercel.com/docs/concepts/analytics/audiences/quickstart */}

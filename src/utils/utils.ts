@@ -369,41 +369,57 @@ export interface IViewState {
   zoom?: number
 }
 
-function getBoundsForGeoData(geoData: FeatureCollection<LineString>): IViewState {
+function getBoundsForGeoData(geoData: FeatureCollection<LineString>, options?: { width?: number, height?: number }): IViewState {
   const { features } = geoData
-  let points: Coordinate[] = []
-  // find first have data
+
+  // Collect all points from all features for better bounds calculation
+  let allPoints: Coordinate[] = []
   for (const f of features) {
     if (f.geometry.coordinates.length) {
-      points = f.geometry.coordinates as Coordinate[]
-      break
+      allPoints = allPoints.concat(f.geometry.coordinates as Coordinate[])
     }
   }
-  if (points.length === 0) {
+
+  if (allPoints.length === 0) {
     return {
       longitude: 100,
       latitude: 40,
       zoom: 3,
     }
   }
-  if (points.length === 2 && String(points[0]) === String(points[1])) {
-    return { longitude: points[0][0], latitude: points[0][1], zoom: 10 }
+
+  // Single point case
+  if (allPoints.length === 1 || (allPoints.length === 2 && String(allPoints[0]) === String(allPoints[1]))) {
+    return { longitude: allPoints[0][0], latitude: allPoints[0][1], zoom: 12 }
   }
-  // Calculate corner values of bounds
-  const pointsLong = points.map(point => point[0]) as number[]
-  const pointsLat = points.map(point => point[1]) as number[]
+
+  // Calculate bounds from all points
+  const pointsLong = allPoints.map(point => point[0])
+  const pointsLat = allPoints.map(point => point[1])
   const cornersLongLat: [Coordinate, Coordinate] = [
     [Math.min(...pointsLong), Math.min(...pointsLat)],
     [Math.max(...pointsLong), Math.max(...pointsLat)],
   ]
+
+  // Use provided dimensions or responsive defaults
+  const width = options?.width ?? (typeof window !== 'undefined' && window.innerWidth < 768 ? window.innerWidth : 960)
+  const height = options?.height ?? (typeof window !== 'undefined' && window.innerWidth < 768 ? 400 : 600)
+
   const viewState = new WebMercatorViewport({
-    width: 800,
-    height: 500,
-  }).fitBounds(cornersLongLat, { padding: 100 })
+    width,
+    height,
+  }).fitBounds(cornersLongLat, { padding: Math.min(width, height) * 0.1 })
+
   let { longitude, latitude, zoom } = viewState
-  if (features.length > 1) {
-    zoom = 13
+
+  // Cap zoom level for better UX
+  if (features.length === 1) {
+    zoom = Math.min(zoom, 15)
   }
+  else {
+    zoom = Math.min(zoom, 14)
+  }
+
   return { longitude, latitude, zoom }
 }
 
@@ -425,10 +441,9 @@ function filterTitleRuns(run: Activity, title: string) {
 }
 
 function filterAndSortRuns(activities: Activity[], item: string, filterFunc: (_run: Activity, _bvalue: string) => boolean, sortFunc: (_a: Activity, _b: Activity) => number) {
-  let s = activities
-  if (item !== 'Total') {
-    s = activities.filter(run => filterFunc(run, item))
-  }
+  const s = item !== 'Total'
+    ? activities.filter(run => filterFunc(run, item))
+    : [...activities]
   return s.sort(sortFunc)
 }
 

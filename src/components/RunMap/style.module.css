@@ -27,9 +27,29 @@
   transition: all 0.2s ease;
 }
 
+.button:hover {
+  background-color: var(--color-run-row-hover-background);
+  transform: translateY(-1px);
+}
+
+.button:active {
+  transform: translateY(0);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-selected);
+  outline-offset: 2px;
+}
+
 .selected {
   color: var(--color-selected);
   background-color: var(--color-run-row-hover-background);
+  border-bottom: 2px solid var(--color-selected);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selected:hover {
+  transform: translateY(-1px);
 }
 
 .runTitle {
@@ -177,6 +197,18 @@
     font-size: 0.9rem;
     white-space: nowrap;
     scroll-snap-align: start;
+  }
+
+  .button:hover {
+    transform: translateY(-1px);
+  }
+
+  .button:active {
+    transform: scale(0.96);
+  }
+
+  .selected {
+    border-bottom: 2px solid var(--color-selected);
   }
 }
 

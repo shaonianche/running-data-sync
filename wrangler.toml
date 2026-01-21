@@ -1,3 +1,21 @@
 name = "running-data-sync"
-assets = { directory = "dist" }
 compatibility_date = "2025-06-09"
+
+[assets]
+directory = "./dist"
+html_handling = "auto-trailing-slash"
+not_found_handling = "single-page-application"
+
+[build]
+command = "pnpm install && pnpm run build"
+cwd = "."
+watch_dir = "src"
+
+[env.production]
+name = "running-data-sync"
+
+[env.preview]
+name = "running-data-sync-preview"
+
+[observability]
+enabled = true

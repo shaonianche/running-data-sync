@@ -1,7 +1,20 @@
 import { totalStat } from '@assets/index'
-import { lazy, Suspense, useMemo } from 'react'
+import { lazy, memo, Suspense, useEffect, useMemo } from 'react'
 import { useTheme } from '@/hooks/useTheme'
 import { loadSvgComponent } from '@/utils/svgUtils'
+import { preloadOtherThemeSvgs } from './preload'
+
+function LoadingPlaceholder({ height = 200 }: { height?: number }) {
+  return (
+    <div
+      className="mt-4 rounded overflow-hidden"
+      style={{ height }}
+      aria-live="polite"
+    >
+      <div className="h-full w-full bg-gradient-to-r from-[var(--color-hr)] via-[var(--color-background)] to-[var(--color-hr)] bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+    </div>
+  )
+}
 
 function SVGStat() {
   const { theme } = useTheme()
@@ -18,14 +31,20 @@ function SVGStat() {
     }
   }, [theme])
 
+  useEffect(() => {
+    preloadOtherThemeSvgs(theme)
+  }, [theme])
+
   return (
     <div id="svgStat" className="transition-colors duration-200">
-      <Suspense fallback={<div className="text-center">Loading...</div>}>
+      <Suspense fallback={<LoadingPlaceholder height={150} />}>
         <GithubSvg className="mt-4 h-auto w-full" />
+      </Suspense>
+      <Suspense fallback={<LoadingPlaceholder height={400} />}>
         <GridSvg className="mt-4 h-auto w-full" />
       </Suspense>
     </div>
   )
 }
 
-export default SVGStat
+export default memo(SVGStat)

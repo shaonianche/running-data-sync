@@ -1,4 +1,4 @@
-import getActivities from '@/hooks/useActivities'
+import activitiesData from '@/hooks/useActivities'
 import { DISABLE_MAP } from '@/utils/const'
 import styles from './style.module.css'
 
@@ -17,7 +17,7 @@ function RunMapButtons({
   onToggleMapVisible,
   showMapToggle = true,
 }: RunMapButtonsProps) {
-  const { years } = getActivities()
+  const { years } = activitiesData
   const yearsButtons = years.slice()
   yearsButtons.push('Total')
 

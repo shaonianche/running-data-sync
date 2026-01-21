@@ -2,81 +2,42 @@ import type {
   Activity,
   RunIds,
 } from '@/utils/utils'
-import React, { useState } from 'react'
-import {
-  sortDateFunc,
-  sortDateFuncReverse,
-} from '@/utils/utils'
+import React, { useCallback } from 'react'
 import RunRow from './RunRow'
 import styles from './style.module.css'
 
 interface IRunTableProperties {
   runs: Activity[]
   locateActivity: (_runIds: RunIds) => void
-  setActivity: (_runs: Activity[]) => void
   runIndex: number
   setRunIndex: (_index: number) => void
 }
 
-type SortFunc = (_a: Activity, _b: Activity) => number
+const columnHeaders = ['KM', 'ELEV', 'PACE', 'BPM', 'TIME', 'DATE'] as const
 
 function RunTable({
   runs,
   locateActivity,
-  setActivity,
   runIndex,
   setRunIndex,
 }: IRunTableProperties) {
-  const [sortFuncInfo, setSortFuncInfo] = useState('')
-  // TODO refactor?
-  const sortKMFunc: SortFunc = (a, b) =>
-    sortFuncInfo === 'KM' ? a.distance - b.distance : b.distance - a.distance
-  const sortElevationGainFunc: SortFunc = (a, b) =>
-    sortFuncInfo === 'ELEV'
-      ? (a.elevation_gain ?? 0) - (b.elevation_gain ?? 0)
-      : (b.elevation_gain ?? 0) - (a.elevation_gain ?? 0)
-  const sortPaceFunc: SortFunc = (a, b) =>
-    sortFuncInfo === 'Pace'
-      ? a.average_speed - b.average_speed
-      : b.average_speed - a.average_speed
-  const sortBPMFunc: SortFunc = (a, b) => {
-    return sortFuncInfo === 'BPM'
-      ? (a.average_heartrate ?? 0) - (b.average_heartrate ?? 0)
-      : (b.average_heartrate ?? 0) - (a.average_heartrate ?? 0)
-  }
-  const sortRunTimeFunc: SortFunc = (a, b) => {
-    return sortFuncInfo === 'Time'
-      ? a.moving_time - b.moving_time
-      : b.moving_time - a.moving_time
-  }
-  const sortDateFuncClick
-    = sortFuncInfo === 'Date' ? sortDateFunc : sortDateFuncReverse
-  const sortFuncMap = new Map([
-    ['KM', sortKMFunc],
-    ['ELEV', sortElevationGainFunc],
-    ['PACE', sortPaceFunc],
-    ['BPM', sortBPMFunc],
-    ['TIME', sortRunTimeFunc],
-    ['DATE', sortDateFuncClick],
-  ])
-
-  const handleClick: React.MouseEventHandler<HTMLElement> = (e) => {
-    const funcName = (e.target as HTMLElement).innerHTML
-    const f = sortFuncMap.get(funcName)
-
-    setRunIndex(-1)
-    setSortFuncInfo(sortFuncInfo === funcName ? '' : funcName)
-    setActivity(runs.sort(f))
-  }
+  const handleToggleSelect = useCallback((elementIndex: number) => {
+    if (runIndex === elementIndex) {
+      setRunIndex(-1)
+    }
+    else {
+      setRunIndex(elementIndex)
+    }
+  }, [runIndex, setRunIndex])
 
   return (
     <div className={styles.tableContainer}>
-      <table className={styles.runTable} cellSpacing="0" cellPadding="0">
+      <table className={styles.runTable} cellSpacing="0" cellPadding="0" role="grid">
         <thead>
           <tr>
             <th>ACTIVITY</th>
-            {Array.from(sortFuncMap.keys()).map(k => (
-              <th key={k} onClick={handleClick}>
+            {columnHeaders.map(k => (
+              <th key={k} role="columnheader">
                 {k}
               </th>
             ))}
@@ -86,11 +47,10 @@ function RunTable({
           {runs.map((run, elementIndex) => (
             <RunRow
               key={run.run_id}
-              elementIndex={elementIndex}
+              isSelected={runIndex === elementIndex}
               locateActivity={locateActivity}
               run={run}
-              runIndex={runIndex}
-              setRunIndex={setRunIndex}
+              onToggleSelect={() => handleToggleSelect(elementIndex)}
             />
           ))}
         </tbody>
