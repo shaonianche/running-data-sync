@@ -16,3 +16,6 @@ name = "running-data-sync"
 
 [env.preview]
 name = "running-data-sync-preview"
+
+[observability]
+enabled = true
