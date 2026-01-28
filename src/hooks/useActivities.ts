@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import activities from '@/static/activities.json'
 import { locationForRun, titleForRun } from '@/utils/utils'
 
@@ -11,7 +12,13 @@ interface ActivitiesData {
   thisYear: string
 }
 
-const activitiesData: ActivitiesData = (() => {
+let cachedData: ActivitiesData | null = null
+
+function getActivitiesData(): ActivitiesData {
+  if (cachedData) {
+    return cachedData
+  }
+
   const cities: Record<string, number> = {}
   const runPeriod: Record<string, number> = {}
   const provinces: Set<string> = new Set()
@@ -46,7 +53,7 @@ const activitiesData: ActivitiesData = (() => {
   if (years)
     [thisYear] = yearsArray // set current year as first one of years array
 
-  return {
+  cachedData = {
     activities,
     years: yearsArray,
     countries: [...countries],
@@ -55,6 +62,12 @@ const activitiesData: ActivitiesData = (() => {
     runPeriod,
     thisYear,
   }
-})()
 
-export default activitiesData
+  return cachedData
+}
+
+function useActivities() {
+  return useMemo(() => getActivitiesData(), [])
+}
+
+export default useActivities

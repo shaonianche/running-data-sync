@@ -1,9 +1,9 @@
 import Stat from '@/components/Stat'
-import activitiesData from '@/hooks/useActivities'
+import useActivities from '@/hooks/useActivities'
 
 // only support China for now
 function CitiesStat({ onClick }: { onClick: (_city: string) => void }) {
-  const { cities } = activitiesData
+  const { cities } = useActivities()
 
   const citiesArr = Object.entries(cities)
   citiesArr.sort((a, b) => b[1] - a[1])
