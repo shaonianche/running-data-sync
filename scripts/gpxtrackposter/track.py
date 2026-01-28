@@ -57,39 +57,32 @@ class Track:
         self.subtype = None  # for fit file
         self.device = ""
 
-    def load_gpx(self, file_name):
-        """
-        TODO refactor with load_tcx to one function
-        """
+    def _load_track(self, file_name, file_type, parse_and_load_func):
         try:
             self.file_names = [os.path.basename(file_name)]
-            # Handle empty gpx files
-            # (for example, treadmill runs pulled via garmin-connect-export)
             if os.path.getsize(file_name) == 0:
-                raise TrackLoadError("Empty GPX file")
+                raise TrackLoadError(f"Empty {file_type} file")
+
+            parse_and_load_func()
+        except Exception as e:
+            print(
+                f"Something went wrong when loading {file_type}. for file {self.file_names[0]}, we just ignore this file and continue"
+            )
+            print(str(e))
+
+    def load_gpx(self, file_name):
+        def parse_and_load():
             with open(file_name, "r", encoding="utf-8", errors="ignore") as file:
                 self._load_gpx_data(mod_gpxpy.parse(file))
-        except Exception as e:
-            print(
-                f"Something went wrong when loading GPX. for file {self.file_names[0]}, we just ignore this file and continue"
-            )
-            print(str(e))
-            pass
+
+        self._load_track(file_name, "GPX", parse_and_load)
 
     def load_tcx(self, file_name):
-        try:
-            self.file_names = [os.path.basename(file_name)]
-            # Handle empty tcx files
-            # (for example, treadmill runs pulled via garmin-connect-export)
+        def parse_and_load():
             tcx = TCXReader()
-            if os.path.getsize(file_name) == 0:
-                raise TrackLoadError("Empty TCX file")
             self._load_tcx_data(tcx.read(file_name), file_name=file_name)
-        except Exception as e:
-            print(
-                f"Something went wrong when loading TCX. for file {self.file_names[0]}, we just ignore this file and continue"
-            )
-            print(str(e))
+
+        self._load_track(file_name, "TCX", parse_and_load)
 
     def load_fit(self, file_name):
         try:
