@@ -331,12 +331,10 @@ class Generator:
             return []
 
         # Calculate streak
-        activities_df["start_date_local_date"] = pd.to_datetime(activities_df["start_date_local"]).dt.date
+        activities_df["start_date_local_date"] = pd.to_datetime(activities_df["start_date_local"]).dt.normalize()
         activities_df = activities_df.sort_values("start_date_local_date")
         # Get the difference in days between consecutive runs
-        activities_df["date_diff"] = (
-            activities_df["start_date_local_date"].diff().apply(lambda x: x.days if pd.notna(x) else None)
-        )
+        activities_df["date_diff"] = activities_df["start_date_local_date"].diff().dt.days
         # Identify the start of a new streak
         activities_df["new_streak"] = (activities_df["date_diff"] != 1).cumsum()
         # Calculate streak number within each group
