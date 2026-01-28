@@ -1,3 +1,4 @@
+import concurrent.futures
 import datetime
 import os
 import random
@@ -231,6 +232,23 @@ class Generator:
         parsed_str = minidom.parseString(xml_str)
         return parsed_str.toprettyxml(indent="  ")
 
+    def _process_activity_tcx(self, activity):
+        try:
+            self.logger.info(f"Processing activity: {activity.name} ({activity.id})")
+            stream_types = ["time", "latlng", "altitude", "heartrate"]
+            streams = self.client.get_activity_streams(activity.id, types=stream_types)
+
+            if not streams.get("latlng") or not streams.get("time"):
+                self.logger.warning(f"Skipping activity {activity.id} due to missing latlng or time streams.")
+                return None
+
+            tcx_content = self._make_tcx_from_streams(activity, streams)
+            filename = f"{activity.id}.tcx"
+            return (filename, tcx_content)
+        except Exception as e:
+            self.logger.error(f"Failed to process activity {activity.id}: {e}", exc_info=True)
+            return None
+
     def generate_missing_tcx(self, downloaded_ids):
         self.check_access()
 
@@ -243,24 +261,14 @@ class Generator:
 
         self.logger.info(f"Found {len(activities_to_process)} new activities to generate TCX for.")
 
-        for activity in activities_to_process:
-            try:
-                self.logger.info(f"Processing activity: {activity.name} ({activity.id})")
-                stream_types = ["time", "latlng", "altitude", "heartrate"]
-                streams = self.client.get_activity_streams(activity.id, types=stream_types)
-
-                if not streams.get("latlng") or not streams.get("time"):
-                    self.logger.warning(f"Skipping activity {activity.id} due to missing latlng or time streams.")
-                    continue
-
-                tcx_content = self._make_tcx_from_streams(activity, streams)
-                filename = f"{activity.id}.tcx"
-                tcx_files.append((filename, tcx_content))
-
-                # Rate limiting
-                time.sleep(2)
-            except Exception as e:
-                self.logger.error(f"Failed to process activity {activity.id}: {e}", exc_info=True)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_activity = {
+                executor.submit(self._process_activity_tcx, activity): activity for activity in activities_to_process
+            }
+            for future in concurrent.futures.as_completed(future_to_activity):
+                result = future.result()
+                if result:
+                    tcx_files.append(result)
 
         return tcx_files
 
