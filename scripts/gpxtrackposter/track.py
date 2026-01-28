@@ -150,7 +150,7 @@ class Track:
             raise TrackLoadError("Track is empty.")
 
         self.start_time, self.end_time = time_values[0], time_values[-1]
-        moving_time = int(self.end_time.timestamp() - self.start_time.timestamp())
+        elapsed_time = int(self.end_time.timestamp() - self.start_time.timestamp())
         self.run_id = self.__make_run_id(self.start_time)
         self.average_heartrate = tcx.hr_avg
         polyline_container = []
@@ -175,9 +175,9 @@ class Track:
         self.elevation_gain = tcx.ascent
         self.moving_dict = {
             "distance": self.length,
-            "moving_time": datetime.timedelta(seconds=moving_time),
-            "elapsed_time": datetime.timedelta(seconds=moving_time),  # FIXME for now make it same as moving time
-            "average_speed": self.length / moving_time if moving_time else 0,
+            "moving_time": datetime.timedelta(seconds=elapsed_time),
+            "elapsed_time": datetime.timedelta(seconds=elapsed_time),
+            "average_speed": self.length / elapsed_time if elapsed_time else 0,
         }
 
     def _load_gpx_data(self, gpx):
