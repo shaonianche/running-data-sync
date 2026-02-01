@@ -28,7 +28,7 @@
     "ci": "pnpm run lint && pnpm run build"
   },
   "dependencies": {
-    "@duckdb/duckdb-wasm": "1.29.1-dev132.0",
+    "@duckdb/duckdb-wasm": "1.32.0",
     "@mapbox/polyline": "^1.2.1",
     "@math.gl/web-mercator": "^4.1.0",
     "@surbowl/world-geo-json-zh": "^2.1.5",
