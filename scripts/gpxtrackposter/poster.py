@@ -3,7 +3,9 @@
 import gettext
 import locale
 from collections import defaultdict
+from datetime import datetime
 
+import pytz
 import svgwrite
 
 from .utils import format_float
@@ -57,6 +59,7 @@ class Poster:
         self.tracks_drawer = None
         self.trans = None
         self.set_language(None)
+        self.tc_offset = datetime.now(pytz.timezone("Asia/Shanghai")).utcoffset()
         self.github_style = "align-firstday"
 
     def set_language(self, language):
@@ -70,7 +73,9 @@ class Poster:
 
         # Fall-back to NullTranslations, if the specified language translation cannot be found.
         if language:
-            lang = gettext.translation("gpxposter", localedir="locale", languages=[language], fallback=True)
+            lang = gettext.translation(
+                "gpxposter", localedir="locale", languages=[language], fallback=True
+            )
         else:
             lang = gettext.NullTranslations()
         self.trans = lang.gettext
@@ -106,14 +111,16 @@ class Poster:
         width = self.width
         if self.drawer_type == "plain":
             height = height - 100
-            self.colors["background"] = "#1a1a1a"
-            self.colors["track"] = "red"
-            self.colors["special"] = "yellow"
-            self.colors["text"] = "#e1ed5e"
+        if self.drawer_type == "year_summary":
+            # Year summary has its own layout, use full size
+            height = height
         d = svgwrite.Drawing(output, (f"{width}mm", f"{height}mm"))
         d.viewbox(0, 0, self.width, height)
         d.add(d.rect((0, 0), (width, height), fill=self.colors["background"]))
-        if not self.drawer_type == "plain":
+        if self.drawer_type == "year_summary":
+            # Year summary drawer handles its own layout
+            self.__draw_tracks(d, XY(width - 10, height - 10), XY(5, 5))
+        elif not self.drawer_type == "plain":
             self.__draw_header(d)
             self.__draw_footer(d)
             self.__draw_tracks(d, XY(width - 20, height - 30 - 30), XY(10, 30))
@@ -134,10 +141,7 @@ class Poster:
         return "mi"
 
     def format_distance(self, d: float) -> str:
-        """
-        Formats a distance using the locale specific
-        float format and the selected unit.
-        """
+        """Formats a distance using the locale specific float format and the selected unit."""
         return format_float(self.m2u(d)) + " " + self.u()
 
     def __draw_tracks(self, d, size: XY, offset: XY):
@@ -191,22 +195,26 @@ class Poster:
                 )
             )
 
-            d.add(d.rect((65, self.height - 17), (2.6, 2.6), fill=self.colors["special"]))
+            d.add(
+                d.rect((65, self.height - 17), (2.6, 2.6), fill=self.colors["special"])
+            )
 
             d.add(
                 d.text(
-                    f"Over {special_distance1:.1f} km",
+                    f"Over {special_distance1:.1f} {self.u()}",
                     insert=(70, self.height - 14.5),
                     fill=text_color,
                     style=small_value_style,
                 )
             )
 
-            d.add(d.rect((65, self.height - 13), (2.6, 2.6), fill=self.colors["special2"]))
+            d.add(
+                d.rect((65, self.height - 13), (2.6, 2.6), fill=self.colors["special2"])
+            )
 
             d.add(
                 d.text(
-                    f"Over {special_distance2:.1f} km",
+                    f"Over {special_distance2:.1f} {self.u()}",
                     insert=(70, self.height - 10.5),
                     fill=text_color,
                     style=small_value_style,
