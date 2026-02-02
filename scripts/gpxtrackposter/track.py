@@ -310,21 +310,50 @@ class Track:
 
     def append(self, other):
         """Append other track to self."""
+        if not isinstance(other, Track):
+            print(f"Cannot append non-Track object: {type(other)}")
+            return
+
         self.end_time = other.end_time
+        self.end_time_local = other.end_time_local
         self.length += other.length
-        # TODO maybe a better way
         try:
-            self.moving_dict["distance"] += other.moving_dict["distance"]
-            self.moving_dict["moving_time"] += other.moving_dict["moving_time"]
-            self.moving_dict["elapsed_time"] += other.moving_dict["elapsed_time"]
-            self.polyline_container.extend(other.polyline_container)
-            self.polyline_str = polyline.encode(self.polyline_container)
-            self.moving_dict["average_speed"] = (
-                self.moving_dict["distance"] / self.moving_dict["moving_time"].total_seconds()
-            )
+            # Weighted average heart rate
+            self_moving_time = self.moving_dict.get("moving_time", datetime.timedelta(0)).total_seconds()
+            other_moving_time = other.moving_dict.get("moving_time", datetime.timedelta(0)).total_seconds()
+            if self.average_heartrate is not None and other.average_heartrate is not None:
+                total_time = self_moving_time + other_moving_time
+                if total_time > 0:
+                    self.average_heartrate = (
+                        self.average_heartrate * self_moving_time + other.average_heartrate * other_moving_time
+                    ) / total_time
+                else:
+                    self.average_heartrate = (self.average_heartrate + other.average_heartrate) / 2
+            elif self.average_heartrate is None:
+                self.average_heartrate = other.average_heartrate
+
+            self.moving_dict["distance"] = self.moving_dict.get("distance", 0) + other.moving_dict.get("distance", 0)
+            self.moving_dict["moving_time"] = self.moving_dict.get(
+                "moving_time", datetime.timedelta(0)
+            ) + other.moving_dict.get("moving_time", datetime.timedelta(0))
+            self.moving_dict["elapsed_time"] = self.moving_dict.get(
+                "elapsed_time", datetime.timedelta(0)
+            ) + other.moving_dict.get("elapsed_time", datetime.timedelta(0))
+
+            if hasattr(self, "polyline_container") and hasattr(other, "polyline_container"):
+                self.polyline_container.extend(other.polyline_container)
+                self.polyline_str = polyline.encode(self.polyline_container)
+
+            self.polylines.extend(other.polylines)
+
+            moving_time_seconds = self.moving_dict["moving_time"].total_seconds()
+            if moving_time_seconds > 0:
+                self.moving_dict["average_speed"] = self.moving_dict["distance"] / moving_time_seconds
+            else:
+                self.moving_dict["average_speed"] = 0
+
             self.file_names.extend(other.file_names)
             self.special = self.special or other.special
-            self.average_heartrate = self.average_heartrate or other.average_heartrate
             self.elevation_gain = (self.elevation_gain if self.elevation_gain else 0) + (
                 other.elevation_gain if other.elevation_gain else 0
             )
