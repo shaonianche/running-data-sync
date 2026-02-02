@@ -37,6 +37,8 @@ from .db import (
 from .db import write_fit_dataframes as write_fit_dataframes
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
+TCX_STREAM_TYPES = ["time", "latlng", "altitude", "heartrate"]
+MAX_TCX_WORKERS = 5
 
 
 geopy.geocoders.options.default_user_agent = "running-data-sync"
@@ -235,8 +237,7 @@ class Generator:
     def _process_activity_tcx(self, activity):
         try:
             self.logger.info(f"Processing activity: {activity.name} ({activity.id})")
-            stream_types = ["time", "latlng", "altitude", "heartrate"]
-            streams = self.client.get_activity_streams(activity.id, types=stream_types)
+            streams = self.client.get_activity_streams(activity.id, types=TCX_STREAM_TYPES)
 
             if not streams.get("latlng") or not streams.get("time"):
                 self.logger.warning(f"Skipping activity {activity.id} due to missing latlng or time streams.")
@@ -261,11 +262,9 @@ class Generator:
 
         self.logger.info(f"Found {len(activities_to_process)} new activities to generate TCX for.")
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            future_to_activity = {
-                executor.submit(self._process_activity_tcx, activity): activity for activity in activities_to_process
-            }
-            for future in concurrent.futures.as_completed(future_to_activity):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_TCX_WORKERS) as executor:
+            futures = [executor.submit(self._process_activity_tcx, activity) for activity in activities_to_process]
+            for future in concurrent.futures.as_completed(futures):
                 result = future.result()
                 if result:
                     tcx_files.append(result)
