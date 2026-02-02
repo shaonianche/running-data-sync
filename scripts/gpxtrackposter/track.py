@@ -206,7 +206,7 @@ class Track:
     def _calc_moving_time(self, trackpoints, seconds_threshold=10):
         moving_time = 0
         try:
-            start_time = self.start_time
+            start_time = trackpoints[0].time
             for i in range(1, len(trackpoints)):
                 if trackpoints[i].time - trackpoints[i - 1].time <= datetime.timedelta(
                     seconds=seconds_threshold
@@ -460,8 +460,8 @@ class Track:
     @staticmethod
     def _get_moving_data(gpx, moving_time):
         moving_data = gpx.get_moving_data()
-        elapsed_time = moving_data.moving_time
-        moving_time = moving_time or elapsed_time
+        elapsed_time = moving_data.moving_time + moving_data.stopped_time
+        moving_time = moving_time or moving_data.moving_time
         return {
             "distance": moving_data.moving_distance,
             "moving_time": datetime.timedelta(seconds=moving_time),
