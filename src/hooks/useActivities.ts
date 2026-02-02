@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
 import activities from '@/static/activities.json'
 import { locationForRun, titleForRun } from '@/utils/utils'
 
