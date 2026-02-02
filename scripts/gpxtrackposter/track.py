@@ -66,7 +66,7 @@ class Track:
             parse_and_load_func()
         except Exception as e:
             print(
-                f"Something went wrong when loading {file_type}. for file {self.file_names[0]}, we just ignore this file and continue"
+                f"Something went wrong when loading {file_type}. for file {os.path.basename(file_name)}, we just ignore this file and continue"
             )
             print(str(e))
 
