@@ -301,10 +301,14 @@ sdist = { url = "https://files.pythonhosted.org/packages/e7/a2/d48e4513355c92a32
 [[package]]
 name = "fit-tool"
 version = "0.9.15"
-source = { git = "https://github.com/shaonianche/python_fit_tool.git?rev=main#4e478b6602aebe81d4199354bb5e13386c0e500a" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "bitstruct" },
     { name = "openpyxl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b4/df/110dcfb7c8c985622f1b6c9c768a68eadf8b29974d36443422b79a177076/fit_tool-0.9.15.tar.gz", hash = "sha256:366ffe75ec3c3313a4164a3205b0eff8b7146f3d5c9c3f6fad8291c88b986cb1", size = 154570, upload-time = "2026-02-02T08:29:25.888Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/25/ca/20fe2dc451a3e22c483659a511a71a31c29a6569610a3e14c5a6cb712673/fit_tool-0.9.15-py3-none-any.whl", hash = "sha256:4d367e9fd146dc65288de2bfb9b63f54965485a7a3259fbaaadfefd1ba83e82e", size = 249339, upload-time = "2026-02-02T08:29:24.237Z" },
 ]
 
 [[package]]
@@ -1044,7 +1048,7 @@ requires-dist = [
     { name = "colour", specifier = ">=0.1.5" },
     { name = "duckdb" },
     { name = "eviltransform" },
-    { name = "fit-tool", git = "https://github.com/shaonianche/python_fit_tool.git?rev=main" },
+    { name = "fit-tool" },
     { name = "garmin-fit-sdk" },
     { name = "garth" },
     { name = "geopy" },
