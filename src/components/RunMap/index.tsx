@@ -316,6 +316,7 @@ function RunMap({
                         <Map
                           {...viewState}
                           onMove={onMove}
+                          reuseMaps
                           style={style}
                           mapStyle={isDarkMode ? MAPLIBRE_DARK_STYLE : MAPLIBRE_LIGHT_STYLE}
                           ref={mapRefCallback}
