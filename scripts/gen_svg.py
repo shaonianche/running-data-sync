@@ -4,17 +4,16 @@ import os
 import sys
 
 from config import SQL_FILE
-from generator import Generator
 from gpxtrackposter import (
     circular_drawer,
     github_drawer,
     grid_drawer,
-    month_of_life_drawer,
     poster,
     track_loader,
+    month_of_life_drawer,
+    year_summary_drawer,
 )
 from gpxtrackposter.exceptions import ParameterError, PosterError
-from gpxtrackposter.track import Track
 
 # from flopp great repo
 __app_name__ = "create_poster"
@@ -30,6 +29,7 @@ def main():
         "circular": circular_drawer.CircularDrawer(p),
         "github": github_drawer.GithubDrawer(p),
         "monthoflife": month_of_life_drawer.MonthOfLifeDrawer(p),
+        "year_summary": year_summary_drawer.YearSummaryDrawer(p),
     }
 
     args_parser = argparse.ArgumentParser()
@@ -62,7 +62,9 @@ def main():
         default="all",
         help='Filter tracks by year; "NUM", "NUM-NUM", "all" (default: all years)',
     )
-    args_parser.add_argument("--title", metavar="TITLE", type=str, help="Title to display.")
+    args_parser.add_argument(
+        "--title", metavar="TITLE", type=str, help="Title to display."
+    )
     args_parser.add_argument(
         "--athlete",
         metavar="NAME",
@@ -75,7 +77,8 @@ def main():
         metavar="FILE",
         action="append",
         default=[],
-        help="Mark track file from the GPX directory as special;use multiple times to mark multiple tracks.",
+        help="Mark track file from the GPX directory as special; use multiple times to mark "
+        "multiple tracks.",
     )
     types = '", "'.join(drawers.keys())
     args_parser.add_argument(
@@ -139,10 +142,7 @@ def main():
         help='Distance units; "metric", "imperial" (default: "metric").',
     )
     args_parser.add_argument(
-        "--verbose",
-        dest="verbose",
-        action="store_true",
-        help="Verbose logging.",
+        "--verbose", dest="verbose", action="store_true", help="Verbose logging."
     )
     args_parser.add_argument("--logfile", dest="logfile", metavar="FILE", type=str)
     args_parser.add_argument(
@@ -159,7 +159,7 @@ def main():
         metavar="DISTANCE",
         type=float,
         default=20.0,
-        help="Special Distance2 by km and color with the special_color2",
+        help="Special Distance2 by km and corlor with the special_color2",
     )
     args_parser.add_argument(
         "--min-distance",
@@ -193,12 +193,12 @@ def main():
     )
 
     args_parser.add_argument(
-        "--no-activity-color",
-        dest="no_activity_color",
-        metavar="COLOR",
+        "--sport-type",
+        dest="sport_type",
+        metavar="SPORT_TYPE",
         type=str,
-        default="#444444",
-        help='Color for days without activity (default: "#444444").',
+        default="all",
+        help="Sport type",
     )
 
     for _, drawer in drawers.items():
@@ -226,7 +226,6 @@ def main():
 
     if args.from_db:
         # for svg from db here if you want gpx please do not use --from-db
-        generator = Generator(SQL_FILE)
         # args.type == "grid" means have polyline data or not
         raw_tracks = generator.load()
         tracks = []
@@ -250,14 +249,21 @@ def main():
                 tracks.append(t)
     else:
         tracks = loader.load_tracks(args.gpx_dir)
+
+    if args.sport_type != "all":
+        tracks = [track for track in tracks if track.type == args.sport_type]
+
     if not tracks:
         return
 
     is_circular = args.type == "circular"
     is_mol = args.type == "monthoflife"
+    is_year_summary = args.type == "year_summary"
 
-    if not is_circular and not is_mol:
-        print(f"Creating poster of type {args.type} with {len(tracks)}tracks and storing it in file {args.output}...")
+    if not is_circular and not is_mol and not is_year_summary:
+        print(
+            f"Creating poster of type {args.type} with {len(tracks)} tracks and storing it in file {args.output}..."
+        )
     p.set_language(args.language)
     p.athlete = args.athlete
     if args.title:
@@ -277,7 +283,6 @@ def main():
         "special": args.special_color,
         "special2": args.special_color2 or args.special_color,
         "text": args.text_color,
-        "no_activity": args.no_activity_color,
     }
     p.units = args.units
     p.set_tracks(tracks)
@@ -285,19 +290,40 @@ def main():
     p.drawer_type = "plain" if is_circular else "title"
     if is_mol:
         p.drawer_type = "monthoflife"
+    if is_year_summary:
+        p.drawer_type = "year_summary"
     if args.type == "github":
         p.height = 55 + p.years.real_year * 43
     p.github_style = args.github_style
+
+    if args.type == "circular":
+        if args.background_color == "#222222":
+            p.colors["background"] = "#1a1a1a"
+        if args.track_color == "#4DD2FF":
+            p.colors["track"] = "red"
+        if args.special_color == "#FFFF00":
+            p.colors["special"] = "yellow"
+        if args.text_color == "#FFFFFF":
+            p.colors["text"] = "#e1ed5e"
+
     # for special circular
     if is_circular:
         years = p.years.all()[:]
+        output_dir = os.path.dirname(args.output) or "assets"
         for y in years:
             p.years.from_year, p.years.to_year = y, y
             # may be refactor
             p.set_tracks(tracks)
+            p.draw(drawers[args.type], os.path.join(output_dir, f"year_{str(y)}.svg"))
+    elif is_year_summary and args.summary_year is None:
+        # Generate year summary for all years when --summary-year is not specified
+        years = p.years.all()[:]
+        output_dir = os.path.dirname(args.output) or "assets"
+        for y in years:
+            drawers[args.type].year = y
             p.draw(
                 drawers[args.type],
-                os.path.join("public", "assets", f"year_{str(y)}.svg"),
+                os.path.join(output_dir, f"year_summary_{str(y)}.svg"),
             )
     else:
         p.draw(drawers[args.type], args.output)

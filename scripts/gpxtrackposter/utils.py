@@ -7,31 +7,25 @@
 
 import locale
 import math
+from datetime import datetime
 from typing import List, Optional, Tuple
-from zoneinfo import ZoneInfo
 
 import colour
+import pytz
 import s2sphere as s2
-from timezonefinder import TimezoneFinder
-
-from .value_range import ValueRange
-from .xy import XY
 
 try:
     from tzfpy import get_tz
+
+    tf = None
 except ImportError:
-    get_tz = None
+    # tzfpy is not available, fallback to timezonefinder
+    from timezonefinder import TimezoneFinder
 
-_TIMEZONE_FINDER_INSTANCE: Optional[TimezoneFinder] = None
+    tf = TimezoneFinder()
 
 
-def _get_timezone_finder() -> TimezoneFinder:
-    """Lazy-load the TimezoneFinder instance to improve startup performance."""
-    global _TIMEZONE_FINDER_INSTANCE
-    if _TIMEZONE_FINDER_INSTANCE is None:
-        # This initialization is deferred until it's actually needed.
-        _TIMEZONE_FINDER_INSTANCE = TimezoneFinder()
-    return _TIMEZONE_FINDER_INSTANCE
+from .xy import XY
 
 
 # mercator projection
@@ -83,17 +77,9 @@ def project(
     return lines
 
 
-def compute_bounds_xy(lines: List[List[XY]]) -> Tuple[ValueRange, ValueRange]:
-    range_x = ValueRange()
-    range_y = ValueRange()
-    for line in lines:
-        for xy in line:
-            range_x.extend(xy.x)
-            range_y.extend(xy.y)
-    return range_x, range_y
-
-
-def compute_grid(count: int, dimensions: XY) -> Tuple[Optional[float], Optional[Tuple[int, int]]]:
+def compute_grid(
+    count: int, dimensions: XY
+) -> Tuple[Optional[float], Optional[Tuple[int, int]]]:
     # this is somehow suboptimal O(count^2). I guess it's possible in O(count)
     min_waste = -1.0
     best_size = None
@@ -134,40 +120,31 @@ def format_float(f):
 
 
 def parse_datetime_to_local(start_time, end_time, point):
-    """
-    Converts naive UTC datetime objects to local time based on a geographical point.
-
-    It first checks if the datetime is already timezone-aware. If not, it uses
-    the provided point (lat, lng) to find the correct timezone name and then
-    calculates the local time.
-    """
-    # If the datetime object is already "aware", we can use its offset directly.
-    offset = start_time.utcoffset()
-    if offset:
-        # Note: This assumes start and end times are in the same timezone,
-        # which is safe for single activities.
-        return start_time + offset, end_time + offset
-
-    timezone_name = None
-    if point:
+    if not point:
+        timezone = "Asia/Shanghai"
+    else:
+        # just parse the start time, because start/end maybe different
+        offset = start_time.utcoffset()
+        if offset:
+            return start_time + offset, end_time + offset
         lat, lng = point
-        # Prefer the faster `tzfpy` library if available.
-        if get_tz:
-            timezone_name = get_tz(lng=lng, lat=lat)
-        # Fallback to `timezonefinder` if the first attempt fails.
-        if not timezone_name:
-            tf = _get_timezone_finder()
-            timezone_name = tf.timezone_at(lng=lng, lat=lat)
+        try:
+            timezone = get_tz(lng=lng, lat=lat)
+        except Exception as e:
+            # just a little trick when tzfpy support windows will delete this
+            print(f"tzfpy error: {e} fallback to timezonefinder")
+            lat, lng = point
+            timezone = tf.timezone_at(lng=lng, lat=lat)
+    tc_offset = datetime.now(pytz.timezone(timezone)).utcoffset()
+    return start_time + tc_offset, end_time + tc_offset
 
-    # Use a default fallback if no timezone could be determined.
-    timezone_name = timezone_name or "Asia/Shanghai"
 
-    try:
-        tz = ZoneInfo(timezone_name)
-        # Calculate offset based on the actual start_time (assuming it's naive UTC)
-        start_tc_offset = start_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
-        end_tc_offset = end_time.replace(tzinfo=ZoneInfo("UTC")).astimezone(tz).utcoffset()
-        return start_time + start_tc_offset, end_time + end_tc_offset
-    except Exception:
-        # If any part of the conversion fails, return the original times to prevent a crash.
-        return start_time, end_time
+def get_normalized_sport_type(sport_type):
+    if sport_type == "Run":
+        return "running"
+    elif sport_type == "Walk":
+        return "walking"
+    elif sport_type == "Ride":
+        return "cycling"
+    else:
+        return sport_type

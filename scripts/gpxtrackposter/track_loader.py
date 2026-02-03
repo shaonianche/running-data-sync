@@ -13,11 +13,13 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 import concurrent.futures
 
-from synced_data_file_logger import load_synced_file_list
+from generator.db import Activity, init_db
 
 from .exceptions import ParameterError, TrackLoadError
 from .track import Track
 from .year_range import YearRange
+
+from synced_data_file_logger import load_synced_file_list
 
 log = logging.getLogger(__name__)
 
@@ -90,10 +92,27 @@ class TrackLoader:
         log.info(f"Conventionally loaded tracks: {len(loaded_tracks)}")
 
         tracks = self._filter_tracks(tracks)
-
-        # merge tracks that took place within one hour
-        tracks = self._merge_tracks(tracks)
         # filter out tracks with length < min_length
+        return [t for t in tracks if t.length >= self.min_length]
+
+    def load_tracks_from_db(self, sql_file, is_grid=False):
+        session = init_db(sql_file)
+        if is_grid:
+            activities = (
+                session.query(Activity)
+                .filter(Activity.summary_polyline != "")
+                .order_by(Activity.start_date_local)
+            )
+        else:
+            activities = session.query(Activity).order_by(Activity.start_date_local)
+        tracks = []
+        for activity in activities:
+            t = Track()
+            t.load_from_db(activity)
+            tracks.append(t)
+        print(f"All tracks: {len(tracks)}")
+        tracks = self._filter_tracks(tracks)
+        print(f"After filter tracks: {len(tracks)}")
         return [t for t in tracks if t.length >= self.min_length]
 
     def _filter_tracks(self, tracks):
@@ -105,7 +124,9 @@ class TrackLoader:
             elif not t.start_time_local:
                 log.info(f"{file_name}: skipping track without start time")
             elif not self.year_range.contains(t.start_time_local):
-                log.info(f"{file_name}: skipping track with wrong year {t.start_time_local.year}")
+                log.info(
+                    f"{file_name}: skipping track with wrong year {t.start_time_local.year}"
+                )
             else:
                 t.special = file_name in self.special_file_names
                 filtered_tracks.append(t)
@@ -138,7 +159,8 @@ class TrackLoader:
         tracks = {}
         with concurrent.futures.ProcessPoolExecutor() as executor:
             future_to_file_name = {
-                executor.submit(load_func, file_name, activity_title_dict): file_name for file_name in file_names
+                executor.submit(load_func, file_name, activity_title_dict): file_name
+                for file_name in file_names
             }
         for future in concurrent.futures.as_completed(future_to_file_name):
             file_name = future_to_file_name[future]
