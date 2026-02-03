@@ -168,7 +168,17 @@ def update_or_create_activity(session, run_activity):
 def add_missing_columns(engine, model):
     inspector = inspect(engine)
     table_name = model.__tablename__
-    columns = {col["name"] for col in inspector.get_columns(table_name)}
+    try:
+        columns = {col["name"] for col in inspector.get_columns(table_name)}
+    except Exception:
+        # Fallback for DuckDB or other engines if reflection fails
+        with engine.connect() as conn:
+            # check if table exists first
+            if not inspector.has_table(table_name):
+                return
+            result = conn.execute(text(f"DESCRIBE {table_name}"))
+            columns = {row[0] for row in result}
+
     missing_columns = []
 
     for column in model.__table__.columns:
@@ -186,9 +196,7 @@ def add_missing_columns(engine, model):
 
 
 def init_db(db_path):
-    engine = create_engine(
-        f"sqlite:///{db_path}", connect_args={"check_same_thread": False}
-    )
+    engine = create_engine(f"duckdb:///{db_path}")
     Base.metadata.create_all(engine)
 
     # check missing columns

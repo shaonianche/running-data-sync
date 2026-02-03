@@ -37,6 +37,7 @@ dependencies = [
   "garth",
   "pycryptodome",
   "duckdb",
+  "duckdb-engine",
   "openai",
   "certifi==2025.1.31",
   "pytz",
