@@ -54,7 +54,7 @@ def start_end_hiding(polyline: List[Tuple[float]], distance: int) -> List[Tuple[
 
 
 def filter_out(polyline_str):
-    if not polyline_str:
+    if not isinstance(polyline_str, str) or not polyline_str:
         return
     pl = polyline.decode(polyline_str)
     if not pl:

@@ -240,7 +240,8 @@ def main():
             if (
                 r.get("type") == "Run"
                 and r.get("distance", 0) >= args.min_distance * 1000
-                and r.get("summary_polyline")
+                and (summary_polyline := r.get("summary_polyline"))
+                and isinstance(summary_polyline, str)
             ):
                 # because track.py load_from_db is used for track obj
                 # so we need a class to pass the value
