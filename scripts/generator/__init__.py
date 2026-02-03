@@ -354,6 +354,7 @@ class Generator:
         if not IGNORE_BEFORE_SAVING:
             activities_df["summary_polyline"] = activities_df["summary_polyline"].apply(filter_out)
 
+        activities_df = activities_df.replace({float("nan"): None})
         return activities_df.to_dict("records")
 
     def get_old_tracks_ids(self):
