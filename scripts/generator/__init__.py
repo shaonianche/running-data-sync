@@ -353,6 +353,9 @@ class Generator:
         if not IGNORE_BEFORE_SAVING:
             activities_df["summary_polyline"] = activities_df["summary_polyline"].apply(filter_out)
 
+        # Replace NaN/NaT with None for JSON compatibility
+        activities_df = activities_df.where(pd.notna(activities_df), None)
+
         return activities_df.to_dict("records")
 
     def get_old_tracks_ids(self):
