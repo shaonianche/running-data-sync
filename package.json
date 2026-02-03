@@ -15,7 +15,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "data:clean": "rm -f scripts/data.db {GPX,TCX,FIT}_OUT/* activities/* src/static/activities.json",
+    "data:clean": "rm -f scripts/data.duckdb {GPX,TCX,FIT}_OUT/* src/static/activities.json",
     "data:download:garmin": "python scripts/garmin_sync.py",
     "data:analysis:github": "python scripts/gen_svg.py --from-db --type github --output public/assets/github.svg",
     "data:analysis:grid": "python scripts/gen_svg.py --from-db --type grid --output public/assets/grid.svg",

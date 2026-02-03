@@ -7,14 +7,6 @@ from pathlib import Path
 class TestConfig:
     """Test cases for config module."""
 
-    def test_output_dir_exists(self):
-        """Test that OUTPUT_DIR path is properly defined."""
-        from config import OUTPUT_DIR
-
-        assert OUTPUT_DIR is not None
-        assert isinstance(OUTPUT_DIR, str)
-        assert "activities" in OUTPUT_DIR
-
     def test_gpx_folder_exists(self):
         """Test that GPX_FOLDER path is properly defined."""
         from config import GPX_FOLDER
@@ -92,12 +84,11 @@ class TestConfig:
             FIT_FOLDER,
             GPX_FOLDER,
             JSON_FILE,
-            OUTPUT_DIR,
             SQL_FILE,
             TCX_FOLDER,
         )
 
-        paths = [OUTPUT_DIR, GPX_FOLDER, TCX_FOLDER, FIT_FOLDER, DB_FOLDER, SQL_FILE, JSON_FILE]
+        paths = [GPX_FOLDER, TCX_FOLDER, FIT_FOLDER, DB_FOLDER, SQL_FILE, JSON_FILE]
 
         for path in paths:
             assert os.path.isabs(path), f"Path {path} should be absolute"
