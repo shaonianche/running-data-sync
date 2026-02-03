@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:31a846b35ce7584d723bd24ad2dda68fb0f89e2f537d1b27e5a96e44df995931"
+content_hash = "sha256:8cdef8b70c77c5db6bbac1a02546767ba2f560c45eb8134ab4d888df88a4b85e"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -279,17 +279,17 @@ files = [
 ]
 
 [[package]]
-name = "fit-tool-ng"
-version = "0.9.14a1.dev18"
+name = "fit-tool"
+version = "0.9.15"
 requires_python = ">=3.8"
 git = "https://github.com/shaonianche/python_fit_tool.git"
 ref = "main"
-revision = "456d3b0d792fb95ca285ff1bd04c8d3f0efe4a8f"
+revision = "4e478b6602aebe81d4199354bb5e13386c0e500a"
 summary = "A library for reading and writing Garmin FIT files."
 groups = ["default"]
 dependencies = [
-    "bitstruct>=8.20.0",
-    "openpyxl>=3.1.5",
+    "bitstruct>=8.11.1",
+    "openpyxl>=2.5.12",
 ]
 
 [[package]]
