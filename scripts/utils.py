@@ -17,16 +17,55 @@ from stravalib.exc import RateLimitExceeded
 
 
 class ActivityJSONEncoder(json.JSONEncoder):
-    """Custom JSON encoder to handle pandas Timestamp and other non-serializable types."""
+    """Custom JSON encoder to handle pandas Timestamp and other non-serializable types.
 
-    def default(self, obj):
-        if isinstance(obj, pd.Timestamp):
-            return obj.isoformat() if pd.notna(obj) else None
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        if pd.isna(obj):
+    This encoder ensures strict JSON compliance by:
+    - Converting pandas Timestamps to ISO format strings
+    - Converting datetime objects to ISO format strings
+    - Converting NaN, Infinity, -Infinity floats to null (these are not valid JSON)
+    - Converting pandas NA/NaT values to null
+    """
+
+    def encode(self, o):
+        """Override encode to handle float special values before serialization."""
+        return super().encode(self._sanitize(o))
+
+    def iterencode(self, o, _one_shot=False):
+        """Override iterencode to handle float special values before serialization."""
+        return super().iterencode(self._sanitize(o), _one_shot)
+
+    def _sanitize(self, obj):
+        """Recursively sanitize objects, converting non-JSON-compliant values to None."""
+        import math
+
+        if isinstance(obj, dict):
+            return {k: self._sanitize(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [self._sanitize(item) for item in obj]
+        elif isinstance(obj, float):
+            # NaN, Infinity, -Infinity are not valid JSON
+            if math.isnan(obj) or math.isinf(obj):
+                return None
+            return obj
+        elif obj is pd.NaT:
+            # Must check for pandas NaT BEFORE datetime (since NaT is a datetime subclass)
             return None
-        return super().default(obj)
+        elif isinstance(obj, pd.Timestamp):
+            return obj.isoformat() if pd.notna(obj) else None
+        elif isinstance(obj, datetime):
+            return obj.isoformat()
+        elif pd.isna(obj):
+            return None
+        return obj
+
+    def default(self, o):
+        if isinstance(o, pd.Timestamp):
+            return o.isoformat() if pd.notna(o) else None
+        if isinstance(o, datetime):
+            return o.isoformat()
+        if pd.isna(o):
+            return None
+        return super().default(o)
 
 
 def get_logger(name):

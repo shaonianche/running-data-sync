@@ -41,7 +41,7 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.12.2"]
+dev = ["ruff>=0.12.2", "pytest>=8.0.0", "pytest-cov>=4.1.0"]
 
 [build-system]
 requires = ["pdm-backend"]
@@ -66,3 +66,10 @@ line-ending = "auto"
 
 [tool.ty.environment]
 extra-paths = ["scripts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+pythonpath = ["scripts"]
