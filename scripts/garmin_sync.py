@@ -6,6 +6,7 @@ Copy most code from https://github.com/cyberjunky/python-garminconnect
 import argparse
 import asyncio
 import os
+import shutil
 import sys
 import time
 import zipfile
@@ -60,7 +61,7 @@ class Garmin:
             garth.client.refresh_oauth2()
 
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",  # noqa: E501
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",  # noqa: E501
             "origin": self.URL_DICT.get("SSO_URL_ORIGIN"),
             "nk": "NT",
             "Authorization": str(garth.client.oauth2_token),
@@ -88,8 +89,8 @@ class Garmin:
             else:
                 logger.debug("Session may have expired, trying to relogin: %s", err)
                 # Forcing a refresh here if needed:
-                # garth.client.refresh_oauth2()
-                # self.headers["Authorization"] = str(garth.client.oauth2_token)
+                garth.client.refresh_oauth2()
+                self.headers["Authorization"] = str(garth.client.oauth2_token)
                 return await self.fetch_data(url, retrying=True)
         except Exception as err:
             logger.exception("An unexpected error occurred during data retrieval.")
@@ -242,6 +243,29 @@ def add_summary_info(file_data, summary_infos, fields=None):
     return file_data
 
 
+def unzip_and_process(file_path, folder, activity_id):
+    temp_extract_dir = os.path.join(folder, f"temp_{activity_id}")
+    os.makedirs(temp_extract_dir, exist_ok=True)
+    try:
+        with zipfile.ZipFile(file_path, "r") as zip_ref:
+            for file_info in zip_ref.infolist():
+                zip_ref.extract(file_info, temp_extract_dir)
+                extracted_path = os.path.join(temp_extract_dir, file_info.filename)
+                if file_info.filename.endswith(".fit"):
+                    dest = os.path.join(folder, f"{activity_id}.fit")
+                    os.replace(extracted_path, dest)
+                elif file_info.filename.endswith(".gpx"):
+                    dest = os.path.join(FOLDER_DICT["gpx"], f"{activity_id}.gpx")
+                    os.replace(extracted_path, dest)
+                else:
+                    # other files in temp dir will be removed when cleaning up temp dir
+                    pass
+    finally:
+        shutil.rmtree(temp_extract_dir)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
 async def download_garmin_data(client, activity_id, file_type="gpx", summary_infos=None):
     folder = FOLDER_DICT.get(file_type, "gpx")
     try:
@@ -258,20 +282,9 @@ async def download_garmin_data(client, activity_id, file_type="gpx", summary_inf
             await fb.write(file_data)
 
         if need_unzip:
-            with zipfile.ZipFile(file_path, "r") as zip_ref:
-                for file_info in zip_ref.infolist():
-                    zip_ref.extract(file_info, folder)
-                    extracted_path = os.path.join(folder, file_info.filename)
-                    if file_info.filename.endswith(".fit"):
-                        os.rename(extracted_path, os.path.join(folder, f"{activity_id}.fit"))
-                    elif file_info.filename.endswith(".gpx"):
-                        os.rename(
-                            extracted_path,
-                            os.path.join(FOLDER_DICT["gpx"], f"{activity_id}.gpx"),
-                        )
-                    else:
-                        os.remove(extracted_path)
-            os.remove(file_path)
+            await asyncio.get_running_loop().run_in_executor(
+                None, unzip_and_process, file_path, folder, activity_id
+            )
 
     except Exception:
         logger.exception("Failed to download activity %s", activity_id)

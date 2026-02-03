@@ -1,7 +1,7 @@
 import { yearStats } from '@assets/index'
 import { lazy, Suspense, useMemo } from 'react'
 import Stat from '@/components/Stat'
-import useActivities from '@/hooks/useActivities'
+import activitiesData from '@/hooks/useActivities'
 import useHover from '@/hooks/useHover'
 import { loadSvgComponent } from '@/utils/svgUtils'
 import { formatPace } from '@/utils/utils'
@@ -15,7 +15,7 @@ function YearStat({
   onClick?: (_year: string) => void
   disableClick?: boolean
 }) {
-  const { activities: runs, years } = useActivities()
+  const { activities: runs, years } = activitiesData
   // for hover
   const [hovered, eventHandlers] = useHover()
 

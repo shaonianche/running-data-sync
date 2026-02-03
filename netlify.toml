@@ -1,0 +1,6 @@
+[build]
+  command = "npx pnpm@9.15.4 install && npx pnpm@9.15.4 run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
