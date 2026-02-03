@@ -1,4 +1,3 @@
-import concurrent.futures
 import datetime
 import os
 import sys
@@ -15,8 +14,6 @@ from .db import Activity, init_db, update_or_create_activity
 from synced_data_file_logger import save_synced_data_file_list
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
-TCX_STREAM_TYPES = ["time", "latlng", "altitude", "heartrate"]
-MAX_TCX_WORKERS = 5
 
 
 class Generator:
@@ -172,22 +169,6 @@ class Generator:
         parsed_str = minidom.parseString(xml_str)
         return parsed_str.toprettyxml(indent="  ")
 
-    def _process_activity_tcx(self, activity):
-        try:
-            self.logger.info(f"Processing activity: {activity.name} ({activity.id})")
-            streams = self.client.get_activity_streams(activity.id, types=TCX_STREAM_TYPES)
-
-            if not streams.get("latlng") or not streams.get("time"):
-                self.logger.warning(f"Skipping activity {activity.id} due to missing latlng or time streams.")
-                return None
-
-            tcx_content = self._make_tcx_from_streams(activity, streams)
-            filename = f"{activity.id}.tcx"
-            return (filename, tcx_content)
-        except Exception as e:
-            self.logger.error(f"Failed to process activity {activity.id}: {e}", exc_info=True)
-            return None
-
     def generate_missing_tcx(self, downloaded_ids):
         self.check_access()
 
@@ -200,12 +181,24 @@ class Generator:
 
         self.logger.info(f"Found {len(activities_to_process)} new activities to generate TCX for.")
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_TCX_WORKERS) as executor:
-            futures = [executor.submit(self._process_activity_tcx, activity) for activity in activities_to_process]
-            for future in concurrent.futures.as_completed(futures):
-                result = future.result()
-                if result:
-                    tcx_files.append(result)
+        for activity in activities_to_process:
+            try:
+                self.logger.info(f"Processing activity: {activity.name} ({activity.id})")
+                stream_types = ["time", "latlng", "altitude", "heartrate"]
+                streams = self.client.get_activity_streams(activity.id, types=stream_types)
+
+                if not streams.get("latlng") or not streams.get("time"):
+                    self.logger.warning(f"Skipping activity {activity.id} due to missing latlng or time streams.")
+                    continue
+
+                tcx_content = self._make_tcx_from_streams(activity, streams)
+                filename = f"{activity.id}.tcx"
+                tcx_files.append((filename, tcx_content))
+
+                # Rate limiting
+                time.sleep(2)
+            except Exception as e:
+                self.logger.error(f"Failed to process activity {activity.id}: {e}", exc_info=True)
 
         return tcx_files
 
@@ -264,10 +257,12 @@ class Generator:
         activity_list = []
 
         # Calculate streak
-        activities_df["start_date_local_date"] = pd.to_datetime(activities_df["start_date_local"]).dt.normalize()
+        activities_df["start_date_local_date"] = pd.to_datetime(activities_df["start_date_local"]).dt.date
         activities_df = activities_df.sort_values("start_date_local_date")
         # Get the difference in days between consecutive runs
-        activities_df["date_diff"] = activities_df["start_date_local_date"].diff().dt.days
+        activities_df["date_diff"] = (
+            activities_df["start_date_local_date"].diff().apply(lambda x: x.days if pd.notna(x) else None)
+        )
         # Identify the start of a new streak
         activities_df["new_streak"] = (activities_df["date_diff"] != 1).cumsum()
         # Calculate streak number within each group
@@ -280,7 +275,6 @@ class Generator:
         if not IGNORE_BEFORE_SAVING:
             activities_df["summary_polyline"] = activities_df["summary_polyline"].apply(filter_out)
 
-        activities_df = activities_df.where(pd.notna(activities_df), None)
         return activities_df.to_dict("records")
 
     def get_old_tracks_ids(self):
@@ -395,24 +389,25 @@ class Generator:
     def _add_record_mesgs(self, builder, df):
         if df is None or df.empty:
             return
-        for row in df.itertuples(index=False):
+        for _, row in df.iterrows():
             msg = RecordMessage()
-            naive_ts = row.timestamp.tz_localize(None)
+            naive_ts = row["timestamp"].tz_localize(None)
             msg.timestamp = round(naive_ts.timestamp() * 1000)
 
-            fields_to_copy = (
-                "position_lat",
-                "position_long",
-                "distance",
-                "altitude",
-                "speed",
-                "heart_rate",
-                "cadence",
-            )
-            for field in fields_to_copy:
-                value = getattr(row, field)
-                if pd.notna(value):
-                    setattr(msg, field, value)
+            if pd.notna(row["position_lat"]):
+                msg.position_lat = row["position_lat"]
+            if pd.notna(row["position_long"]):
+                msg.position_long = row["position_long"]
+            if pd.notna(row["distance"]):
+                msg.distance = row["distance"]
+            if pd.notna(row["altitude"]):
+                msg.altitude = row["altitude"]
+            if pd.notna(row["speed"]):
+                msg.speed = row["speed"]
+            if pd.notna(row["heart_rate"]):
+                msg.heart_rate = row["heart_rate"]
+            if pd.notna(row["cadence"]):
+                msg.cadence = row["cadence"]
             builder.add(msg)
 
     def _add_lap_mesg(self, builder, df):

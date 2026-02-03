@@ -31,7 +31,7 @@ dependencies = [
   "tenacity",
   "numpy",
   "tzlocal",
-  "fit-tool",
+  "fit-tool @ git+https://github.com/shaonianche/python_fit_tool.git@main",
   "garmin-fit-sdk",
   "haversine==2.8.0",
   "garth",

@@ -8,6 +8,7 @@ import asyncio
 import datetime as dt
 import logging
 import os
+import shutil
 import sys
 import time
 import traceback
@@ -64,7 +65,7 @@ class Garmin:
             garth.client.refresh_oauth2()
 
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",  # noqa: E501
             "origin": self.URL_DICT.get("SSO_URL_ORIGIN"),
             "nk": "NT",
             "Authorization": str(garth.client.oauth2_token),
@@ -93,11 +94,14 @@ class Garmin:
                 )
                 raise GarminConnectConnectionError("Error connecting") from err
             else:
-                logger.debug(
-                    "Exception occurred during data retrieval - perhaps session expired - trying relogin: %s"
-                    % err
-                )
-                await self.fetch_data(url, retrying=True)
+                logger.debug("Session may have expired, trying to relogin: %s", err)
+                # Forcing a refresh here if needed:
+                garth.client.refresh_oauth2()
+                self.headers["Authorization"] = str(garth.client.oauth2_token)
+                return await self.fetch_data(url, retrying=True)
+        except Exception as err:
+            logger.exception("An unexpected error occurred during data retrieval.")
+            raise GarminConnectConnectionError("Error connecting") from err
 
     async def get_activities(self, start, limit):
         """
@@ -266,9 +270,30 @@ def add_summary_info(file_data, summary_infos, fields=None):
     return file_data
 
 
-async def download_garmin_data(
-    client, activity_id, file_type="gpx", summary_infos=None
-):
+def unzip_and_process(file_path, folder, activity_id):
+    temp_extract_dir = os.path.join(folder, f"temp_{activity_id}")
+    os.makedirs(temp_extract_dir, exist_ok=True)
+    try:
+        with zipfile.ZipFile(file_path, "r") as zip_ref:
+            for file_info in zip_ref.infolist():
+                zip_ref.extract(file_info, temp_extract_dir)
+                extracted_path = os.path.join(temp_extract_dir, file_info.filename)
+                if file_info.filename.endswith(".fit"):
+                    dest = os.path.join(folder, f"{activity_id}.fit")
+                    os.replace(extracted_path, dest)
+                elif file_info.filename.endswith(".gpx"):
+                    dest = os.path.join(FOLDER_DICT["gpx"], f"{activity_id}.gpx")
+                    os.replace(extracted_path, dest)
+                else:
+                    # other files in temp dir will be removed when cleaning up temp dir
+                    pass
+    finally:
+        shutil.rmtree(temp_extract_dir)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+
+async def download_garmin_data(client, activity_id, file_type="gpx", summary_infos=None):
     folder = FOLDER_DICT.get(file_type, "gpx")
     try:
         file_data = await client.download_activity(activity_id, file_type=file_type)
@@ -282,25 +307,12 @@ async def download_garmin_data(
         async with aiofiles.open(file_path, "wb") as fb:
             await fb.write(file_data)
         if need_unzip:
-            zip_file = zipfile.ZipFile(file_path, "r")
-            for file_info in zip_file.infolist():
-                zip_file.extract(file_info, folder)
-                if file_info.filename.endswith(".fit"):
-                    os.rename(
-                        os.path.join(folder, f"{activity_id}_ACTIVITY.fit"),
-                        os.path.join(folder, f"{activity_id}.fit"),
-                    )
-                elif file_info.filename.endswith(".gpx"):
-                    os.rename(
-                        os.path.join(folder, f"{activity_id}_ACTIVITY.gpx"),
-                        os.path.join(FOLDER_DICT["gpx"], f"{activity_id}.gpx"),
-                    )
-                else:
-                    os.remove(os.path.join(folder, file_info.filename))
-            os.remove(file_path)
-    except Exception as e:
-        print(f"Failed to download activity {activity_id}: {str(e)}")
-        traceback.print_exc()
+            await asyncio.get_running_loop().run_in_executor(
+                None, unzip_and_process, file_path, folder, activity_id
+            )
+
+    except Exception:
+        logger.exception("Failed to download activity %s", activity_id)
 
 
 async def get_activity_id_list(client, start=0):
