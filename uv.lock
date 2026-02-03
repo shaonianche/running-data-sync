@@ -1310,7 +1310,6 @@ dependencies = [
     { name = "aiofiles" },
     { name = "appdirs" },
     { name = "arrow" },
-    { name = "cairosvg" },
     { name = "certifi" },
     { name = "cloudscraper" },
     { name = "colour" },
@@ -1336,7 +1335,6 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "stravalib" },
     { name = "stravaweblib" },
-    { name = "svglib" },
     { name = "svgwrite" },
     { name = "tcxreader" },
     { name = "tenacity" },
@@ -1347,7 +1345,9 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "cairosvg" },
     { name = "ruff" },
+    { name = "svglib" },
 ]
 
 [package.metadata]
@@ -1355,7 +1355,6 @@ requires-dist = [
     { name = "aiofiles" },
     { name = "appdirs", specifier = ">=1.4.0" },
     { name = "arrow" },
-    { name = "cairosvg", specifier = ">=2.7.1" },
     { name = "certifi", specifier = "==2025.1.31" },
     { name = "cloudscraper" },
     { name = "colour", specifier = ">=0.1.5" },
@@ -1381,7 +1380,6 @@ requires-dist = [
     { name = "sqlalchemy" },
     { name = "stravalib", specifier = "==0.10.4" },
     { name = "stravaweblib" },
-    { name = "svglib", specifier = ">=1.5.1" },
     { name = "svgwrite", specifier = ">=1.1.9" },
     { name = "tcxreader" },
     { name = "tenacity" },
@@ -1391,7 +1389,11 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ruff", specifier = ">=0.12.2" }]
+dev = [
+    { name = "cairosvg", specifier = ">=2.7.1" },
+    { name = "ruff", specifier = ">=0.12.2" },
+    { name = "svglib", specifier = ">=1.5.1" },
+]
 
 [[package]]
 name = "s2sphere"
