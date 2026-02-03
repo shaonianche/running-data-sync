@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import sys
 
@@ -25,6 +26,7 @@ class Generator:
         self.client_secret = ""
         self.refresh_token = ""
         self.only_run = False
+        self.logger = logging.getLogger(__name__)
 
     def set_strava_config(self, client_id, client_secret, refresh_token):
         self.client_id = client_id
@@ -63,24 +65,25 @@ class Generator:
             else:
                 filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
 
-        for activity in self.client.get_activities(**filters):
-            if self.only_run and activity.type != "Run":
-                continue
-            if IGNORE_BEFORE_SAVING:
-                if activity.map and activity.map.summary_polyline:
-                    activity.map.summary_polyline = filter_out(
-                        activity.map.summary_polyline
-                    )
-            #  strava use total_elevation_gain as elevation_gain
-            activity.elevation_gain = activity.total_elevation_gain
-            activity.subtype = activity.type
-            created = update_or_create_activity(self.session, activity)
-            if created:
-                sys.stdout.write("+")
-            else:
-                self.logger.info("No new flyby data to sync.")
+        try:
+            for activity in self.client.get_activities(**filters):
+                if self.only_run and activity.type != "Run":
+                    continue
+                if IGNORE_BEFORE_SAVING:
+                    if activity.map and activity.map.summary_polyline:
+                        activity.map.summary_polyline = filter_out(
+                            activity.map.summary_polyline
+                        )
+                #  strava use total_elevation_gain as elevation_gain
+                activity.elevation_gain = activity.total_elevation_gain
+                activity.subtype = activity.type
+                created = update_or_create_activity(self.session, activity)
+                if created:
+                    sys.stdout.write("+")
+                else:
+                    self.logger.info("No new flyby data to sync.")
         except Exception as e:
-            self.logger.warning(f"Flyby data synchronization failed: {e},but main sync completed successfully.")
+            self.logger.warning(f"Failed to sync activities: {e}")
 
     def _make_tcx_from_streams(self, activity, streams):
         # TCX XML structure
