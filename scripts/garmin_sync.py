@@ -253,14 +253,10 @@ def unzip_and_process(file_path, folder, activity_id):
                 extracted_path = os.path.join(temp_extract_dir, file_info.filename)
                 if file_info.filename.endswith(".fit"):
                     dest = os.path.join(folder, f"{activity_id}.fit")
-                    if os.path.exists(dest):
-                        os.remove(dest)
-                    os.rename(extracted_path, dest)
+                    os.replace(extracted_path, dest)
                 elif file_info.filename.endswith(".gpx"):
                     dest = os.path.join(FOLDER_DICT["gpx"], f"{activity_id}.gpx")
-                    if os.path.exists(dest):
-                        os.remove(dest)
-                    os.rename(extracted_path, dest)
+                    os.replace(extracted_path, dest)
                 else:
                     # other files in temp dir will be removed when cleaning up temp dir
                     pass
