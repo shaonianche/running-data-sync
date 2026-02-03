@@ -1,8 +1,9 @@
-import activities from '@/static/activities.json'
+import { useMemo } from 'react'
+import activitiesJson from '@/static/activities.json'
 import { locationForRun, titleForRun } from '@/utils/utils'
 
 interface ActivitiesData {
-  activities: typeof activities
+  activities: typeof activitiesJson
   years: string[]
   countries: string[]
   provinces: string[]
@@ -11,7 +12,13 @@ interface ActivitiesData {
   thisYear: string
 }
 
-const activitiesData: ActivitiesData = (() => {
+let cachedData: ActivitiesData | null = null
+
+function getActivitiesData(): ActivitiesData {
+  if (cachedData) {
+    return cachedData
+  }
+
   const cities: Record<string, number> = {}
   const runPeriod: Record<string, number> = {}
   const provinces: Set<string> = new Set()
@@ -19,7 +26,7 @@ const activitiesData: ActivitiesData = (() => {
   const years: Set<string> = new Set()
   let thisYear = ''
 
-  activities.forEach((run) => {
+  activitiesJson.forEach((run) => {
     const location = locationForRun(run)
 
     const periodName = titleForRun(run)
@@ -43,11 +50,12 @@ const activitiesData: ActivitiesData = (() => {
   })
 
   const yearsArray = [...years].sort().reverse()
-  if (years)
-    [thisYear] = yearsArray // set current year as first one of years array
+  if (yearsArray.length > 0) {
+    thisYear = yearsArray[0]
+  }
 
-  return {
-    activities,
+  cachedData = {
+    activities: activitiesJson,
     years: yearsArray,
     countries: [...countries],
     provinces: [...provinces],
@@ -55,6 +63,12 @@ const activitiesData: ActivitiesData = (() => {
     runPeriod,
     thisYear,
   }
-})()
 
-export default activitiesData
+  return cachedData
+}
+
+function useActivities(): ActivitiesData {
+  return useMemo(() => getActivitiesData(), [])
+}
+
+export default useActivities
