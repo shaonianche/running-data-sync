@@ -1,9 +1,9 @@
 import Stat from '@/components/Stat'
-import activitiesData from '@/hooks/useActivities'
+import useActivities from '@/hooks/useActivities'
 
 // only support China for now
 function LocationSummary() {
-  const { years, countries, provinces, cities } = activitiesData
+  const { years, countries, provinces, cities } = useActivities()
   return (
     <div className="cursor-pointer">
       <section>
