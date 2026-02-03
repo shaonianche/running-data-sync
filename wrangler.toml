@@ -7,7 +7,7 @@ html_handling = "auto-trailing-slash"
 not_found_handling = "single-page-application"
 
 [build]
-command = "pnpm install && pnpm run build"
+command = "npm install -g pnpm@9.15.4 && pnpm install && pnpm run build"
 cwd = "."
 watch_dir = "src"
 

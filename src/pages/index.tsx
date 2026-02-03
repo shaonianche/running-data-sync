@@ -13,7 +13,7 @@ import RunTable from '@/components/RunTable'
 import SVGStat from '@/components/SVGStat'
 import { preloadTotalSvgs } from '@/components/SVGStat/preload'
 import YearsStat from '@/components/YearsStat'
-import useActivities from '@/hooks/useActivities'
+import activitiesData from '@/hooks/useActivities'
 import { IS_CHINESE } from '@/utils/const'
 import {
   filterAndSortRuns,
@@ -26,7 +26,7 @@ import {
 } from '@/utils/utils'
 
 function Index() {
-  const { activities, thisYear } = useActivities()
+  const { activities, thisYear } = activitiesData
   const [year, setYear] = useState(thisYear)
   const [runIndex, setRunIndex] = useState(-1)
   const [title, setTitle] = useState('')

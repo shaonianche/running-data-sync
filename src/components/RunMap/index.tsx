@@ -12,7 +12,7 @@ import Map, {
   NavigationControl,
   Source,
 } from 'react-map-gl/maplibre'
-import useActivities from '@/hooks/useActivities'
+import activitiesData from '@/hooks/useActivities'
 import {
   DISABLE_CHART,
   DISABLE_MAP,
@@ -63,7 +63,7 @@ function RunMap({
   geoData,
   thisYear,
 }: IRunMapProps) {
-  const { countries, provinces } = useActivities()
+  const { countries, provinces } = activitiesData
   const mapRef = useRef<MapRef | null>(null)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme')

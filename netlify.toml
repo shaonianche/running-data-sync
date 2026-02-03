@@ -1,0 +1,6 @@
+[build]
+  command = "npm install -g pnpm@9.15.4 && pnpm install && pnpm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
