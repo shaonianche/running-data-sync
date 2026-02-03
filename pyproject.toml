@@ -38,15 +38,13 @@ dependencies = [
   "pycryptodome",
   "duckdb",
   "openai",
-  "svglib>=1.5.1",
-  "cairosvg>=2.7.1",
   "certifi==2025.1.31",
   "pytz",
   "pandas",
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.12.2"]
+dev = ["ruff>=0.12.2", "svglib>=1.5.1", "cairosvg>=2.7.1"]
 
 [build-system]
 requires = ["pdm-backend"]
