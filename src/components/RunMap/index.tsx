@@ -28,6 +28,7 @@ import {
 } from '@/utils/const'
 import { geoJsonForMap, getMainColor } from '@/utils/utils'
 import ActivityChart from './ActivityChart'
+import MapErrorBoundary from './MapErrorBoundary'
 import RunMapButtons from './RunMapButtons'
 import RunMarker from './RunMarker'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -304,73 +305,75 @@ function RunMap({
         : (
             !DISABLE_MAP && isMapVisible && (
               <div style={{ position: 'relative' }}>
-                <Map
-                  {...viewState}
-                  onMove={onMove}
-                  style={style}
-                  mapStyle={isDarkMode ? MAPLIBRE_DARK_STYLE : MAPLIBRE_LIGHT_STYLE}
-                  ref={mapRefCallback}
-                  doubleClickZoom={!isSmallScreen}
-                  scrollZoom={!isSmallScreen}
-                  keyboard={!isSmallScreen}
-                  touchZoomRotate={!isSmallScreen}
-                  touchPitch={!isSmallScreen}
-                  dragRotate={!isSmallScreen}
-                  dragPan={!isSmallScreen}
-                  pitchWithRotate={!isSmallScreen}
-                  minZoom={isSmallScreen ? 0.25 : 0}
-                  maxZoom={isSmallScreen ? 16 : 22}
-                >
-                  <Source id="data" type="geojson" data={composedGeoData}>
-                    <Layer
-                      id="province"
-                      type="fill"
-                      paint={{
-                        'fill-color': PROVINCE_FILL_COLOR,
-                      }}
-                      filter={filterProvinces}
+                <MapErrorBoundary>
+                  <Map
+                    {...viewState}
+                    onMove={onMove}
+                    style={style}
+                    mapStyle={isDarkMode ? MAPLIBRE_DARK_STYLE : MAPLIBRE_LIGHT_STYLE}
+                    ref={mapRefCallback}
+                    doubleClickZoom={!isSmallScreen}
+                    scrollZoom={!isSmallScreen}
+                    keyboard={!isSmallScreen}
+                    touchZoomRotate={!isSmallScreen}
+                    touchPitch={!isSmallScreen}
+                    dragRotate={!isSmallScreen}
+                    dragPan={!isSmallScreen}
+                    pitchWithRotate={!isSmallScreen}
+                    minZoom={isSmallScreen ? 0.25 : 0}
+                    maxZoom={isSmallScreen ? 16 : 22}
+                  >
+                    <Source id="data" type="geojson" data={composedGeoData}>
+                      <Layer
+                        id="province"
+                        type="fill"
+                        paint={{
+                          'fill-color': PROVINCE_FILL_COLOR,
+                        }}
+                        filter={filterProvinces}
+                      />
+                      <Layer
+                        id="countries"
+                        type="fill"
+                        paint={{
+                          'fill-color': COUNTRY_FILL_COLOR,
+                          'fill-opacity': ['case', ['==', ['get', 'name'], '中国'], 0.1, 0.5],
+                        }}
+                        filter={filterCountries}
+                      />
+                      <Layer
+                        id="runs2"
+                        type="line"
+                        paint={{
+                          'line-color': ['coalesce', ['get', 'color'], ['literal', getMainColor()]],
+                          'line-width': isBigMap ? 4 : 5,
+                          'line-dasharray': dash,
+                          'line-opacity': LINE_OPACITY,
+                          'line-blur': 1,
+                        }}
+                        layout={{
+                          'line-join': 'round',
+                          'line-cap': 'round',
+                        }}
+                      />
+                    </Source>
+                    {isSingleRun && (
+                      <RunMarker
+                        startLat={startLat}
+                        startLon={startLon}
+                        endLat={endLat}
+                        endLon={endLon}
+                        coordinates={lineCoordinates}
+                      />
+                    )}
+                    <FullscreenControl style={fullscreenButton} />
+                    <NavigationControl
+                      showCompass={false}
+                      position="bottom-right"
+                      style={{ opacity: 0.3 }}
                     />
-                    <Layer
-                      id="countries"
-                      type="fill"
-                      paint={{
-                        'fill-color': COUNTRY_FILL_COLOR,
-                        'fill-opacity': ['case', ['==', ['get', 'name'], '中国'], 0.1, 0.5],
-                      }}
-                      filter={filterCountries}
-                    />
-                    <Layer
-                      id="runs2"
-                      type="line"
-                      paint={{
-                        'line-color': ['coalesce', ['get', 'color'], ['literal', getMainColor()]],
-                        'line-width': isBigMap ? 4 : 5,
-                        'line-dasharray': dash,
-                        'line-opacity': LINE_OPACITY,
-                        'line-blur': 1,
-                      }}
-                      layout={{
-                        'line-join': 'round',
-                        'line-cap': 'round',
-                      }}
-                    />
-                  </Source>
-                  {isSingleRun && (
-                    <RunMarker
-                      startLat={startLat}
-                      startLon={startLon}
-                      endLat={endLat}
-                      endLon={endLon}
-                      coordinates={lineCoordinates}
-                    />
-                  )}
-                  <FullscreenControl style={fullscreenButton} />
-                  <NavigationControl
-                    showCompass={false}
-                    position="bottom-right"
-                    style={{ opacity: 0.3 }}
-                  />
-                </Map>
+                  </Map>
+                </MapErrorBoundary>
               </div>
             )
           )}

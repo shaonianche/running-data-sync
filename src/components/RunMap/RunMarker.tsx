@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Marker } from 'react-map-gl'
+import { Marker } from 'react-map-gl/maplibre'
 import styles from './style.module.css'
 
 interface IRunMarkerProperties {
