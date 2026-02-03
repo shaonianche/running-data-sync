@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import RunMapButtons from '@/components/RunMap/RunMapButtons'
 import YearStat from '@/components/YearStat'
 import activitiesData from '@/hooks/useActivities'

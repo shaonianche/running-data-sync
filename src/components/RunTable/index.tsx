@@ -2,7 +2,7 @@ import type {
   Activity,
   RunIds,
 } from '@/utils/utils'
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import RunRow from './RunRow'
 import styles from './style.module.css'
 

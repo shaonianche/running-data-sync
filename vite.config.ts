@@ -38,6 +38,11 @@ export default defineConfig({
     }),
   ],
   base: process.env.PATH_PREFIX || '/',
+  resolve: {
+    alias: {
+      'mapbox-gl': 'maplibre-gl',
+    },
+  },
   define: {
     'import.meta.env.VERCEL': JSON.stringify(process.env.VERCEL),
   },
@@ -48,11 +53,13 @@ export default defineConfig({
       output: {
         manualChunks: (id: string) => {
           if (id.includes('node_modules')) {
-            return 'vendors'
-            // If there will be more and more external packages referenced in the future,
-            // the following approach can be considered.
-            // const name = id.split('node_modules/')[1].split('/');
-            // return name[0] == '.pnpm' ? name[1] : name[0];
+            if (id.includes('maplibre-gl')) {
+              return 'maplibre-gl';
+            }
+            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+              return 'react-vendor';
+            }
+            return 'vendors';
           }
           else {
             for (const item of individuallyPackages) {

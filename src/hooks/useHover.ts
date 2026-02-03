@@ -1,17 +1,19 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 type HoverHook = [boolean, { onMouseOver: () => void, onMouseOut: () => void }]
 
 function useHover(): HoverHook {
   const [hovered, setHovered] = useState(false)
-  const [timer, setTimer] = useState<number>()
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const eventHandlers = {
     onMouseOver() {
-      setTimer(setTimeout(() => setHovered(true), 500)) // 500ms delay
+      timerRef.current = setTimeout(() => setHovered(true), 500)
     },
     onMouseOut() {
-      clearTimeout(timer)
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
       setHovered(false)
     },
   }

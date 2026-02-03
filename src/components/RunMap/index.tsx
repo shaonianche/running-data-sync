@@ -188,8 +188,16 @@ function RunMap({
 
   const isBigMap = (viewState.zoom ?? 0) <= 3
 
-  const filterProvinces = useMemo(() => ['in', 'name', ...provinces], [provinces])
-  const filterCountries = useMemo(() => ['in', 'name', ...countries], [countries])
+  const filterProvinces = useMemo(
+    (): ['in', ['get', string], ['literal', string[]]] =>
+      ['in', ['get', 'name'], ['literal', provinces]],
+    [provinces],
+  )
+  const filterCountries = useMemo(
+    (): ['in', ['get', string], ['literal', string[]]] =>
+      ['in', ['get', 'name'], ['literal', countries]],
+    [countries],
+  )
 
   const composedGeoData = useMemo(() => {
     if (isBigMap && IS_CHINESE) {

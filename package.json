@@ -12,7 +12,7 @@
     "url": "https://github.com/yihong0618/running_page"
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=20"
   },
   "scripts": {
     "data:clean": "rm -f scripts/data.db {GPX,TCX,FIT}_OUT/* activities/* src/static/activities.json",
@@ -25,7 +25,8 @@
     "develop": "vite dev",
     "serve": "vite serve",
     "lint": "eslint --ext .ts,.tsx src --fix",
-    "ci": "pnpm run lint && pnpm run build"
+    "typecheck": "tsc --noEmit",
+    "ci": "pnpm run lint && pnpm run typecheck && pnpm run build"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "1.29.1-dev132.0",
