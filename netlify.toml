@@ -1,5 +1,5 @@
 [build]
-  command = "npm install -g pnpm@9.15.4 && pnpm install && pnpm run build"
+  command = "npx pnpm@9.15.4 install && npx pnpm@9.15.4 run build"
   publish = "dist"
 
 [build.environment]
