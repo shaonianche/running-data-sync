@@ -131,7 +131,7 @@ class TrackLoader:
         return merged_tracks
 
     @staticmethod
-    def _load_data_tracks(file_names, load_func=load_gpx_file, activity_title_dict={}):
+    def _load_data_tracks(file_names, load_func=load_gpx_file, activity_title_dict=None):
         """Load tracks from file names using the provided load function"""
         tracks = {}
         with concurrent.futures.ProcessPoolExecutor() as executor:
