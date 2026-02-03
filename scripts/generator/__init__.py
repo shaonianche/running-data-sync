@@ -632,25 +632,24 @@ class Generator:
     def _add_record_mesgs(self, builder, df):
         if df is None or df.empty:
             return
-        for _, row in df.iterrows():
+        for row in df.itertuples(index=False):
             msg = RecordMessage()
-            naive_ts = row["timestamp"].tz_localize(None)
+            naive_ts = row.timestamp.tz_localize(None)
             msg.timestamp = round(naive_ts.timestamp() * 1000)
 
-            if pd.notna(row["position_lat"]):
-                msg.position_lat = row["position_lat"]
-            if pd.notna(row["position_long"]):
-                msg.position_long = row["position_long"]
-            if pd.notna(row["distance"]):
-                msg.distance = row["distance"]
-            if pd.notna(row["altitude"]):
-                msg.altitude = row["altitude"]
-            if pd.notna(row["speed"]):
-                msg.speed = row["speed"]
-            if pd.notna(row["heart_rate"]):
-                msg.heart_rate = row["heart_rate"]
-            if pd.notna(row["cadence"]):
-                msg.cadence = row["cadence"]
+            fields_to_copy = (
+                "position_lat",
+                "position_long",
+                "distance",
+                "altitude",
+                "speed",
+                "heart_rate",
+                "cadence",
+            )
+            for field in fields_to_copy:
+                value = getattr(row, field)
+                if pd.notna(value):
+                    setattr(msg, field, value)
             builder.add(msg)
 
     def _add_lap_mesg(self, builder, df):
