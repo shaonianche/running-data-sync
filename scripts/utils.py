@@ -30,28 +30,12 @@ def adjust_timestamp_to_utc(timestamp, tz_name):
 
 
 def to_date(ts):
-    """
-    Parse ISO format timestamp string to datetime object.
-    Uses datetime.fromisoformat() for standard ISO format strings.
-    Falls back to strptime for non-standard formats.
-    """
-    # Try fromisoformat first (Python 3.7+)
-    try:
-        return datetime.fromisoformat(ts)
-    except ValueError:
-        # Fallback to strptime for non-standard formats
-        ts_fmts = ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f"]
-        for ts_fmt in ts_fmts:
-            try:
-                return datetime.strptime(ts, ts_fmt)
-            except ValueError:
-                pass
-        raise ValueError(f"cannot parse timestamp {ts} into date")
+    return datetime.fromisoformat(ts)
 
 
-def make_activities_file(
-    sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict={}
-):
+def make_activities_file(sql_file, data_dir, json_file, file_suffix="gpx", activity_title_dict={}):
+    from generator import Generator
+
     generator = Generator(sql_file)
     generator.sync_from_data_dir(
         data_dir, file_suffix=file_suffix, activity_title_dict=activity_title_dict

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import RunMapButtons from '@/components/RunMap/RunMapButtons'
 import YearStat from '@/components/YearStat'
-import activitiesData from '@/hooks/useActivities'
+import useActivities from '@/hooks/useActivities'
 import { INFO_MESSAGE } from '@/utils/const'
 
 function YearsStat({
@@ -9,7 +9,7 @@ function YearsStat({
 }: {
   year: string
 }) {
-  const { years } = activitiesData
+  const { years } = useActivities()
 
   const [isSmallScreen, setIsSmallScreen] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches)
   const [selectedYear, setSelectedYear] = useState<string>('')

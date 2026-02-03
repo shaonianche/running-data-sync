@@ -1,3 +1,4 @@
+import concurrent.futures
 import datetime
 import os
 import sys
@@ -14,6 +15,8 @@ from .db import Activity, init_db, update_or_create_activity
 from synced_data_file_logger import save_synced_data_file_list
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
+TCX_STREAM_TYPES = ["time", "latlng", "altitude", "heartrate"]
+MAX_TCX_WORKERS = 5
 
 
 class Generator:
@@ -78,9 +81,133 @@ class Generator:
             if created:
                 sys.stdout.write("+")
             else:
-                sys.stdout.write(".")
-            sys.stdout.flush()
-        self.session.commit()
+                self.logger.info("No new flyby data to sync.")
+        except Exception as e:
+            self.logger.warning(f"Flyby data synchronization failed: {e},but main sync completed successfully.")
+
+    def _make_tcx_from_streams(self, activity, streams):
+        # TCX XML structure
+        root = Element("TrainingCenterDatabase")
+        root.attrib = {
+            "xmlns": "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2",
+            "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "xsi:schemaLocation": "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd",  # noqa: E501
+        }
+
+        activities_node = SubElement(root, "Activities")
+        activity_node = SubElement(activities_node, "Activity")
+        activity_node.set("Sport", activity.type)
+
+        # Activity ID (Start time in ISO format)
+        activity_id_node = SubElement(activity_node, "Id")
+        activity_id_node.text = activity.start_date.isoformat()
+
+        # Lap
+        lap_node = SubElement(activity_node, "Lap")
+        lap_node.set("StartTime", activity.start_date.isoformat())
+
+        total_time_seconds = SubElement(lap_node, "TotalTimeSeconds")
+        total_time_seconds.text = str(activity.elapsed_time.total_seconds())
+
+        distance_meters = SubElement(lap_node, "DistanceMeters")
+        distance_meters.text = str(float(activity.distance))
+
+        if activity.calories:
+            calories = SubElement(lap_node, "Calories")
+            calories.text = str(int(activity.calories))
+
+        if streams.get("heartrate"):
+            avg_hr = SubElement(lap_node, "AverageHeartRateBpm")
+            avg_hr_val = SubElement(avg_hr, "Value")
+            avg_hr_val.text = str(int(sum(s for s in streams["heartrate"].data) / len(streams["heartrate"].data)))
+
+            max_hr = SubElement(lap_node, "MaximumHeartRateBpm")
+            max_hr_val = SubElement(max_hr, "Value")
+            max_hr_val.text = str(int(max(streams["heartrate"].data)))
+
+        intensity = SubElement(lap_node, "Intensity")
+        intensity.text = "Active"
+
+        trigger_method = SubElement(lap_node, "TriggerMethod")
+        trigger_method.text = "Manual"
+
+        track_node = SubElement(lap_node, "Track")
+
+        # Trackpoints
+        time_stream = streams.get("time").data if streams.get("time") else []
+        latlng_stream = streams.get("latlng").data if streams.get("latlng") else []
+        alt_stream = streams.get("altitude").data if streams.get("altitude") else [0] * len(time_stream)
+        hr_stream = streams.get("heartrate").data if streams.get("heartrate") else [0] * len(time_stream)
+
+        for i, time_offset in enumerate(time_stream):
+            trackpoint_node = SubElement(track_node, "Trackpoint")
+
+            time_node = SubElement(trackpoint_node, "Time")
+            time_node.text = (activity.start_date + datetime.timedelta(seconds=time_offset)).isoformat()
+
+            if i < len(latlng_stream):
+                position_node = SubElement(trackpoint_node, "Position")
+                lat_node = SubElement(position_node, "LatitudeDegrees")
+                lat_node.text = str(latlng_stream[i][0])
+                lon_node = SubElement(position_node, "LongitudeDegrees")
+                lon_node.text = str(latlng_stream[i][1])
+
+            if i < len(alt_stream):
+                alt_node = SubElement(trackpoint_node, "AltitudeMeters")
+                alt_node.text = str(alt_stream[i])
+
+            if i < len(hr_stream):
+                hr_node = SubElement(trackpoint_node, "HeartRateBpm")
+                hr_val_node = SubElement(hr_node, "Value")
+                hr_val_node.text = str(hr_stream[i])
+
+        # Creator
+        creator_node = SubElement(activity_node, "Creator")
+        creator_node.set("xsi:type", "Device_t")
+        name_node = SubElement(creator_node, "Name")
+        name_node.text = "Strava"
+
+        # Pretty print XML
+        xml_str = tostring(root, "utf-8")
+        parsed_str = minidom.parseString(xml_str)
+        return parsed_str.toprettyxml(indent="  ")
+
+    def _process_activity_tcx(self, activity):
+        try:
+            self.logger.info(f"Processing activity: {activity.name} ({activity.id})")
+            streams = self.client.get_activity_streams(activity.id, types=TCX_STREAM_TYPES)
+
+            if not streams.get("latlng") or not streams.get("time"):
+                self.logger.warning(f"Skipping activity {activity.id} due to missing latlng or time streams.")
+                return None
+
+            tcx_content = self._make_tcx_from_streams(activity, streams)
+            filename = f"{activity.id}.tcx"
+            return (filename, tcx_content)
+        except Exception as e:
+            self.logger.error(f"Failed to process activity {activity.id}: {e}", exc_info=True)
+            return None
+
+    def generate_missing_tcx(self, downloaded_ids):
+        self.check_access()
+
+        self.logger.info("Fetching all activities from Strava to check for missing TCX files...")
+        activities = self.client.get_activities()  # Fetch all activities
+
+        tcx_files = []
+
+        activities_to_process = [a for a in activities if str(a.id) not in downloaded_ids]
+
+        self.logger.info(f"Found {len(activities_to_process)} new activities to generate TCX for.")
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_TCX_WORKERS) as executor:
+            futures = [executor.submit(self._process_activity_tcx, activity) for activity in activities_to_process]
+            for future in concurrent.futures.as_completed(futures):
+                result = future.result()
+                if result:
+                    tcx_files.append(result)
+
+        return tcx_files
 
     def sync_from_data_dir(self, data_dir, file_suffix="gpx", activity_title_dict={}):
         loader = track_loader.TrackLoader()
@@ -136,29 +263,25 @@ class Generator:
         activities = query.order_by(Activity.start_date_local)
         activity_list = []
 
-        streak = 0
-        last_date = None
-        for activity in activities:
-            # Determine running streak.
-            date = datetime.datetime.strptime(
-                activity.start_date_local, "%Y-%m-%d %H:%M:%S"  # type: ignore
-            ).date()
-            if last_date is None:
-                streak = 1
-            elif date == last_date:
-                pass
-            elif date == last_date + datetime.timedelta(days=1):
-                streak += 1
-            else:
-                assert date > last_date
-                streak = 1
-            activity.streak = streak  # type: ignore
-            last_date = date
-            if not IGNORE_BEFORE_SAVING:
-                activity.summary_polyline = filter_out(activity.summary_polyline)  # type: ignore
-            activity_list.append(activity.to_dict())
+        # Calculate streak
+        activities_df["start_date_local_date"] = pd.to_datetime(activities_df["start_date_local"]).dt.normalize()
+        activities_df = activities_df.sort_values("start_date_local_date")
+        # Get the difference in days between consecutive runs
+        activities_df["date_diff"] = activities_df["start_date_local_date"].diff().dt.days
+        # Identify the start of a new streak
+        activities_df["new_streak"] = (activities_df["date_diff"] != 1).cumsum()
+        # Calculate streak number within each group
+        activities_df["streak"] = activities_df.groupby("new_streak").cumcount() + 1
 
-        return activity_list
+        # Drop temporary columns
+        activities_df = activities_df.drop(columns=["start_date_local_date", "date_diff", "new_streak"])
+
+        # Polyline filtering
+        if not IGNORE_BEFORE_SAVING:
+            activities_df["summary_polyline"] = activities_df["summary_polyline"].apply(filter_out)
+
+        activities_df = activities_df.where(pd.notna(activities_df), None)
+        return activities_df.to_dict("records")
 
     def get_old_tracks_ids(self):
         try:
@@ -181,3 +304,160 @@ class Generator:
             # pass the error
             print(f"something wrong with {str(e)}")
             return []
+
+        self.logger.info(f"Found {len(activities)} activities for FIT processing.")
+        fit_files_generated = []
+        for activity in activities:
+            try:
+                # Check if FIT file already exists (instead of checking database)
+                if not force and str(activity.id) in existing_fit_files:
+                    self.logger.info(f"Skipping activity {activity.id}, FIT file already exists.")
+                    continue
+
+                self.logger.info(f"Processing activity for FIT: {activity.id} ({activity.name})")
+                stream_types = [
+                    "time",
+                    "latlng",
+                    "altitude",
+                    "heartrate",
+                    "cadence",
+                    "velocity_smooth",
+                    "distance",
+                ]
+                streams = self.client.get_activity_streams(activity.id, types=stream_types, resolution="high")
+
+                # Generate FIT data without writing to database
+                dataframes = get_dataframes_for_fit_tables(activity, streams)
+                fit_byte_data = self.build_fit_file_from_dataframes(dataframes)
+
+                filename = f"{activity.id}.fit"
+                filepath = os.path.join("FIT_OUT", filename)
+                with open(filepath, "wb") as f:
+                    f.write(fit_byte_data)
+                fit_files_generated.append(filename)
+                self.logger.info(f"Successfully generated FIT file: {filepath}")
+
+            except Exception as e:
+                self.logger.error(
+                    f"Failed to generate FIT file for activity {activity.id}: {e}",
+                    exc_info=True,
+                )
+        return fit_files_generated
+
+    def build_fit_file_from_dataframes(self, dataframes):
+        """
+        Builds a FIT file from a dictionary of DataFrames,
+        following the official example's logic.
+        """
+        builder = FitFileBuilder(auto_define=True)
+
+        # The order of messages is important.
+        self._add_file_id_mesg(builder, dataframes.get("fit_file_id"))
+        self._add_event_mesg(builder, dataframes, event_type="start")
+        self._add_record_mesgs(builder, dataframes.get("fit_record"))
+        self._add_lap_mesg(builder, dataframes.get("fit_lap"))
+        self._add_session_mesg(builder, dataframes.get("fit_session"))
+        self._add_event_mesg(builder, dataframes, event_type="stop")
+
+        return builder.build().to_bytes()
+
+    def _add_file_id_mesg(self, builder, df):
+        if df is None or df.empty:
+            return
+        msg = FileIdMessage()
+        row = df.iloc[0]
+        msg.type = FileType(row["type"])
+        msg.manufacturer = row["manufacturer"]
+        msg.product = row["product"]
+        msg.software_version = row["software_version"]
+        msg.serial_number = random.randint(0, 4294967295)
+        naive_dt = row["time_created"].tz_localize(None)
+        msg.time_created = round(naive_dt.timestamp() * 1000)
+        builder.add(msg)
+
+    def _add_event_mesg(self, builder, dataframes, event_type):
+        if event_type == "start":
+            timestamp = dataframes["fit_session"].iloc[0]["start_time"]
+            event_type_enum = EventType.START
+        else:  # stop
+            timestamp = dataframes["fit_session"].iloc[0]["timestamp"]
+            event_type_enum = EventType.STOP_ALL
+
+        naive_dt = timestamp.tz_localize(None)
+        timestamp_ms = round(naive_dt.timestamp() * 1000)
+
+        event_msg = EventMessage()
+        event_msg.event = Event.TIMER
+        event_msg.event_type = event_type_enum
+        event_msg.timestamp = timestamp_ms
+        builder.add(event_msg)
+
+    def _add_record_mesgs(self, builder, df):
+        if df is None or df.empty:
+            return
+        for row in df.itertuples(index=False):
+            msg = RecordMessage()
+            naive_ts = row.timestamp.tz_localize(None)
+            msg.timestamp = round(naive_ts.timestamp() * 1000)
+
+            fields_to_copy = (
+                "position_lat",
+                "position_long",
+                "distance",
+                "altitude",
+                "speed",
+                "heart_rate",
+                "cadence",
+            )
+            for field in fields_to_copy:
+                value = getattr(row, field)
+                if pd.notna(value):
+                    setattr(msg, field, value)
+            builder.add(msg)
+
+    def _add_lap_mesg(self, builder, df):
+        if df is None or df.empty:
+            return
+        msg = LapMessage()
+        row = df.iloc[0]
+
+        naive_ts = row["timestamp"].tz_localize(None)
+        msg.timestamp = round(naive_ts.timestamp() * 1000)
+
+        naive_start = row["start_time"].tz_localize(None)
+        msg.start_time = round(naive_start.timestamp() * 1000)
+
+        msg.total_elapsed_time = row["total_elapsed_time"] * 1000
+        msg.total_timer_time = row["total_timer_time"] * 1000
+        msg.total_distance = row["total_distance"]
+        if pd.notna(row["avg_speed"]):
+            msg.avg_speed = row["avg_speed"]
+        if pd.notna(row["avg_heart_rate"]):
+            msg.avg_heart_rate = row["avg_heart_rate"]
+        if pd.notna(row["avg_cadence"]):
+            msg.avg_cadence = row["avg_cadence"]
+        builder.add(msg)
+
+    def _add_session_mesg(self, builder, df):
+        if df is None or df.empty:
+            return
+        msg = SessionMessage()
+        row = df.iloc[0]
+
+        naive_ts = row["timestamp"].tz_localize(None)
+        msg.timestamp = round(naive_ts.timestamp() * 1000)
+
+        naive_start = row["start_time"].tz_localize(None)
+        msg.start_time = round(naive_start.timestamp() * 1000)
+
+        msg.total_elapsed_time = row["total_elapsed_time"] * 1000
+        msg.total_timer_time = row["total_timer_time"] * 1000
+        msg.total_distance = row["total_distance"]
+        msg.sport = row["sport"]
+        if pd.notna(row["avg_speed"]):
+            msg.avg_speed = row["avg_speed"]
+        if pd.notna(row["avg_heart_rate"]):
+            msg.avg_heart_rate = row["avg_heart_rate"]
+        if pd.notna(row["avg_cadence"]):
+            msg.avg_cadence = row["avg_cadence"]
+        builder.add(msg)

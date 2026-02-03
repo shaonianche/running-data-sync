@@ -57,39 +57,32 @@ class Track:
         self.subtype = None  # for fit file
         self.device = ""
 
-    def load_gpx(self, file_name):
-        """
-        TODO refactor with load_tcx to one function
-        """
+    def _load_track(self, file_name, file_type, parse_and_load_func):
         try:
             self.file_names = [os.path.basename(file_name)]
-            # Handle empty gpx files
-            # (for example, treadmill runs pulled via garmin-connect-export)
             if os.path.getsize(file_name) == 0:
-                raise TrackLoadError("Empty GPX file")
+                raise TrackLoadError(f"Empty {file_type} file")
+
+            parse_and_load_func()
+        except Exception as e:
+            print(
+                f"Something went wrong when loading {file_type}. for file {os.path.basename(file_name)}, we just ignore this file and continue"
+            )
+            print(str(e))
+
+    def load_gpx(self, file_name):
+        def parse_and_load():
             with open(file_name, "r", encoding="utf-8", errors="ignore") as file:
                 self._load_gpx_data(mod_gpxpy.parse(file))
-        except Exception as e:
-            print(
-                f"Something went wrong when loading GPX. for file {self.file_names[0]}, we just ignore this file and continue"
-            )
-            print(str(e))
-            pass
+
+        self._load_track(file_name, "GPX", parse_and_load)
 
     def load_tcx(self, file_name):
-        try:
-            self.file_names = [os.path.basename(file_name)]
-            # Handle empty tcx files
-            # (for example, treadmill runs pulled via garmin-connect-export)
+        def parse_and_load():
             tcx = TCXReader()
-            if os.path.getsize(file_name) == 0:
-                raise TrackLoadError("Empty TCX file")
             self._load_tcx_data(tcx.read(file_name), file_name=file_name)
-        except Exception as e:
-            print(
-                f"Something went wrong when loading TCX. for file {self.file_names[0]}, we just ignore this file and continue"
-            )
-            print(str(e))
+
+        self._load_track(file_name, "TCX", parse_and_load)
 
     def load_fit(self, file_name):
         try:
@@ -135,7 +128,11 @@ class Track:
             summary_polyline = filter_out(activity.summary_polyline)
         else:
             summary_polyline = activity.summary_polyline
-        polyline_data = polyline.decode(summary_polyline) if summary_polyline else []
+        polyline_data = (
+            polyline.decode(summary_polyline)
+            if summary_polyline and isinstance(summary_polyline, str)
+            else []
+        )
         self.polylines = [[s2.LatLng.from_degrees(p[0], p[1]) for p in polyline_data]]
         self.run_id = activity.run_id
         self.type = get_normalized_sport_type(activity.type)
@@ -432,25 +429,53 @@ class Track:
 
     def append(self, other):
         """Append other track to self."""
+        if not isinstance(other, Track):
+            print(f"Cannot append non-Track object: {type(other)}")
+            return
+
         self.end_time = other.end_time
+        self.end_time_local = other.end_time_local
         self.length += other.length
-        # TODO maybe a better way
         try:
-            self.moving_dict["distance"] += other.moving_dict["distance"]
-            self.moving_dict["moving_time"] += other.moving_dict["moving_time"]
-            self.moving_dict["elapsed_time"] += other.moving_dict["elapsed_time"]
-            self.polyline_container.extend(other.polyline_container)
-            self.polyline_str = polyline.encode(self.polyline_container)
-            self.moving_dict["average_speed"] = (
-                self.moving_dict["distance"]
-                / self.moving_dict["moving_time"].total_seconds()
-            )
+            # Weighted average heart rate
+            self_moving_time = self.moving_dict.get("moving_time", datetime.timedelta(0)).total_seconds()
+            other_moving_time = other.moving_dict.get("moving_time", datetime.timedelta(0)).total_seconds()
+            if self.average_heartrate is not None and other.average_heartrate is not None:
+                total_time = self_moving_time + other_moving_time
+                if total_time > 0:
+                    self.average_heartrate = (
+                        self.average_heartrate * self_moving_time + other.average_heartrate * other_moving_time
+                    ) / total_time
+                else:
+                    self.average_heartrate = (self.average_heartrate + other.average_heartrate) / 2
+            elif self.average_heartrate is None:
+                self.average_heartrate = other.average_heartrate
+
+            self.moving_dict["distance"] = self.moving_dict.get("distance", 0) + other.moving_dict.get("distance", 0)
+            self.moving_dict["moving_time"] = self.moving_dict.get(
+                "moving_time", datetime.timedelta(0)
+            ) + other.moving_dict.get("moving_time", datetime.timedelta(0))
+            self.moving_dict["elapsed_time"] = self.moving_dict.get(
+                "elapsed_time", datetime.timedelta(0)
+            ) + other.moving_dict.get("elapsed_time", datetime.timedelta(0))
+
+            if hasattr(self, "polyline_container") and hasattr(other, "polyline_container"):
+                self.polyline_container.extend(other.polyline_container)
+                self.polyline_str = polyline.encode(self.polyline_container)
+
+            self.polylines.extend(other.polylines)
+
+            moving_time_seconds = self.moving_dict["moving_time"].total_seconds()
+            if moving_time_seconds > 0:
+                self.moving_dict["average_speed"] = self.moving_dict["distance"] / moving_time_seconds
+            else:
+                self.moving_dict["average_speed"] = 0
+
             self.file_names.extend(other.file_names)
             self.special = self.special or other.special
-            self.average_heartrate = self.average_heartrate or other.average_heartrate
-            self.elevation_gain = (
-                self.elevation_gain if self.elevation_gain else 0
-            ) + (other.elevation_gain if other.elevation_gain else 0)
+            self.elevation_gain = (self.elevation_gain if self.elevation_gain else 0) + (
+                other.elevation_gain if other.elevation_gain else 0
+            )
         except Exception as e:
             print(
                 f"something wrong append this {self.end_time},in files {str(self.file_names)}: {e}"
