@@ -6,12 +6,27 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import pandas as pd
+
 try:
     from rich import print
 except Exception:
     pass
 from stravalib.client import Client
 from stravalib.exc import RateLimitExceeded
+
+
+class ActivityJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder to handle pandas Timestamp and other non-serializable types."""
+
+    def default(self, obj):
+        if isinstance(obj, pd.Timestamp):
+            return obj.isoformat() if pd.notna(obj) else None
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        if pd.isna(obj):
+            return None
+        return super().default(obj)
 
 
 def get_logger(name):
@@ -124,7 +139,7 @@ def make_activities_file(sql_file, data_dir, json_file, file_suffix="gpx", activ
     )
     activities_list = generator.load()
     with open(json_file, "w") as f:
-        json.dump(activities_list, f)
+        json.dump(activities_list, f, cls=ActivityJSONEncoder)
 
 
 def make_strava_client(client_id, client_secret, refresh_token):

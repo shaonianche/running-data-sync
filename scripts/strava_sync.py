@@ -5,7 +5,7 @@ import os
 from config import FIT_FOLDER, JSON_FILE, SQL_FILE, TCX_FOLDER
 from generator import Generator
 
-from utils import get_logger, load_env_config
+from utils import ActivityJSONEncoder, get_logger, load_env_config
 
 
 # for only run type, we use the same logic as garmin_sync
@@ -59,7 +59,7 @@ def run_strava_sync(
         generator.sync(force=force_sync)
         activities_list = generator.load()
         with open(JSON_FILE, "w") as f:
-            json.dump(activities_list, f)
+            json.dump(activities_list, f, cls=ActivityJSONEncoder)
         logger.info("Default sync finished.")
 
 
