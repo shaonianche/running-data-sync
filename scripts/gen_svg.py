@@ -257,7 +257,7 @@ def main():
     is_mol = args.type == "monthoflife"
 
     if not is_circular and not is_mol:
-        print(f"Creating poster of type {args.type} with {len(tracks)}tracks and storing it in file {args.output}...")
+        print(f"Creating poster of type {args.type} with {len(tracks)} tracks and storing it in file {args.output}...")
     p.set_language(args.language)
     p.athlete = args.athlete
     if args.title:

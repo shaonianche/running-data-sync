@@ -70,11 +70,7 @@ class Track:
             with open(file_name, "r", encoding="utf-8", errors="ignore") as file:
                 self._load_gpx_data(mod_gpxpy.parse(file))
         except Exception as e:
-            print(
-                f"Something went wrong when loading GPX. for file {self.file_names[0]}, we just ignore this file and continue"
-            )
-            print(str(e))
-            pass
+            print(f"Failed to load GPX file {self.file_names[0]}, skipping: {e}")
 
     def load_tcx(self, file_name):
         try:
@@ -86,10 +82,7 @@ class Track:
                 raise TrackLoadError("Empty TCX file")
             self._load_tcx_data(tcx.read(file_name), file_name=file_name)
         except Exception as e:
-            print(
-                f"Something went wrong when loading TCX. for file {self.file_names[0]}, we just ignore this file and continue"
-            )
-            print(str(e))
+            print(f"Failed to load TCX file {self.file_names[0]}, skipping: {e}")
 
     def load_fit(self, file_name):
         try:
@@ -105,16 +98,11 @@ class Track:
                 print(f"FIT file read fail: {errors}")
                 return
             if messages.get("session_mesgs") is None or messages.get("session_mesgs")[0].get("total_distance") is None:
-                print(
-                    f"Session message or total distance is missing when loading FIT. for file {self.file_names[0]}, we just ignore this file and continue"
-                )
+                print(f"Session/total_distance missing in FIT file {self.file_names[0]}, skipping")
                 return
             self._load_fit_data(messages)
         except Exception as e:
-            print(
-                f"Something went wrong when loading FIT. for file {self.file_names[0]}, we just ignore this file and continue"
-            )
-            print(str(e))
+            print(f"Failed to load FIT file {self.file_names[0]}, skipping: {e}")
 
     def load_from_db(self, activity):
         # use strava as file name
@@ -127,7 +115,11 @@ class Track:
             summary_polyline = filter_out(activity.summary_polyline)
         else:
             summary_polyline = activity.summary_polyline
-        polyline_data = polyline.decode(summary_polyline) if summary_polyline else []
+        # Ensure summary_polyline is a valid string (not None, NaN, or other types)
+        if not isinstance(summary_polyline, str) or not summary_polyline:
+            polyline_data = []
+        else:
+            polyline_data = polyline.decode(summary_polyline)
         self.polylines = [[s2.LatLng.from_degrees(p[0], p[1]) for p in polyline_data]]
         self.run_id = activity.run_id
 

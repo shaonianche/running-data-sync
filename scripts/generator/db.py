@@ -470,7 +470,7 @@ def convert_streams_to_flyby_dataframe(activity, streams):
         return flyby_df
 
     except Exception as e:
-        logger.error(f"Error converting streams to flyby dataframefor activity {activity.id}: {e}")
+        logger.error(f"Error converting streams to flyby dataframe for activity {activity.id}: {e}")
         return pd.DataFrame()
 
 

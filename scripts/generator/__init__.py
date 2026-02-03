@@ -304,6 +304,10 @@ class Generator:
             }
             activities_data.append(record)
 
+        # Initialize DB connection if not already done
+        if self.db_connection is None:
+            self.db_connection = init_db(self.db_path)
+
         activities_df = pd.DataFrame(activities_data)
         updated_count = update_or_create_activities(self.db_connection, activities_df)
         self.logger.info(f"Synced {updated_count} activities to the database.")
@@ -535,8 +539,8 @@ class Generator:
                     )
                 else:
                     self.logger.info("No existing FIT files found. Processing all activities.")
-            except Exception:
-                self.logger.warning("Could not check existing FIT files, processing all activities. Error: {e}")
+            except Exception as e:
+                self.logger.warning(f"Could not check existing FIT files, processing all activities. Error: {e}")
                 existing_fit_files = set()
 
         activities = list(self.client.get_activities(**filters))
