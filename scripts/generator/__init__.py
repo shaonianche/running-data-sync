@@ -83,7 +83,7 @@ class Generator:
                 else:
                     self.logger.info("No new flyby data to sync.")
         except Exception as e:
-            self.logger.warning(f"Flyby data synchronization failed: {e},but main sync completed successfully.")
+            self.logger.warning(f"Failed to sync activities: {e}")
 
     def _make_tcx_from_streams(self, activity, streams):
         # TCX XML structure
