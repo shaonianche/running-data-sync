@@ -121,7 +121,22 @@ class Track:
     def load_from_db(self, activity):
         # use strava as file name
         self.file_names = [str(activity.run_id)]
-        start_time = datetime.datetime.strptime(activity.start_date_local, "%Y-%m-%d %H:%M:%S")
+        start_time_value = activity.start_date_local
+        if isinstance(start_time_value, datetime.datetime):
+            start_time = start_time_value
+        elif isinstance(start_time_value, datetime.date):
+            start_time = datetime.datetime.combine(start_time_value, datetime.time.min)
+        else:
+            start_time_str = str(start_time_value)
+            # Strip timezone suffixes like "+08" or "Z" for naive parsing.
+            if "+" in start_time_str:
+                start_time_str = start_time_str.split("+", 1)[0].strip()
+            if start_time_str.endswith("Z"):
+                start_time_str = start_time_str[:-1]
+            try:
+                start_time = datetime.datetime.fromisoformat(start_time_str)
+            except ValueError:
+                start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
         self.start_time_local = start_time
         self.end_time = start_time + datetime.timedelta(seconds=activity.elapsed_time)
         self.length = float(activity.distance)
