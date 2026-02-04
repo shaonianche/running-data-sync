@@ -8,13 +8,7 @@ on:
     branches:
       - main
     paths:
-      - scripts/strava_sync.py
-      - scripts/gen_svg.py
-      - scripts/gpx_sync.py
-      - scripts/garmin_sync.py
-      - scripts/fit_to_garmin_sync.py
-      - scripts/strava_to_garmin_sync.py
-      - scripts/save_to_parquet.py
+      - scripts/**
       - pdm.lock
 
 env:
@@ -25,6 +19,7 @@ env:
   TITLE_GRID: Over 5km Runs
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org
+  DUCKDB_ENCRYPTION_KEY: ${{ secrets.DUCKDB_ENCRYPTION_KEY }}
 
   BACKGROUND_COLOR_LIGHT: '#e5e5e5'
   NO_ACTIVITY_COLOR_LIGHT: '#d4d4d4'
@@ -88,35 +83,35 @@ jobs:
 
       - name: Run sync Strava script
         if: env.RUN_TYPE == 'strava'
-        run: python scripts/strava_sync.py --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
+        run: pdm run strava_sync --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
 
       # - name: Run strava_to_garmin_sync script
       #   if: env.RUN_TYPE == 'strava'
       #   continue-on-error: true
-      #   run: python scripts/strava_to_garmin_sync.py --is-cn '${{ secrets.GARMIN_SECRET_CN }}' --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
+      #   run: pdm run strava_to_garmin_sync --is-cn '${{ secrets.GARMIN_SECRET_CN }}' --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
 
       # - name: Fit to garmin cn sync
       #   if: env.RUN_TYPE == 'strava'
-      #   run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET_CN }}' --is-cn
+      #   run: pdm run fit_to_garmin_sync '${{ secrets.GARMIN_SECRET_CN }}' --is-cn
 
       # - name: Fit to garmin sync
       #   if: env.RUN_TYPE == 'strava'
-      #   run: python scripts/fit_to_garmin_sync.py '${{ secrets.GARMIN_SECRET }}'
+      #   run: pdm run fit_to_garmin_sync '${{ secrets.GARMIN_SECRET }}'
 
       - name: Run sync Only GPX script
         if: env.RUN_TYPE == 'only_gpx'
-        run: python scripts/gpx_sync.py
+        run: pdm run gpx_sync
 
       - name: Make svg GitHub profile
         if: env.RUN_TYPE != 'pass'
         run: |
-          python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --use-localtime --min-distance 0.5 --output public/assets/github.svg
-          python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid.svg
-          python scripts/gen_svg.py --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output public/assets/github-light.svg
-          python scripts/gen_svg.py --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid-light.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --use-localtime --min-distance 0.5 --output public/assets/github.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output public/assets/github-light.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid-light.svg
 
       - name: Save data to parquet
-        run: python scripts/save_to_parquet.py
+        run: pdm run save_to_parquet
 
       - name: Push new runs
         run: |

@@ -1,7 +1,11 @@
 import json
 import os
 
-from config import SYNCED_FILE
+from .config import SYNCED_FILE
+
+from .utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def save_synced_data_file_list(file_list: list):
@@ -19,7 +23,7 @@ def load_synced_file_list():
             try:
                 return json.load(f)
             except Exception as e:
-                print(f"json load {SYNCED_FILE} \nerror {e}")
+                logger.error(f"json load {SYNCED_FILE} error: {e}")
                 pass
 
     return []

@@ -14,17 +14,18 @@ import gpxpy as mod_gpxpy
 import lxml
 import polyline
 import s2sphere as s2
+from ..config import run_map, start_point
 from garmin_fit_sdk import Decoder, Stream
 from garmin_fit_sdk.util import FIT_EPOCH_S
-from polyline_processor import filter_out
-from rich import print
+from ..polyline_processor import filter_out
 from tcxreader.tcxreader import TCXReader
+
+from ..utils import get_logger
 
 from .exceptions import TrackLoadError
 from .utils import parse_datetime_to_local
 
-start_point = namedtuple("start_point", "lat lon")
-run_map = namedtuple("polyline", "summary_polyline")
+logger = get_logger(__name__)
 
 IGNORE_BEFORE_SAVING = os.getenv("IGNORE_BEFORE_SAVING", False)
 
@@ -69,8 +70,13 @@ class Track:
                 raise TrackLoadError("Empty GPX file")
             with open(file_name, "r", encoding="utf-8", errors="ignore") as file:
                 self._load_gpx_data(mod_gpxpy.parse(file))
+        except TrackLoadError:
+            raise
+        except (OSError, IOError) as e:
+            raise TrackLoadError(f"Cannot read GPX file {file_name}: {e}") from e
         except Exception as e:
-            print(f"Failed to load GPX file {self.file_names[0]}, skipping: {e}")
+            logger.warning(f"Failed to load GPX file {self.file_names[0]}: {e}")
+            raise TrackLoadError(f"Failed to parse GPX file: {e}") from e
 
     def load_tcx(self, file_name):
         try:
@@ -81,8 +87,13 @@ class Track:
             if os.path.getsize(file_name) == 0:
                 raise TrackLoadError("Empty TCX file")
             self._load_tcx_data(tcx.read(file_name), file_name=file_name)
+        except TrackLoadError:
+            raise
+        except (OSError, IOError) as e:
+            raise TrackLoadError(f"Cannot read TCX file {file_name}: {e}") from e
         except Exception as e:
-            print(f"Failed to load TCX file {self.file_names[0]}, skipping: {e}")
+            logger.warning(f"Failed to load TCX file {self.file_names[0]}: {e}")
+            raise TrackLoadError(f"Failed to parse TCX file: {e}") from e
 
     def load_fit(self, file_name):
         try:
@@ -95,14 +106,17 @@ class Track:
             decoder = Decoder(stream)
             messages, errors = decoder.read(convert_datetimes_to_dates=False)
             if errors:
-                print(f"FIT file read fail: {errors}")
-                return
+                raise TrackLoadError(f"FIT file decode errors: {errors}")
             if messages.get("session_mesgs") is None or messages.get("session_mesgs")[0].get("total_distance") is None:
-                print(f"Session/total_distance missing in FIT file {self.file_names[0]}, skipping")
-                return
+                raise TrackLoadError(f"Session/total_distance missing in FIT file {self.file_names[0]}")
             self._load_fit_data(messages)
+        except TrackLoadError:
+            raise
+        except (OSError, IOError) as e:
+            raise TrackLoadError(f"Cannot read FIT file {file_name}: {e}") from e
         except Exception as e:
-            print(f"Failed to load FIT file {self.file_names[0]}, skipping: {e}")
+            logger.warning(f"Failed to load FIT file {self.file_names[0]}: {e}")
+            raise TrackLoadError(f"Failed to parse FIT file: {e}") from e
 
     def load_from_db(self, activity):
         # use strava as file name
@@ -148,7 +162,7 @@ class Track:
         polyline_container = []
         position_values = [(i.latitude, i.longitude) for i in tcx.trackpoints]
         if not position_values and int(self.length) == 0:
-            raise Exception(f"This {file_name} TCX file do not contain distance and position values we ignore it")
+            raise TrackLoadError(f"TCX file {file_name} has no distance or position values")
         if position_values:
             line = [s2.LatLng.from_degrees(p[0], p[1]) for p in position_values]
             self.polylines.append(line)
@@ -161,10 +175,9 @@ class Track:
             try:
                 self.start_latlng = start_point(*polyline_container[0])
             except Exception as e:
-                print(f"Error getting start point: {e}")
-                pass
+                logger.debug(f"Error getting start point: {e}")
             self.polyline_str = polyline.encode(polyline_container)
-        self.elevation_gain = tcx.ascent
+            self.elevation_gain = tcx.ascent
         self.moving_dict = {
             "distance": self.length,
             "moving_time": datetime.timedelta(seconds=moving_time),
@@ -214,8 +227,7 @@ class Track:
         try:
             self.start_latlng = start_point(*polyline_container[0])
         except Exception as e:
-            print(f"Error getting start point: {e}")
-            pass
+            logger.debug(f"Error getting start point: {e}")
         self.start_time_local, self.end_time_local = parse_datetime_to_local(
             self.start_time, self.end_time, polyline_container[0]
         )
@@ -320,9 +332,11 @@ class Track:
             self.elevation_gain = (self.elevation_gain if self.elevation_gain else 0) + (
                 other.elevation_gain if other.elevation_gain else 0
             )
+        except (KeyError, TypeError, AttributeError) as e:
+            logger.warning(f"Failed to append track {self.end_time} in files {str(self.file_names)}: {e}")
         except Exception as e:
-            print(f"something wrong append this {self.end_time},in files {str(self.file_names)}: {e}")
-            pass
+            logger.error(f"Unexpected error appending track {self.end_time} in files {str(self.file_names)}: {e}")
+            raise
 
     @staticmethod
     def _get_moving_data(gpx):

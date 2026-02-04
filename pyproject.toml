@@ -41,7 +41,12 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["ruff>=0.12.2", "pytest>=8.0.0", "pytest-cov>=4.1.0"]
+dev = [
+    "ruff>=0.12.2",
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "ty>=0.0.14",
+]
 
 [build-system]
 requires = ["pdm-backend"]
@@ -49,6 +54,18 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[tool.pdm.scripts]
+strava_sync = "python -m scripts.cli.strava_sync"
+garmin_sync = "python -m scripts.cli.garmin_sync"
+export_fit = "python -m scripts.cli.export_fit"
+fit_to_garmin_sync = "python -m scripts.cli.fit_to_garmin_sync"
+strava_to_garmin_sync = "python -m scripts.cli.strava_to_garmin_sync"
+stravaweb_to_garmin_sync = "python -m scripts.cli.stravaweb_to_garmin_sync"
+gen_svg = "python -m scripts.cli.gen_svg"
+gpx_sync = "python -m scripts.cli.gpx_sync"
+save_to_parquet = "python -m scripts.cli.save_to_parquet"
+get_garmin_secret = "python -m scripts.cli.get_garmin_secret"
 
 [tool.ruff]
 line-length = 120

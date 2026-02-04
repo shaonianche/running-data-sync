@@ -1,12 +1,10 @@
-import argparse
-import asyncio
 from datetime import datetime
 
-from garmin_sync import Garmin
-from strava_sync import run_strava_sync
+from .garmin_sync import Garmin
+from .strava_sync import run_strava_sync
 from stravaweblib import DataFormat, WebClient
 
-from utils import get_logger, load_env_config, make_strava_client
+from .utils import get_logger, load_env_config, make_strava_client
 
 logger = get_logger(__name__)
 
@@ -47,44 +45,18 @@ async def upload_to_activities(
     return files_list
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--client-id", dest="client_id", help="strava client id")
-    parser.add_argument("--client-secret", dest="client_secret", help="strava client secret")
-    parser.add_argument("--refresh-token", dest="refresh_token", help="strava refresh token")
-    parser.add_argument("secret_string", nargs="?", help="secret_string for get_garmin_secret.py")
-    parser.add_argument("strava_jwt", nargs="?", help="jwt token of strava")
-    parser.add_argument("strava_email", nargs="?", help="email of strava")
-    parser.add_argument("strava_password", nargs="?", help="password of strava")
-    parser.add_argument(
-        "--is-cn",
-        dest="is_cn",
-        action="store_true",
-        help="if garmin account is cn",
-    )
-    parser.add_argument(
-        "--use-fake-garmin-device",
-        action="store_true",
-        default=False,
-        help="whether to use a faked Garmin device",
-    )
-    parser.add_argument(
-        "--fix-hr",
-        dest="fix_hr",
-        action="store_true",
-        help="fix heart rate in fit file",
-    )
-
-    options = parser.parse_args()
-
-    # Load Strava credentials from args or .env.local
-    client_id = options.client_id
-    client_secret = options.client_secret
-    refresh_token = options.refresh_token
-    strava_jwt = options.strava_jwt
-    strava_email = options.strava_email
-    strava_password = options.strava_password
-
+async def run_stravaweb_to_garmin_sync(
+    client_id: str | None,
+    client_secret: str | None,
+    refresh_token: str | None,
+    secret_string: str | None,
+    strava_jwt: str | None,
+    strava_email: str | None,
+    strava_password: str | None,
+    is_cn: bool,
+    use_fake_garmin_device: bool,
+    fix_hr: bool,
+) -> None:
     if not all([client_id, client_secret, refresh_token]):
         env_config = load_env_config()
         if env_config:
@@ -96,7 +68,7 @@ if __name__ == "__main__":
             strava_password = strava_password or env_config.get("strava_password")
 
         if not all([client_id, client_secret, refresh_token]):
-            raise Exception(
+            raise ValueError(
                 "Missing required Strava credentials. Please provide them as arguments or in .env.local file"
             )
 
@@ -106,7 +78,6 @@ if __name__ == "__main__":
         refresh_token,
     )
 
-    strava_web_client = None
     if strava_jwt:
         strava_web_client = WebClient(
             access_token=strava_client.access_token,
@@ -119,37 +90,39 @@ if __name__ == "__main__":
             password=strava_password,
         )
     else:
-        raise Exception("Missing Strava web authentication. Please provide either strava_jwt or strava_email/password")
+        raise ValueError("Missing Strava web authentication. Please provide either strava_jwt or strava_email/password")
 
-    garmin_auth_domain = "CN" if options.is_cn else ""
-    secret_string = options.secret_string
+    garmin_auth_domain = "CN" if is_cn else ""
     if not secret_string:
         logger.info("Secret string is not provided, trying to load from env")
         env_config = load_env_config()
         if env_config:
-            secret_string = env_config.get("garmin_secret_cn") if options.is_cn else env_config.get("garmin_secret")
+            secret_string = env_config.get("garmin_secret_cn") if is_cn else env_config.get("garmin_secret")
 
     if not secret_string:
-        raise Exception("Missing garmin secret string")
+        raise ValueError("Missing garmin secret string")
 
     try:
         garmin_client = Garmin(secret_string, garmin_auth_domain)
-        asyncio.run(
-            upload_to_activities(
-                garmin_client,
-                strava_client,
-                strava_web_client,
-                DataFormat.ORIGINAL,
-                options.use_fake_garmin_device,
-                options.fix_hr,
-            )
+        await upload_to_activities(
+            garmin_client,
+            strava_client,
+            strava_web_client,
+            DataFormat.ORIGINAL,
+            use_fake_garmin_device,
+            fix_hr,
         )
     except Exception as err:
         print(err)
 
-    # Run the strava sync
     run_strava_sync(
         client_id,
         client_secret,
         refresh_token,
     )
+
+
+if __name__ == "__main__":
+    from .cli.stravaweb_to_garmin_sync import main
+
+    main()

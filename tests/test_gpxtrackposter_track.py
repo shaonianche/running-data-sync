@@ -14,7 +14,7 @@ class TestTrackInit:
 
     def test_track_default_values(self):
         """Test that Track initializes with default values."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         track = Track()
 
@@ -31,7 +31,7 @@ class TestTrackInit:
 
     def test_track_has_moving_dict(self):
         """Test that Track has an empty moving_dict."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         track = Track()
 
@@ -45,7 +45,7 @@ class TestTrackBbox:
         """Test bbox with empty polylines."""
         import s2sphere as s2
 
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         track = Track()
         bbox = track.bbox()
@@ -56,7 +56,7 @@ class TestTrackBbox:
         """Test bbox with polylines."""
         import s2sphere as s2
 
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         track = Track()
         track.polylines = [
@@ -78,7 +78,7 @@ class TestTrackMakeRunId:
 
     def test_make_run_id(self):
         """Test that run_id is created from timestamp."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         # Access the private method through name mangling
         timestamp = datetime.datetime(2024, 1, 15, 10, 30, 0)
@@ -92,22 +92,21 @@ class TestTrackLoadGpx:
     """Test cases for Track.load_gpx method."""
 
     def test_load_gpx_empty_file(self, temp_dir):
-        """Test loading an empty GPX file."""
-        from gpxtrackposter.track import Track
+        """Test loading an empty GPX file raises TrackLoadError."""
+        from scripts.gpxtrackposter.exceptions import TrackLoadError
+        from scripts.gpxtrackposter.track import Track
 
         # Create empty file
         gpx_file = temp_dir / "empty.gpx"
         gpx_file.write_text("")
 
         track = Track()
-        track.load_gpx(str(gpx_file))
-
-        # Should handle gracefully (file_names should be set)
-        assert "empty.gpx" in track.file_names
+        with pytest.raises(TrackLoadError, match="Empty GPX file"):
+            track.load_gpx(str(gpx_file))
 
     def test_load_gpx_valid_file(self, temp_dir, sample_gpx_content):
         """Test loading a valid GPX file."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         gpx_file = temp_dir / "test.gpx"
         gpx_file.write_text(sample_gpx_content)
@@ -118,46 +117,45 @@ class TestTrackLoadGpx:
         assert "test.gpx" in track.file_names
 
     def test_load_gpx_nonexistent_file(self):
-        """Test loading a non-existent GPX file."""
-        from gpxtrackposter.track import Track
+        """Test loading a non-existent GPX file raises TrackLoadError."""
+        from scripts.gpxtrackposter.exceptions import TrackLoadError
+        from scripts.gpxtrackposter.track import Track
 
         track = Track()
-        track.load_gpx("/nonexistent/path/file.gpx")
-
-        # Should handle gracefully
-        assert track.length == 0
+        with pytest.raises(TrackLoadError, match="Cannot read GPX file"):
+            track.load_gpx("/nonexistent/path/file.gpx")
 
 
 class TestTrackLoadTcx:
     """Test cases for Track.load_tcx method."""
 
     def test_load_tcx_empty_file(self, temp_dir):
-        """Test loading an empty TCX file."""
-        from gpxtrackposter.track import Track
+        """Test loading an empty TCX file raises TrackLoadError."""
+        from scripts.gpxtrackposter.exceptions import TrackLoadError
+        from scripts.gpxtrackposter.track import Track
 
         tcx_file = temp_dir / "empty.tcx"
         tcx_file.write_text("")
 
         track = Track()
-        track.load_tcx(str(tcx_file))
-
-        assert "empty.tcx" in track.file_names
+        with pytest.raises(TrackLoadError, match="Empty TCX file"):
+            track.load_tcx(str(tcx_file))
 
 
 class TestTrackLoadFit:
     """Test cases for Track.load_fit method."""
 
     def test_load_fit_empty_file(self, temp_dir):
-        """Test loading an empty FIT file."""
-        from gpxtrackposter.track import Track
+        """Test loading an empty FIT file raises TrackLoadError."""
+        from scripts.gpxtrackposter.exceptions import TrackLoadError
+        from scripts.gpxtrackposter.track import Track
 
         fit_file = temp_dir / "empty.fit"
         fit_file.write_text("")
 
         track = Track()
-        track.load_fit(str(fit_file))
-
-        assert "empty.fit" in track.file_names
+        with pytest.raises(TrackLoadError, match="Empty FIT file"):
+            track.load_fit(str(fit_file))
 
 
 class TestTrackLoadFromDb:
@@ -165,7 +163,7 @@ class TestTrackLoadFromDb:
 
     def test_load_from_db_with_polyline(self):
         """Test loading track from database activity with polyline."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         # Create mock activity
         activity = MagicMock()
@@ -184,7 +182,7 @@ class TestTrackLoadFromDb:
 
     def test_load_from_db_without_polyline(self):
         """Test loading track from database activity without polyline."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         activity = MagicMock()
         activity.run_id = 1234567890
@@ -201,7 +199,7 @@ class TestTrackLoadFromDb:
 
     def test_load_from_db_with_empty_string_polyline(self):
         """Test loading track from database with empty string polyline."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         activity = MagicMock()
         activity.run_id = 1234567890
@@ -221,7 +219,7 @@ class TestTrackAppend:
 
     def test_append_tracks(self):
         """Test appending two tracks."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         track1 = Track()
         track1.file_names = ["file1.gpx"]
@@ -260,7 +258,7 @@ class TestTrackToNamedtuple:
 
     def test_to_namedtuple(self):
         """Test converting track to namedtuple."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         track = Track()
         track.run_id = 1234567890
@@ -293,7 +291,7 @@ class TestTrackToNamedtuple:
 
     def test_to_namedtuple_no_name(self):
         """Test converting track without name to namedtuple."""
-        from gpxtrackposter.track import Track
+        from scripts.gpxtrackposter.track import Track
 
         track = Track()
         track.run_id = 1234567890
@@ -318,7 +316,7 @@ class TestSemicircleConstant:
 
     def test_semicircle_value(self):
         """Test that SEMICIRCLE constant is correct."""
-        from gpxtrackposter.track import SEMICIRCLE
+        from scripts.gpxtrackposter.track import SEMICIRCLE
 
         # 2^32 / 360 = 11930464.711...
         expected = 11930465

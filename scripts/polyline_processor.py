@@ -1,21 +1,26 @@
 import os
+import sys
 from typing import List, Tuple
 
 import polyline
 from haversine import haversine
 
+from .utils import get_logger
+
+logger = get_logger(__name__)
+
 try:
     IGNORE_POLYLINE = polyline.decode(os.getenv("IGNORE_POLYLINE")) if os.getenv("IGNORE_POLYLINE") else []
 except Exception:
-    print("IGNORE_POLYLINE is not a valid polyline")
-    exit(1)
+    logger.error("IGNORE_POLYLINE is not a valid polyline")
+    sys.exit(1)
 
 try:
     IGNORE_RANGE = int(os.getenv("IGNORE_RANGE", "0")) / 1000
     IGNORE_START_END_RANGE = int(os.getenv("IGNORE_START_END_RANGE", "0")) / 1000
 except ValueError:
-    print("IGNORE_RANGE or IGNORE_START_END_RANGE is not a number")
-    exit(1)
+    logger.error("IGNORE_RANGE or IGNORE_START_END_RANGE is not a number")
+    sys.exit(1)
 
 
 def point_distance_in_range(point: Tuple[float], center_point: Tuple[float], distance: int) -> bool:

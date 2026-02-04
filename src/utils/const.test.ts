@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest'
 import {
   ACTIVITY_TYPES,
   CYCLING_TITLES,
-  RUN_TITLES,
-  MUNICIPALITY_CITIES_ARR,
+  IS_CHINESE,
+  LINE_OPACITY,
   MAP_HEIGHT,
   MAP_HEIGHT_MOBILE,
-  LINE_OPACITY,
-  IS_CHINESE,
-  MAPLIBRE_LIGHT_STYLE,
   MAPLIBRE_DARK_STYLE,
+  MAPLIBRE_LIGHT_STYLE,
+  MUNICIPALITY_CITIES_ARR,
+  RUN_TITLES,
 } from './const'
 
-describe('Constants', () => {
-  describe('ACTIVITY_TYPES', () => {
+describe('constants', () => {
+  describe('aCTIVITY_TYPES', () => {
     it('should have all required activity types', () => {
       expect(ACTIVITY_TYPES.RUN_GENERIC_TITLE).toBeDefined()
       expect(ACTIVITY_TYPES.RUN_TRAIL_TITLE).toBeDefined()
@@ -30,7 +30,7 @@ describe('Constants', () => {
     })
   })
 
-  describe('RUN_TITLES', () => {
+  describe('rUN_TITLES', () => {
     it('should have all run title variants', () => {
       expect(RUN_TITLES.MORNING_RUN_TITLE).toBeDefined()
       expect(RUN_TITLES.MIDDAY_RUN_TITLE).toBeDefined()
@@ -42,7 +42,7 @@ describe('Constants', () => {
     })
   })
 
-  describe('CYCLING_TITLES', () => {
+  describe('cYCLING_TITLES', () => {
     it('should have all cycling title variants', () => {
       expect(CYCLING_TITLES.MORNING_CYCLING_TITLE).toBeDefined()
       expect(CYCLING_TITLES.MIDDAY_CYCLING_TITLE).toBeDefined()
@@ -52,7 +52,7 @@ describe('Constants', () => {
     })
   })
 
-  describe('MUNICIPALITY_CITIES_ARR', () => {
+  describe('mUNICIPALITY_CITIES_ARR', () => {
     it('should contain Chinese municipality cities', () => {
       expect(MUNICIPALITY_CITIES_ARR).toContain('北京市')
       expect(MUNICIPALITY_CITIES_ARR).toContain('上海市')
@@ -65,7 +65,7 @@ describe('Constants', () => {
     })
   })
 
-  describe('Map Configuration', () => {
+  describe('map Configuration', () => {
     it('should have valid map height values', () => {
       expect(MAP_HEIGHT).toBeGreaterThan(0)
       expect(MAP_HEIGHT_MOBILE).toBeGreaterThan(0)
@@ -83,7 +83,7 @@ describe('Constants', () => {
     })
   })
 
-  describe('Locale Settings', () => {
+  describe('locale Settings', () => {
     it('should have IS_CHINESE defined', () => {
       expect(typeof IS_CHINESE).toBe('boolean')
     })

@@ -1,17 +1,14 @@
-import argparse
-import asyncio
 import json
 import os
-import sys
 from collections import namedtuple
 from datetime import datetime, timezone
 
 import httpx
-from config import FIT_FOLDER
+from .config import FIT_FOLDER
 from garmin_fit_sdk import Decoder, Stream
-from garmin_sync import Garmin
+from .garmin_sync import Garmin
 
-from utils import get_logger, load_env_config
+from .utils import get_logger, load_env_config
 
 logger = get_logger(__name__)
 
@@ -78,7 +75,7 @@ def get_fit_files():
     return files
 
 
-async def main(secret_string, garmin_auth_domain):
+async def _upload_new_fit_activities(secret_string, garmin_auth_domain):
     garmin_client = FitToGarmin(secret_string, garmin_auth_domain)
     try:
         last_activity = await garmin_client.get_activities(0, 1)
@@ -111,31 +108,22 @@ async def main(secret_string, garmin_auth_domain):
         logger.info("No new activities to upload.")
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("secret_string", nargs="?", help="secret_string fro get_garmin_secret.py")
-    parser.add_argument(
-        "--is-cn",
-        dest="is_cn",
-        action="store_true",
-        help="if garmin account is cn",
-    )
-    options = parser.parse_args()
-    secret_string = options.secret_string
-    garmin_auth_domain = "CN" if options.is_cn else "COM"
+async def run_fit_to_garmin_sync(secret_string: str | None, is_cn: bool) -> None:
+    garmin_auth_domain = "CN" if is_cn else "COM"
     if secret_string is None:
         env_config = load_env_config()
-        secret_key = "GARMIN_SECRET_CN" if options.is_cn else "GARMIN_SECRET"
+        secret_key = "GARMIN_SECRET_CN" if is_cn else "GARMIN_SECRET"
         if env_config and env_config.get(secret_key.lower()):
             secret_string = env_config[secret_key.lower()]
         else:
-            logger.error(
+            raise ValueError(
                 f"Missing Garmin secret string. Please provide it as an argument or set {secret_key} in .env.local"
             )
-            sys.exit(1)
 
-    try:
-        asyncio.run(main(secret_string, garmin_auth_domain))
-    except Exception as e:
-        logger.error(f"An unexpected error occurred in main execution: {e}")
-        sys.exit(1)
+    await _upload_new_fit_activities(secret_string, garmin_auth_domain)
+
+
+if __name__ == "__main__":
+    from .cli.fit_to_garmin_sync import main
+
+    main()

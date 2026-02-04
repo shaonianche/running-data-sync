@@ -1,14 +1,14 @@
-import { describe, expect, it } from 'vitest'
 import type { Activity } from '../utils/utils'
+import { describe, expect, it } from 'vitest'
 import {
-  filterYearRuns,
   filterCityRuns,
+  filterYearRuns,
   formatPace,
   formatRunTime,
+  getMainColor,
   intComma,
   sortDateFunc,
   sortDateFuncReverse,
-  getMainColor,
 } from '../utils/utils'
 
 describe('formatPace', () => {
@@ -20,12 +20,12 @@ describe('formatPace', () => {
 
   it('should return 0\'00" for zero speed', () => {
     const result = formatPace(0)
-    expect(result).toBe("0'00\"")
+    expect(result).toBe('0\'00"')
   })
 
   it('should return 0\'00" for NaN', () => {
     const result = formatPace(Number.NaN)
-    expect(result).toBe("0'00\"")
+    expect(result).toBe('0\'00"')
   })
 
   it('should handle slow pace correctly', () => {
@@ -216,6 +216,6 @@ describe('sortDateFuncReverse', () => {
 describe('getMainColor', () => {
   it('should return a valid color string', () => {
     const result = getMainColor()
-    expect(result).toMatch(/^#[0-9a-fA-F]{6}$/)
+    expect(result).toMatch(/^#[0-9a-f]{6}$/i)
   })
 })

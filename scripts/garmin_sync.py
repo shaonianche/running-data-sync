@@ -3,21 +3,21 @@ Python 3 API wrapper for Garmin Connect to get your statistics.
 Copy most code from https://github.com/cyberjunky/python-garminconnect
 """
 
-import argparse
 import asyncio
+import logging
 import os
-import sys
 import time
 import zipfile
 
 import aiofiles
 import garth
 import httpx
-from config import FOLDER_DICT, JSON_FILE, SQL_FILE
-from garmin_device_adaptor import add_fake_device_info, fix_heart_rate
+from .config import FOLDER_DICT, JSON_FILE, SQL_FILE
+from .exceptions import AuthenticationError, RateLimitError, SyncError
+from .garmin_device_adaptor import add_fake_device_info, fix_heart_rate
 from lxml import etree
 
-from utils import get_logger, load_env_config, make_activities_file
+from .utils import get_logger, load_env_config, make_activities_file
 
 logger = get_logger(__name__)
 
@@ -139,6 +139,19 @@ class Garmin:
                 files = {"file": (os.path.basename(data.filename), file_content)}
 
                 res = await self.req.post(self.upload_url, files=files, headers=self.headers)
+
+                logger.info(f"Upload Response Code: {res.status_code}")
+
+                if logger.isEnabledFor(logging.DEBUG):
+                    safe_headers = {
+                        k: v
+                        for k, v in res.headers.items()
+                        if k.lower() not in ("authorization", "cookie", "set-cookie", "x-auth-token")
+                    }
+                    logger.debug(f"Upload Response Headers: {safe_headers}")
+                    body_preview = res.text[:500] + "..." if len(res.text) > 500 else res.text
+                    logger.debug(f"Upload Response Body: {body_preview}")
+
                 res.raise_for_status()
 
                 # Handle successful upload with no content response
@@ -184,23 +197,26 @@ class Garmin:
         await self.req.aclose()
 
 
-class GarminConnectHttpError(Exception):
+class GarminConnectHttpError(SyncError):
+    """Raised when HTTP request fails."""
+
     pass
 
 
-class GarminConnectConnectionError(Exception):
+class GarminConnectConnectionError(SyncError):
     """Raised when communication ended in error."""
 
     pass
 
 
-class GarminConnectTooManyRequestsError(Exception):
+class GarminConnectTooManyRequestsError(RateLimitError):
     """Raised when rate limit is exceeded."""
 
-    pass
+    def __init__(self, message: str, retry_after: float | None = None):
+        super().__init__(message, retry_after)
 
 
-class GarminConnectAuthenticationError(Exception):
+class GarminConnectAuthenticationError(AuthenticationError):
     """Raised when login returns wrong result."""
 
     pass
@@ -378,64 +394,31 @@ async def download_new_activities(
     return to_generate_garmin_ids, to_generate_garmin_id2title
 
 
-async def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "secret_string",
-        nargs="?",
-        help="secret_string from get_garmin_secret.py or .env.local",
-    )
-    parser.add_argument(
-        "--is-cn",
-        dest="is_cn",
-        action="store_true",
-        help="if garmin account is cn",
-    )
-    parser.add_argument(
-        "--only-run",
-        dest="only_run",
-        action="store_true",
-        help="if is only for running",
-    )
-    parser.add_argument(
-        "--tcx",
-        dest="download_file_type",
-        action="store_const",
-        const="tcx",
-        default="gpx",
-        help="to download tcx files",
-    )
-    parser.add_argument(
-        "--fit",
-        dest="download_file_type",
-        action="store_const",
-        const="fit",
-        default="gpx",
-        help="to download fit files",
-    )
-    options = parser.parse_args()
-    secret_string = options.secret_string
-
-    auth_domain = "CN" if options.is_cn else "COM"
+async def run_garmin_sync(
+    secret_string: str | None,
+    is_cn: bool,
+    only_run: bool,
+    download_file_type: str,
+) -> None:
+    auth_domain = "CN" if is_cn else "COM"
     if secret_string is None:
         env_config = load_env_config()
-        secret_key = "GARMIN_SECRET_CN" if options.is_cn else "GARMIN_SECRET"
-        secret_string = env_config.get(secret_key.lower())
+        secret_key = "GARMIN_SECRET_CN" if is_cn else "GARMIN_SECRET"
+        secret_string = env_config.get(secret_key.lower()) if env_config else None
         if not secret_string:
-            logger.error(
+            raise ValueError(
                 f"Missing Garmin secret string. Please provide it as an argument or set {secret_key} in .env.local"
             )
-            sys.exit(1)
 
     new_ids, id2title = await download_new_activities(
         secret_string,
         auth_domain,
-        options.only_run,
-        options.download_file_type,
+        only_run,
+        download_file_type,
     )
 
     if new_ids:
-        if options.download_file_type == "fit":
+        if download_file_type == "fit":
             make_activities_file(
                 SQL_FILE,
                 FOLDER_DICT["gpx"],
@@ -445,12 +428,14 @@ async def main():
             )
         make_activities_file(
             SQL_FILE,
-            FOLDER_DICT.get(options.download_file_type, "gpx"),
+            FOLDER_DICT.get(download_file_type, "gpx"),
             JSON_FILE,
-            file_suffix=options.download_file_type,
+            file_suffix=download_file_type,
             activity_title_dict=id2title,
         )
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    from .cli.garmin_sync import main
+
+    main()

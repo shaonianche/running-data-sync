@@ -13,42 +13,42 @@ class TestMercatorProjection:
 
     def test_lng2x_zero(self):
         """Test longitude 0 converts to x=1."""
-        from gpxtrackposter.utils import lng2x
+        from scripts.gpxtrackposter.utils import lng2x
 
         result = lng2x(0)
         assert result == 1.0
 
     def test_lng2x_positive(self):
         """Test positive longitude conversion."""
-        from gpxtrackposter.utils import lng2x
+        from scripts.gpxtrackposter.utils import lng2x
 
         result = lng2x(180)
         assert result == 2.0
 
     def test_lng2x_negative(self):
         """Test negative longitude conversion."""
-        from gpxtrackposter.utils import lng2x
+        from scripts.gpxtrackposter.utils import lng2x
 
         result = lng2x(-180)
         assert result == 0.0
 
     def test_lat2y_zero(self):
         """Test latitude 0 converts to y=0.5."""
-        from gpxtrackposter.utils import lat2y
+        from scripts.gpxtrackposter.utils import lat2y
 
         result = lat2y(0)
         assert result == 0.5
 
     def test_lat2y_positive(self):
         """Test positive latitude conversion."""
-        from gpxtrackposter.utils import lat2y
+        from scripts.gpxtrackposter.utils import lat2y
 
         result = lat2y(45)
         assert 0 < result < 0.5  # North of equator should be less than 0.5
 
     def test_lat2y_negative(self):
         """Test negative latitude conversion."""
-        from gpxtrackposter.utils import lat2y
+        from scripts.gpxtrackposter.utils import lat2y
 
         result = lat2y(-45)
         assert result > 0.5  # South of equator should be greater than 0.5
@@ -61,7 +61,7 @@ class TestLatlng2xy:
         """Test conversion of origin point."""
         import s2sphere as s2
 
-        from gpxtrackposter.utils import latlng2xy
+        from scripts.gpxtrackposter.utils import latlng2xy
 
         latlng = s2.LatLng.from_degrees(0, 0)
         result = latlng2xy(latlng)
@@ -73,7 +73,7 @@ class TestLatlng2xy:
         """Test conversion of Beijing coordinates."""
         import s2sphere as s2
 
-        from gpxtrackposter.utils import latlng2xy
+        from scripts.gpxtrackposter.utils import latlng2xy
 
         latlng = s2.LatLng.from_degrees(39.9042, 116.4074)
         result = latlng2xy(latlng)
@@ -87,8 +87,8 @@ class TestComputeBoundsXY:
 
     def test_compute_bounds_single_point(self):
         """Test computing bounds with a single point."""
-        from gpxtrackposter.utils import compute_bounds_xy
-        from gpxtrackposter.xy import XY
+        from scripts.gpxtrackposter.utils import compute_bounds_xy
+        from scripts.gpxtrackposter.xy import XY
 
         lines = [[XY(1.0, 2.0)]]
         range_x, range_y = compute_bounds_xy(lines)
@@ -100,8 +100,8 @@ class TestComputeBoundsXY:
 
     def test_compute_bounds_multiple_points(self):
         """Test computing bounds with multiple points."""
-        from gpxtrackposter.utils import compute_bounds_xy
-        from gpxtrackposter.xy import XY
+        from scripts.gpxtrackposter.utils import compute_bounds_xy
+        from scripts.gpxtrackposter.xy import XY
 
         lines = [[XY(0.0, 0.0), XY(10.0, 5.0), XY(5.0, 10.0)]]
         range_x, range_y = compute_bounds_xy(lines)
@@ -113,7 +113,7 @@ class TestComputeBoundsXY:
 
     def test_compute_bounds_empty_lines(self):
         """Test computing bounds with empty lines."""
-        from gpxtrackposter.utils import compute_bounds_xy
+        from scripts.gpxtrackposter.utils import compute_bounds_xy
 
         lines = []
         range_x, range_y = compute_bounds_xy(lines)
@@ -128,8 +128,8 @@ class TestComputeGrid:
 
     def test_compute_grid_single_item(self):
         """Test grid computation for single item."""
-        from gpxtrackposter.utils import compute_grid
-        from gpxtrackposter.xy import XY
+        from scripts.gpxtrackposter.utils import compute_grid
+        from scripts.gpxtrackposter.xy import XY
 
         size, counts = compute_grid(1, XY(100, 100))
 
@@ -138,8 +138,8 @@ class TestComputeGrid:
 
     def test_compute_grid_four_items_square(self):
         """Test grid computation for 4 items in a square."""
-        from gpxtrackposter.utils import compute_grid
-        from gpxtrackposter.xy import XY
+        from scripts.gpxtrackposter.utils import compute_grid
+        from scripts.gpxtrackposter.xy import XY
 
         size, counts = compute_grid(4, XY(100, 100))
 
@@ -149,8 +149,8 @@ class TestComputeGrid:
 
     def test_compute_grid_many_items(self):
         """Test grid computation for many items."""
-        from gpxtrackposter.utils import compute_grid
-        from gpxtrackposter.xy import XY
+        from scripts.gpxtrackposter.utils import compute_grid
+        from scripts.gpxtrackposter.xy import XY
 
         size, counts = compute_grid(100, XY(1000, 800))
 
@@ -164,7 +164,7 @@ class TestInterpolateColor:
 
     def test_interpolate_color_ratio_zero(self):
         """Test color interpolation at ratio 0."""
-        from gpxtrackposter.utils import interpolate_color
+        from scripts.gpxtrackposter.utils import interpolate_color
 
         result = interpolate_color("#ff0000", "#0000ff", 0)
 
@@ -173,7 +173,7 @@ class TestInterpolateColor:
 
     def test_interpolate_color_ratio_one(self):
         """Test color interpolation at ratio 1."""
-        from gpxtrackposter.utils import interpolate_color
+        from scripts.gpxtrackposter.utils import interpolate_color
 
         result = interpolate_color("#ff0000", "#0000ff", 1)
 
@@ -182,7 +182,7 @@ class TestInterpolateColor:
 
     def test_interpolate_color_ratio_half(self):
         """Test color interpolation at ratio 0.5."""
-        from gpxtrackposter.utils import interpolate_color
+        from scripts.gpxtrackposter.utils import interpolate_color
 
         result = interpolate_color("#ff0000", "#0000ff", 0.5)
 
@@ -191,7 +191,7 @@ class TestInterpolateColor:
 
     def test_interpolate_color_clamps_negative_ratio(self):
         """Test that negative ratio is clamped to 0."""
-        from gpxtrackposter.utils import interpolate_color
+        from scripts.gpxtrackposter.utils import interpolate_color
 
         result_neg = interpolate_color("#ff0000", "#0000ff", -0.5)
         result_zero = interpolate_color("#ff0000", "#0000ff", 0)
@@ -200,7 +200,7 @@ class TestInterpolateColor:
 
     def test_interpolate_color_clamps_high_ratio(self):
         """Test that ratio > 1 is clamped to 1."""
-        from gpxtrackposter.utils import interpolate_color
+        from scripts.gpxtrackposter.utils import interpolate_color
 
         result_high = interpolate_color("#ff0000", "#0000ff", 1.5)
         result_one = interpolate_color("#ff0000", "#0000ff", 1)
@@ -213,14 +213,14 @@ class TestFormatFloat:
 
     def test_format_float_integer(self):
         """Test formatting an integer value."""
-        from gpxtrackposter.utils import format_float
+        from scripts.gpxtrackposter.utils import format_float
 
         result = format_float(42.0)
         assert "42" in result
 
     def test_format_float_decimal(self):
         """Test formatting a decimal value."""
-        from gpxtrackposter.utils import format_float
+        from scripts.gpxtrackposter.utils import format_float
 
         result = format_float(3.14159)
         assert "3.1" in result or "3,1" in result  # Locale-dependent
@@ -231,7 +231,7 @@ class TestParseDatetimeToLocal:
 
     def test_parse_datetime_with_aware_datetime(self):
         """Test parsing already timezone-aware datetime."""
-        from gpxtrackposter.utils import parse_datetime_to_local
+        from scripts.gpxtrackposter.utils import parse_datetime_to_local
 
         start_time = datetime(2024, 1, 15, 10, 30, 0, tzinfo=ZoneInfo("Asia/Shanghai"))
         end_time = datetime(2024, 1, 15, 11, 30, 0, tzinfo=ZoneInfo("Asia/Shanghai"))
@@ -244,7 +244,7 @@ class TestParseDatetimeToLocal:
 
     def test_parse_datetime_with_naive_datetime_and_point(self):
         """Test parsing naive datetime with geographic point."""
-        from gpxtrackposter.utils import parse_datetime_to_local
+        from scripts.gpxtrackposter.utils import parse_datetime_to_local
 
         start_time = datetime(2024, 1, 15, 2, 30, 0)  # UTC
         end_time = datetime(2024, 1, 15, 3, 30, 0)  # UTC
@@ -258,7 +258,7 @@ class TestParseDatetimeToLocal:
 
     def test_parse_datetime_without_point(self):
         """Test parsing naive datetime without geographic point."""
-        from gpxtrackposter.utils import parse_datetime_to_local
+        from scripts.gpxtrackposter.utils import parse_datetime_to_local
 
         start_time = datetime(2024, 1, 15, 2, 30, 0)
         end_time = datetime(2024, 1, 15, 3, 30, 0)
@@ -271,7 +271,7 @@ class TestParseDatetimeToLocal:
 
     def test_parse_datetime_invalid_timezone(self):
         """Test parsing with a point that might fail timezone lookup."""
-        from gpxtrackposter.utils import parse_datetime_to_local
+        from scripts.gpxtrackposter.utils import parse_datetime_to_local
 
         start_time = datetime(2024, 1, 15, 2, 30, 0)
         end_time = datetime(2024, 1, 15, 3, 30, 0)

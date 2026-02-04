@@ -1,4 +1,4 @@
-"""Tests for synced_data_file_logger.py module."""
+"""Tests for scripts.synced_data_file_logger.py module."""
 
 import json
 import os
@@ -14,8 +14,8 @@ class TestSyncedDataFileLogger:
 
     def test_load_synced_file_list_missing_file(self, temp_dir):
         """Test loading when the synced file doesn't exist."""
-        with patch("synced_data_file_logger.SYNCED_FILE", str(temp_dir / "nonexistent.json")):
-            from synced_data_file_logger import load_synced_file_list
+        with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(temp_dir / "nonexistent.json")):
+            from scripts.synced_data_file_logger import load_synced_file_list
 
             result = load_synced_file_list()
             assert result == []
@@ -26,8 +26,8 @@ class TestSyncedDataFileLogger:
         test_data = ["file1.gpx", "file2.gpx", "file3.gpx"]
         synced_file.write_text(json.dumps(test_data))
 
-        with patch("synced_data_file_logger.SYNCED_FILE", str(synced_file)):
-            from synced_data_file_logger import load_synced_file_list
+        with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(synced_file)):
+            from scripts.synced_data_file_logger import load_synced_file_list
 
             result = load_synced_file_list()
             assert result == test_data
@@ -37,8 +37,8 @@ class TestSyncedDataFileLogger:
         synced_file = temp_dir / "synced.json"
         synced_file.write_text("not valid json {{{")
 
-        with patch("synced_data_file_logger.SYNCED_FILE", str(synced_file)):
-            from synced_data_file_logger import load_synced_file_list
+        with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(synced_file)):
+            from scripts.synced_data_file_logger import load_synced_file_list
 
             result = load_synced_file_list()
             assert result == []
@@ -48,8 +48,8 @@ class TestSyncedDataFileLogger:
         synced_file = temp_dir / "synced.json"
         synced_file.write_text("")
 
-        with patch("synced_data_file_logger.SYNCED_FILE", str(synced_file)):
-            from synced_data_file_logger import load_synced_file_list
+        with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(synced_file)):
+            from scripts.synced_data_file_logger import load_synced_file_list
 
             result = load_synced_file_list()
             assert result == []
@@ -58,8 +58,8 @@ class TestSyncedDataFileLogger:
         """Test saving to a new synced file."""
         synced_file = temp_dir / "synced.json"
 
-        with patch("synced_data_file_logger.SYNCED_FILE", str(synced_file)):
-            from synced_data_file_logger import save_synced_data_file_list
+        with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(synced_file)):
+            from scripts.synced_data_file_logger import save_synced_data_file_list
 
             new_files = ["file1.gpx", "file2.gpx"]
             save_synced_data_file_list(new_files)
@@ -77,8 +77,8 @@ class TestSyncedDataFileLogger:
         existing_data = ["existing1.gpx", "existing2.gpx"]
         synced_file.write_text(json.dumps(existing_data))
 
-        with patch("synced_data_file_logger.SYNCED_FILE", str(synced_file)):
-            from synced_data_file_logger import (
+        with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(synced_file)):
+            from scripts.synced_data_file_logger import (
                 load_synced_file_list,
                 save_synced_data_file_list,
             )
@@ -102,8 +102,8 @@ class TestSyncedDataFileLogger:
         existing_data = ["existing.gpx"]
         synced_file.write_text(json.dumps(existing_data))
 
-        with patch("synced_data_file_logger.SYNCED_FILE", str(synced_file)):
-            from synced_data_file_logger import save_synced_data_file_list
+        with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(synced_file)):
+            from scripts.synced_data_file_logger import save_synced_data_file_list
 
             save_synced_data_file_list([])
 

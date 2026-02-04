@@ -16,7 +16,7 @@ class TestActivityJSONEncoder:
 
     def test_encode_datetime(self):
         """Test encoding datetime objects."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         dt = datetime(2024, 1, 15, 10, 30, 0)
         result = json.dumps({"time": dt}, cls=ActivityJSONEncoder)
@@ -24,7 +24,7 @@ class TestActivityJSONEncoder:
 
     def test_encode_pandas_timestamp(self):
         """Test encoding pandas Timestamp objects."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         ts = pd.Timestamp("2024-01-15 10:30:00")
         result = json.dumps({"time": ts}, cls=ActivityJSONEncoder)
@@ -32,14 +32,14 @@ class TestActivityJSONEncoder:
 
     def test_encode_pandas_nat(self):
         """Test encoding pandas NaT (Not a Time) as null."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         result = json.dumps({"time": pd.NaT}, cls=ActivityJSONEncoder)
         assert result == '{"time": null}'
 
     def test_encode_regular_types(self):
         """Test encoding regular Python types."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         data = {"string": "hello", "number": 42, "float": 3.14, "list": [1, 2, 3]}
         result = json.dumps(data, cls=ActivityJSONEncoder)
@@ -48,7 +48,7 @@ class TestActivityJSONEncoder:
 
     def test_encode_nan_float(self):
         """Test encoding NaN float values as null for JSON compliance."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         data = {"value": float("nan")}
         result = json.dumps(data, cls=ActivityJSONEncoder)
@@ -58,7 +58,7 @@ class TestActivityJSONEncoder:
 
     def test_encode_infinity_float(self):
         """Test encoding Infinity float values as null for JSON compliance."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         data = {"positive": float("inf"), "negative": float("-inf")}
         result = json.dumps(data, cls=ActivityJSONEncoder)
@@ -69,7 +69,7 @@ class TestActivityJSONEncoder:
 
     def test_encode_nested_structures_with_special_values(self):
         """Test encoding nested structures containing special float values."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         data = {
             "activities": [
@@ -91,7 +91,7 @@ class TestActivityJSONEncoder:
 
     def test_output_is_valid_json(self):
         """Test that the output is always valid JSON that can be parsed by standard parsers."""
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
         import math
 
         data = {
@@ -116,12 +116,91 @@ class TestActivityJSONEncoder:
         assert parsed["normal_float"] == 123.456
 
 
+class TestSensitiveFilter:
+    """Test cases for SensitiveFilter."""
+
+    def test_filter_redacts_sensitive_info(self):
+        """Test that sensitive information is redacted from logs."""
+        from scripts.utils import SensitiveFilter
+        import logging
+
+        filter_ = SensitiveFilter()
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="test.py",
+            lineno=1,
+            msg="Request with params {'client_id': '12345', 'client_secret': 'my_secret_value', 'other': 'value'}",
+            args=(),
+            exc_info=None,
+        )
+
+        filter_.filter(record)
+
+        assert "***" in record.msg
+        assert "12345" not in record.msg
+        assert "my_secret_value" not in record.msg
+        assert "value" in record.msg  # Non-sensitive info should be preserved
+
+    def test_filter_redacts_args_dict(self):
+        """Test that sensitive information in args dictionary is redacted."""
+        from scripts.utils import SensitiveFilter
+        import logging
+
+        filter_ = SensitiveFilter()
+        args = {"client_id": "12345", "public_id": "999"}
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="test.py",
+            lineno=1,
+            msg="Logging dict: %s",
+            args=args,
+            exc_info=None,
+        )
+
+        filter_.filter(record)
+
+        assert record.args["client_id"] == "***"
+        assert record.args["public_id"] == "999"
+
+    def test_filter_redacts_multiline_string(self):
+        """Test that sensitive information in multiline strings is redacted."""
+        from scripts.utils import SensitiveFilter
+        import logging
+
+        filter_ = SensitiveFilter()
+        msg = """
+        POST https://example.com
+        params: {
+            'client_id': '12345',
+            'refresh_token':
+            'abcde'
+        }
+        """
+        record = logging.LogRecord(
+            name="test",
+            level=logging.INFO,
+            pathname="test.py",
+            lineno=1,
+            msg=msg,
+            args=(),
+            exc_info=None,
+        )
+
+        filter_.filter(record)
+
+        assert "'client_id': '***'" in record.msg
+        assert "12345" not in record.msg
+        assert "abcde" not in record.msg
+
+
 class TestGetLogger:
     """Test cases for get_logger function."""
 
     def test_get_logger_returns_logger(self):
         """Test that get_logger returns a logger instance."""
-        from utils import get_logger
+        from scripts.utils import get_logger
 
         logger = get_logger("test_logger")
         assert logger is not None
@@ -129,18 +208,23 @@ class TestGetLogger:
 
     def test_get_logger_same_instance(self):
         """Test that get_logger returns the same instance for the same name."""
-        from utils import get_logger
+        from scripts.utils import get_logger
 
         logger1 = get_logger("same_name")
         logger2 = get_logger("same_name")
         assert logger1 is logger2
 
     def test_get_logger_has_handler(self):
-        """Test that the logger has at least one handler."""
-        from utils import get_logger
+        """Test that the logger (or root logger) has at least one handler."""
+        from scripts.utils import get_logger
+        import logging
 
-        logger = get_logger("handler_test")
-        assert len(logger.handlers) >= 1
+        # Ensure logging is configured
+        get_logger("handler_test")
+
+        # Check root logger handlers since get_logger configures the root logger
+        root_logger = logging.getLogger()
+        assert len(root_logger.handlers) >= 1
 
 
 class TestLoadEnvConfig:
@@ -148,7 +232,7 @@ class TestLoadEnvConfig:
 
     def test_load_env_config_missing_file(self):
         """Test that load_env_config returns None when file is missing."""
-        from utils import load_env_config
+        from scripts.utils import load_env_config
 
         with patch("utils.Path") as mock_path:
             mock_path.return_value.__truediv__.return_value.exists.return_value = False
@@ -182,7 +266,7 @@ class TestAdjustTime:
 
     def test_adjust_time_utc_to_local(self):
         """Test converting UTC time to local time."""
-        from utils import adjust_time
+        from scripts.utils import adjust_time
 
         utc_time = datetime(2024, 1, 15, 2, 30, 0)  # 2:30 UTC
         local_time = adjust_time(utc_time, "Asia/Shanghai")
@@ -194,7 +278,7 @@ class TestAdjustTime:
 
     def test_adjust_time_invalid_timezone(self):
         """Test that invalid timezone falls back to original time."""
-        from utils import adjust_time
+        from scripts.utils import adjust_time
 
         utc_time = datetime(2024, 1, 15, 2, 30, 0)
         result = adjust_time(utc_time, "Invalid/Timezone")
@@ -203,7 +287,7 @@ class TestAdjustTime:
 
     def test_adjust_time_to_utc(self):
         """Test converting local time to UTC."""
-        from utils import adjust_time_to_utc
+        from scripts.utils import adjust_time_to_utc
 
         local_time = datetime(2024, 1, 15, 10, 30, 0)  # 10:30 Shanghai
         utc_time = adjust_time_to_utc(local_time, "Asia/Shanghai")
@@ -214,7 +298,7 @@ class TestAdjustTime:
 
     def test_adjust_timestamp_to_utc(self):
         """Test converting local timestamp to UTC timestamp."""
-        from utils import adjust_timestamp_to_utc
+        from scripts.utils import adjust_timestamp_to_utc
 
         # Create a local timestamp (assume it's a local time)
         local_dt = datetime(2024, 1, 15, 10, 30, 0)
@@ -230,7 +314,7 @@ class TestToDate:
 
     def test_to_date_standard_format(self):
         """Test parsing standard datetime format."""
-        from utils import to_date
+        from scripts.utils import to_date
 
         result = to_date("2024-01-15T10:30:00")
         assert result.year == 2024
@@ -241,7 +325,7 @@ class TestToDate:
 
     def test_to_date_with_microseconds(self):
         """Test parsing datetime with microseconds."""
-        from utils import to_date
+        from scripts.utils import to_date
 
         result = to_date("2024-01-15T10:30:00.123456")
         assert result.year == 2024
@@ -249,7 +333,7 @@ class TestToDate:
 
     def test_to_date_invalid_format(self):
         """Test that invalid format raises ValueError."""
-        from utils import to_date
+        from scripts.utils import to_date
 
         with pytest.raises(ValueError, match="cannot parse timestamp"):
             to_date("invalid-date-format")
@@ -260,9 +344,9 @@ class TestMakeStravaClient:
 
     def test_make_strava_client_creates_client(self):
         """Test that make_strava_client creates and configures a client."""
-        from utils import make_strava_client
+        from scripts.utils import make_strava_client
 
-        with patch("utils.Client") as mock_client_class:
+        with patch("scripts.utils.Client") as mock_client_class:
             mock_client = MagicMock()
             mock_client.refresh_access_token.return_value = {"access_token": "new_token"}
             mock_client_class.return_value = mock_client
@@ -282,7 +366,7 @@ class TestGetStravaLastTime:
 
     def test_get_strava_last_time_with_run_activity(self):
         """Test getting last time when there are run activities."""
-        from utils import get_strava_last_time
+        from scripts.utils import get_strava_last_time
 
         mock_client = MagicMock()
         mock_activity = MagicMock()
@@ -300,7 +384,7 @@ class TestGetStravaLastTime:
 
     def test_get_strava_last_time_no_run_activities(self):
         """Test getting last time when there are no run activities."""
-        from utils import get_strava_last_time
+        from scripts.utils import get_strava_last_time
 
         mock_client = MagicMock()
         mock_activity = MagicMock()
@@ -314,7 +398,7 @@ class TestGetStravaLastTime:
 
     def test_get_strava_last_time_empty_activities(self):
         """Test getting last time when there are no activities."""
-        from utils import get_strava_last_time
+        from scripts.utils import get_strava_last_time
 
         mock_client = MagicMock()
         mock_client.get_activities.return_value = []
@@ -325,7 +409,7 @@ class TestGetStravaLastTime:
 
     def test_get_strava_last_time_exception(self):
         """Test getting last time when an exception occurs."""
-        from utils import get_strava_last_time
+        from scripts.utils import get_strava_last_time
 
         mock_client = MagicMock()
         mock_client.get_activities.side_effect = Exception("API Error")
@@ -343,7 +427,7 @@ class TestMakeActivitiesFile:
         Test that make_activities_file produces valid JSON even when
         the generator returns data with NaN, Infinity, and NaT values.
         """
-        from utils import make_activities_file
+        from scripts.utils import make_activities_file
 
         # Create dummy paths
         sql_file = tmp_path / "data.duckdb"
@@ -352,7 +436,7 @@ class TestMakeActivitiesFile:
         data_dir.mkdir()
 
         # Mock the Generator class
-        with patch("generator.Generator") as MockGenerator:
+        with patch("scripts.generator.Generator") as MockGenerator:
             # Setup the mock instance
             mock_gen = MockGenerator.return_value
 
@@ -409,7 +493,7 @@ class TestMakeActivitiesFile:
         strict JSON parsers (like the one in Vite/Node).
         This specifically tests json.dump behavior with our encoder.
         """
-        from utils import ActivityJSONEncoder
+        from scripts.utils import ActivityJSONEncoder
 
         json_file = tmp_path / "activities.json"
 

@@ -14,7 +14,7 @@ class TestDatabaseSchemas:
 
     def test_activities_schema_has_required_columns(self):
         """Test that ACTIVITIES_SCHEMA has all required columns."""
-        from generator.db import ACTIVITIES_SCHEMA
+        from scripts.generator.db import ACTIVITIES_SCHEMA
 
         required_columns = [
             "run_id",
@@ -33,13 +33,13 @@ class TestDatabaseSchemas:
 
     def test_activities_schema_run_id_is_primary_key(self):
         """Test that run_id is the primary key."""
-        from generator.db import ACTIVITIES_SCHEMA
+        from scripts.generator.db import ACTIVITIES_SCHEMA
 
         assert "PRIMARY KEY" in ACTIVITIES_SCHEMA["run_id"]
 
     def test_activities_flyby_schema_has_required_columns(self):
         """Test that ACTIVITIES_FLYBY_SCHEMA has all required columns."""
-        from generator.db import ACTIVITIES_FLYBY_SCHEMA
+        from scripts.generator.db import ACTIVITIES_FLYBY_SCHEMA
 
         required_columns = ["activity_id", "time_offset", "lat", "lng", "hr", "pace"]
 
@@ -48,14 +48,14 @@ class TestDatabaseSchemas:
 
     def test_fit_file_id_schema_exists(self):
         """Test that FIT_FILE_ID_SCHEMA is defined."""
-        from generator.db import FIT_FILE_ID_SCHEMA
+        from scripts.generator.db import FIT_FILE_ID_SCHEMA
 
         assert "serial_number" in FIT_FILE_ID_SCHEMA
         assert "PRIMARY KEY" in FIT_FILE_ID_SCHEMA["serial_number"]
 
     def test_fit_record_schema_exists(self):
         """Test that FIT_RECORD_SCHEMA is defined."""
-        from generator.db import FIT_RECORD_SCHEMA
+        from scripts.generator.db import FIT_RECORD_SCHEMA
 
         required_columns = ["activity_id", "timestamp", "position_lat", "position_long"]
         for col in required_columns:
@@ -63,14 +63,14 @@ class TestDatabaseSchemas:
 
     def test_fit_lap_schema_exists(self):
         """Test that FIT_LAP_SCHEMA is defined."""
-        from generator.db import FIT_LAP_SCHEMA
+        from scripts.generator.db import FIT_LAP_SCHEMA
 
         assert "activity_id" in FIT_LAP_SCHEMA
         assert "total_distance" in FIT_LAP_SCHEMA
 
     def test_fit_session_schema_exists(self):
         """Test that FIT_SESSION_SCHEMA is defined."""
-        from generator.db import FIT_SESSION_SCHEMA
+        from scripts.generator.db import FIT_SESSION_SCHEMA
 
         assert "activity_id" in FIT_SESSION_SCHEMA
         assert "PRIMARY KEY" in FIT_SESSION_SCHEMA["activity_id"]
@@ -81,7 +81,7 @@ class TestCreateTableIfNotExists:
 
     def test_create_table_simple_schema(self, temp_dir):
         """Test creating a table with a simple schema."""
-        from generator.db import _create_table_if_not_exists
+        from scripts.generator.db import _create_table_if_not_exists
 
         db_path = temp_dir / "test.duckdb"
         con = duckdb.connect(str(db_path))
@@ -98,7 +98,7 @@ class TestCreateTableIfNotExists:
 
     def test_create_table_idempotent(self, temp_dir):
         """Test that creating the same table twice is safe."""
-        from generator.db import _create_table_if_not_exists
+        from scripts.generator.db import _create_table_if_not_exists
 
         db_path = temp_dir / "test.duckdb"
         con = duckdb.connect(str(db_path))
@@ -120,7 +120,7 @@ class TestInitDb:
 
     def test_init_db_creates_tables(self, temp_dir):
         """Test that init_db creates the required tables."""
-        from generator.db import init_db
+        from scripts.generator.db import init_db
 
         db_path = temp_dir / "test.duckdb"
         con = init_db(str(db_path))
@@ -136,7 +136,7 @@ class TestInitDb:
 
     def test_init_db_returns_connection(self, temp_dir):
         """Test that init_db returns a valid connection."""
-        from generator.db import init_db
+        from scripts.generator.db import init_db
 
         db_path = temp_dir / "test.duckdb"
         con = init_db(str(db_path))
@@ -148,13 +148,72 @@ class TestInitDb:
 
         con.close()
 
+    def test_init_db_creates_primary_key_constraints(self, temp_dir):
+        """Test that init_db creates tables with primary key constraints."""
+        from scripts.generator.db import init_db
+
+        # Mock load_env_config to avoid encryption issues with temp db
+        with patch("scripts.generator.db.load_env_config", return_value={}):
+            db_path = temp_dir / "test_pk.duckdb"
+            con = init_db(str(db_path))
+
+            # Check 'activities' table PK
+            activities_info = con.execute("PRAGMA table_info('activities')").fetchdf()
+            run_id_row = activities_info[activities_info["name"] == "run_id"]
+            assert not run_id_row.empty
+            # Use bool() to handle numpy bool types
+            assert bool(run_id_row.iloc[0]["pk"]) is True
+
+            # Check 'activities_flyby' table PK
+            flyby_info = con.execute("PRAGMA table_info('activities_flyby')").fetchdf()
+            activity_id_row = flyby_info[flyby_info["name"] == "activity_id"]
+            time_offset_row = flyby_info[flyby_info["name"] == "time_offset"]
+
+            assert not activity_id_row.empty
+            assert bool(activity_id_row.iloc[0]["pk"]) is True
+            assert not time_offset_row.empty
+            assert bool(time_offset_row.iloc[0]["pk"]) is True
+
+            con.close()
+
+    def test_init_db_migrates_missing_pk(self, temp_dir):
+        """Test that init_db adds missing primary keys to existing tables."""
+        from scripts.generator.db import init_db
+        import duckdb
+
+        db_path = temp_dir / "test_migration.duckdb"
+        con = duckdb.connect(str(db_path))
+
+        # Create table WITHOUT PK manually
+        con.execute("CREATE TABLE activities (run_id BIGINT, name VARCHAR)")
+        con.execute("INSERT INTO activities VALUES (1, 'Run 1')")
+        con.close()
+
+        # Mock load_env_config to avoid encryption issues with temp db
+        with patch("scripts.generator.db.load_env_config", return_value={}):
+            # Run init_db which should migrate schema
+            con = init_db(str(db_path))
+
+            # Check PK
+            activities_info = con.execute("PRAGMA table_info('activities')").fetchdf()
+            run_id_row = activities_info[activities_info["name"] == "run_id"]
+            assert bool(run_id_row.iloc[0]["pk"]) is True
+
+            # Verify data preserved
+            count = con.execute("SELECT count(*) FROM activities").fetchone()[0]
+            assert count == 1
+            name = con.execute("SELECT name FROM activities WHERE run_id=1").fetchone()[0]
+            assert name == "Run 1"
+
+            con.close()
+
 
 class TestUpdateOrCreateActivities:
     """Test cases for update_or_create_activities function."""
 
     def test_insert_new_activities(self, temp_dir):
         """Test inserting new activities."""
-        from generator.db import ACTIVITIES_SCHEMA, init_db, update_or_create_activities
+        from scripts.generator.db import ACTIVITIES_SCHEMA, init_db, update_or_create_activities
 
         db_path = temp_dir / "test.duckdb"
         con = init_db(str(db_path))
@@ -191,7 +250,7 @@ class TestUpdateOrCreateActivities:
 
     def test_update_existing_activities(self, temp_dir):
         """Test updating existing activities."""
-        from generator.db import init_db, update_or_create_activities
+        from scripts.generator.db import init_db, update_or_create_activities
 
         db_path = temp_dir / "test.duckdb"
         con = init_db(str(db_path))
@@ -247,7 +306,7 @@ class TestUpdateOrCreateActivities:
 
     def test_empty_dataframe(self, temp_dir):
         """Test with empty DataFrame."""
-        from generator.db import init_db, update_or_create_activities
+        from scripts.generator.db import init_db, update_or_create_activities
 
         db_path = temp_dir / "test.duckdb"
         con = init_db(str(db_path))
@@ -265,7 +324,7 @@ class TestMigrateSchema:
 
     def test_migrate_schema_adds_missing_columns(self, temp_dir):
         """Test that migration adds missing columns."""
-        from generator.db import ACTIVITIES_SCHEMA, _migrate_schema
+        from scripts.generator.db import ACTIVITIES_SCHEMA, _migrate_schema
 
         db_path = temp_dir / "test.duckdb"
         con = duckdb.connect(str(db_path))
@@ -287,7 +346,7 @@ class TestMigrateSchema:
 
     def test_migrate_schema_no_op_if_complete(self, temp_dir):
         """Test that migration does nothing if schema is complete."""
-        from generator.db import init_db
+        from scripts.generator.db import init_db
 
         db_path = temp_dir / "test.duckdb"
 
@@ -305,6 +364,6 @@ class TestGeocoding:
 
     def test_geocode_cache_exists(self):
         """Test that geocode cache is initialized."""
-        from generator.db import _geocode_cache
+        from scripts.generator.db import _geocode_cache
 
         assert isinstance(_geocode_cache, dict)

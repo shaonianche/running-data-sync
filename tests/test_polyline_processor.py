@@ -11,7 +11,7 @@ class TestPointDistanceInRange:
 
     def test_point_in_range(self):
         """Test that a nearby point is detected as in range."""
-        from polyline_processor import point_distance_in_range
+        from scripts.polyline_processor import point_distance_in_range
 
         # Two points very close together (less than 1km apart)
         point1 = (39.9042, 116.4074)  # Beijing
@@ -21,7 +21,7 @@ class TestPointDistanceInRange:
 
     def test_point_out_of_range(self):
         """Test that a distant point is detected as out of range."""
-        from polyline_processor import point_distance_in_range
+        from scripts.polyline_processor import point_distance_in_range
 
         # Two points far apart
         point1 = (39.9042, 116.4074)  # Beijing
@@ -31,7 +31,7 @@ class TestPointDistanceInRange:
 
     def test_point_exactly_at_boundary(self):
         """Test point at the boundary distance."""
-        from polyline_processor import point_distance_in_range
+        from scripts.polyline_processor import point_distance_in_range
 
         point1 = (39.9042, 116.4074)
         point2 = (39.9042, 116.4074)  # Same point
@@ -44,7 +44,7 @@ class TestPointInListPointsRange:
 
     def test_point_near_one_of_the_points(self):
         """Test that a point near any point in the list is detected."""
-        from polyline_processor import point_in_list_points_range
+        from scripts.polyline_processor import point_in_list_points_range
 
         test_point = (39.9042, 116.4074)
         points_list = [
@@ -57,7 +57,7 @@ class TestPointInListPointsRange:
 
     def test_point_far_from_all_points(self):
         """Test that a point far from all points in the list is not detected."""
-        from polyline_processor import point_in_list_points_range
+        from scripts.polyline_processor import point_in_list_points_range
 
         test_point = (39.9042, 116.4074)  # Beijing
         points_list = [
@@ -70,7 +70,7 @@ class TestPointInListPointsRange:
 
     def test_empty_points_list(self):
         """Test with empty points list."""
-        from polyline_processor import point_in_list_points_range
+        from scripts.polyline_processor import point_in_list_points_range
 
         test_point = (39.9042, 116.4074)
         points_list = []
@@ -83,7 +83,7 @@ class TestRangeHiding:
 
     def test_hide_points_near_specified_locations(self):
         """Test that points near specified locations are hidden."""
-        from polyline_processor import range_hiding
+        from scripts.polyline_processor import range_hiding
 
         polyline_coords = [
             (39.9042, 116.4074),  # Should be hidden (near hide_point)
@@ -99,7 +99,7 @@ class TestRangeHiding:
 
     def test_no_points_hidden(self):
         """Test when no points need to be hidden."""
-        from polyline_processor import range_hiding
+        from scripts.polyline_processor import range_hiding
 
         polyline_coords = [
             (31.2304, 121.4737),  # Shanghai
@@ -113,7 +113,7 @@ class TestRangeHiding:
 
     def test_all_points_hidden(self):
         """Test when all points should be hidden."""
-        from polyline_processor import range_hiding
+        from scripts.polyline_processor import range_hiding
 
         polyline_coords = [
             (39.9042, 116.4074),
@@ -132,7 +132,7 @@ class TestStartEndHiding:
 
     def test_hide_start_and_end(self):
         """Test hiding the start and end portions of a polyline."""
-        from polyline_processor import start_end_hiding
+        from scripts.polyline_processor import start_end_hiding
 
         # Create a polyline with enough distance
         polyline_coords = [
@@ -156,7 +156,7 @@ class TestStartEndHiding:
 
     def test_hide_with_zero_distance(self):
         """Test that zero distance returns empty list (all points hidden at start/end)."""
-        from polyline_processor import start_end_hiding
+        from scripts.polyline_processor import start_end_hiding
 
         polyline_coords = [
             (39.9000, 116.4000),
@@ -173,7 +173,7 @@ class TestStartEndHiding:
 
     def test_hide_with_distance_larger_than_track(self):
         """Test hiding when distance is larger than track length."""
-        from polyline_processor import start_end_hiding
+        from scripts.polyline_processor import start_end_hiding
 
         polyline_coords = [
             (39.9000, 116.4000),
@@ -189,7 +189,7 @@ class TestStartEndHiding:
 
     def test_single_point_polyline(self):
         """Test with single point polyline."""
-        from polyline_processor import start_end_hiding
+        from scripts.polyline_processor import start_end_hiding
 
         polyline_coords = [(39.9000, 116.4000)]
 
@@ -203,21 +203,21 @@ class TestFilterOut:
 
     def test_filter_out_none_input(self):
         """Test that None input returns None."""
-        from polyline_processor import filter_out
+        from scripts.polyline_processor import filter_out
 
         result = filter_out(None)
         assert result is None
 
     def test_filter_out_empty_string(self):
         """Test that empty string input returns None."""
-        from polyline_processor import filter_out
+        from scripts.polyline_processor import filter_out
 
         result = filter_out("")
         assert result is None
 
     def test_filter_out_valid_polyline(self):
         """Test filtering a valid polyline string."""
-        from polyline_processor import filter_out
+        from scripts.polyline_processor import filter_out
 
         # Create a simple encoded polyline (Beijing area)
         import polyline

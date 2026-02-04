@@ -3,20 +3,22 @@
 # Use of this source code is governed by a MIT-style
 # license that can be found in the LICENSE file.
 
+from ..exceptions import ConfigurationError, ParseError, RunningDataSyncError
 
-class PosterError(Exception):
-    "Base class for all errors"
+
+class PosterError(RunningDataSyncError):
+    "Base class for all poster errors"
 
     pass
 
 
-class TrackLoadError(PosterError):
+class TrackLoadError(ParseError):
     "Something went wrong when loading a track file, we just ignore this file and continue"
 
     pass
 
 
-class ParameterError(PosterError):
+class ParameterError(ConfigurationError):
     "Something's wrong with user supplied parameters"
 
     pass

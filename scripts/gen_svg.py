@@ -1,11 +1,10 @@
 import argparse
 import logging
 import os
-import sys
 
-from config import SQL_FILE
-from generator import Generator
-from gpxtrackposter import (
+from .config import SQL_FILE
+from .generator import Generator
+from .gpxtrackposter import (
     circular_drawer,
     github_drawer,
     grid_drawer,
@@ -13,8 +12,12 @@ from gpxtrackposter import (
     poster,
     track_loader,
 )
-from gpxtrackposter.exceptions import ParameterError, PosterError
-from gpxtrackposter.track import Track
+from .gpxtrackposter.exceptions import ParameterError
+from .gpxtrackposter.track import Track
+
+from .utils import get_logger
+
+logger = get_logger(__name__)
 
 # from flopp great repo
 __app_name__ = "create_poster"
@@ -257,7 +260,7 @@ def main():
     is_mol = args.type == "monthoflife"
 
     if not is_circular and not is_mol:
-        print(f"Creating poster of type {args.type} with {len(tracks)} tracks and storing it in file {args.output}...")
+        logger.info(f"Creating poster of type {args.type} with {len(tracks)} tracks, output: {args.output}")
     p.set_language(args.language)
     p.athlete = args.athlete
     if args.title:
@@ -304,9 +307,6 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
-        # generate svg
-        main()
-    except PosterError as e:
-        print(e)
-        sys.exit(1)
+    from .cli.gen_svg import cli_main
+
+    cli_main()

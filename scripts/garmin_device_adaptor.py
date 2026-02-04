@@ -3,7 +3,7 @@ from fit_tool.fit_file_builder import FitFileBuilder
 from fit_tool.profile.messages.device_info_message import DeviceInfoMessage
 from fit_tool.profile.messages.record_message import RecordMessage
 
-from utils import get_logger
+from .utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -11,8 +11,8 @@ logger = get_logger(__name__)
 # the device manufacturer and product info can be found in github,
 # https://github.com/garmin/fit-python-sdk/blob/main/garmin_fit_sdk/profile.py
 MANUFACTURER = 1  # Garmin
-GARMIN_DEVICE_PRODUCT_ID = 3415  # Forerunner 245
-GARMIN_SOFTWARE_VERSION = 3.58
+GARMIN_DEVICE_PRODUCT_ID = 3589  # Forerunner 245
+GARMIN_SOFTWARE_VERSION = 5.50
 # The device serial number must be real Garmin will identify device with it
 # here the default number:1234567890 Garmin will recognize it as Forerunner 245
 GARMIN_DEVICE_SERIAL_NUMBER = 1234567890
