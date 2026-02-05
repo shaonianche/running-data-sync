@@ -48,19 +48,30 @@ export default defineConfig({
       output: {
         manualChunks: (id: string) => {
           if (id.includes('node_modules')) {
-            if (id.includes('maplibre-gl')) {
-              return 'maplibre-gl';
+            if (
+              id.includes('/react/')
+              || id.includes('/react-dom/')
+              || id.includes('/scheduler/')
+              || id.includes('/react-router')
+              || id.includes('/react-helmet')
+              || id.includes('/react-ga')
+              || id.includes('/@vercel/analytics')
+              || id.includes('/react-map-gl/')
+              || id.includes('/maplibre-gl/')
+            ) {
+              return 'ui'
             }
-            if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-              return 'react-vendor';
+            if (id.includes('/@duckdb/duckdb-wasm/')) {
+              return 'duckdb'
             }
-            return 'vendors';
+            if (id.includes('/recharts/') || id.includes('/d3-')) {
+              return 'charts'
+            }
+            return 'vendors'
           }
-          else {
-            for (const item of individuallyPackages) {
-              if (id.includes(item)) {
-                return item
-              }
+          for (const item of individuallyPackages) {
+            if (id.includes(item)) {
+              return item
             }
           }
         },
