@@ -38,11 +38,6 @@ export default defineConfig({
     }),
   ],
   base: process.env.PATH_PREFIX || '/',
-  resolve: {
-    alias: {
-      'mapbox-gl': 'maplibre-gl',
-    },
-  },
   define: {
     'import.meta.env.VERCEL': JSON.stringify(process.env.VERCEL),
   },

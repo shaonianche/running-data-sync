@@ -20,6 +20,7 @@ import {
   filterYearRuns,
   geoJsonForRuns,
   getBoundsForGeoData,
+  getRunTimestamp,
   scrollToMap,
   sortDateFunc,
   titleForShow,
@@ -120,7 +121,7 @@ function Index() {
       }
 
       const lastRun = selectedRuns.reduce((latest, cur) =>
-        new Date(cur.start_date_local) > new Date(latest.start_date_local) ? cur : latest,
+        getRunTimestamp(cur) > getRunTimestamp(latest) ? cur : latest,
       )
 
       if (!lastRun) {
@@ -144,7 +145,10 @@ function Index() {
     [],
   )
 
-  if (prevYearRef.current !== year) {
+  useEffect(() => {
+    if (prevYearRef.current === year) {
+      return
+    }
     prevYearRef.current = year
     if (selectedRunIds.length > 0) {
       setSelectedRunIds([])
@@ -155,7 +159,7 @@ function Index() {
     if (viewStateOverride !== null) {
       setViewStateOverride(null)
     }
-  }
+  }, [year, selectedRunIds.length, title, viewStateOverride])
 
   useEffect(() => {
     if (year !== 'Total') {

@@ -1,5 +1,5 @@
 import activities from '@/static/activities.json'
-import { locationForRun, titleForRun } from '@/utils/utils'
+import { locationForRun, pathForRun, titleForRun } from '@/utils/utils'
 
 interface ActivitiesData {
   activities: typeof activities
@@ -21,6 +21,8 @@ const activitiesData: ActivitiesData = (() => {
 
   activities.forEach((run) => {
     const location = locationForRun(run)
+    // Precompute and cache decoded paths to avoid doing it during render.
+    pathForRun(run)
 
     const periodName = titleForRun(run)
     if (periodName) {

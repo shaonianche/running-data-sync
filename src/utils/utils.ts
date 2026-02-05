@@ -80,9 +80,19 @@ function formatRunTime(moving_time: number): string {
   }
 }
 
+let scrollTargetEl: HTMLElement | null = null
+
+function getScrollTargetEl(): HTMLElement | null {
+  if (scrollTargetEl && scrollTargetEl.isConnected) {
+    return scrollTargetEl
+  }
+  scrollTargetEl = document.querySelector('.fl.w-100.w-70-l')
+  return scrollTargetEl
+}
+
 // for scroll to the map
 function scrollToMap() {
-  const el = document.querySelector('.fl.w-100.w-70-l')
+  const el = getScrollTargetEl()
   const rect = el?.getBoundingClientRect()
   if (rect) {
     window.scroll(rect.left + window.scrollX, rect.top + window.scrollY)
@@ -132,6 +142,8 @@ function extractCoordinate(str: string): [number, number] | null {
 }
 
 const cities = chinaCities.map(c => c.name)
+const runPathCache = new Map<number, Coordinate[]>()
+const runTimestampCache = new Map<number, number>()
 const locationCache = new Map<number, ReturnType<typeof locationForRun>>()
 // what about oversea?
 function locationForRun(run: Activity): {
@@ -200,7 +212,11 @@ function intComma(x = '') {
 
 function pathForRun(run: Activity): Coordinate[] {
   try {
+    if (runPathCache.has(run.run_id)) {
+      return runPathCache.get(run.run_id)!
+    }
     if (!run.summary_polyline) {
+      runPathCache.set(run.run_id, [])
       return []
     }
     const c = mapboxPolyline.decode(run.summary_polyline)
@@ -214,14 +230,26 @@ function pathForRun(run: Activity): Coordinate[] {
     if (c.length === 2 && String(c[0]) === String(c[1])) {
       const { coordinate } = locationForRun(run)
       if (coordinate?.[0] && coordinate?.[1]) {
-        return [coordinate, coordinate]
+        const fallback = [coordinate, coordinate]
+        runPathCache.set(run.run_id, fallback)
+        return fallback
       }
     }
+    runPathCache.set(run.run_id, c)
     return c
   }
   catch {
     return []
   }
+}
+
+function getRunTimestamp(run: Activity): number {
+  if (runTimestampCache.has(run.run_id)) {
+    return runTimestampCache.get(run.run_id)!
+  }
+  const ts = Date.parse(run.start_date_local)
+  runTimestampCache.set(run.run_id, ts)
+  return ts
 }
 
 function geoJsonForRuns(runs: Activity[]): FeatureCollection<LineString> {
@@ -512,6 +540,7 @@ export {
   getBoundsForGeoData,
   getDuckDBConnection,
   getMainColor,
+  getRunTimestamp,
   initDuckDB,
   intComma,
   loadDuckDBFile,

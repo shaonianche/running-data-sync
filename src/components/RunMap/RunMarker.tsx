@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Marker } from 'react-map-gl'
+import { Marker } from 'react-map-gl/maplibre'
 import styles from './style.module.css'
 
 interface IRunMarkerProperties {
@@ -16,7 +16,6 @@ function RunMarker({
   coordinates,
 }: IRunMarkerProperties) {
   const [currentPosition, setCurrentPosition] = useState({ longitude: startLon, latitude: startLat })
-  const [, setProgress] = useState(0)
   const [isAnimating, setIsAnimating] = useState(true)
 
   const getDistance = useCallback((point1: { longitude: number, latitude: number }, point2: { longitude: number, latitude: number }) => {
@@ -85,7 +84,6 @@ function RunMarker({
 
       const progress = Math.min(currentDist / totalLength, 1)
 
-      setProgress(progress)
       setCurrentPosition(getPositionOnPath(progress))
 
       if (progress < 1) {
