@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:3726bea0ea10b4d7c10e0a36cb5f40fa613e44fa7e66f7d8e7c7c314c6bcd74a"
+content_hash = "sha256:937457a023113fa5ebfe4c4142145f4774d14c37bf0795e377c147dabae8584e"
 
 [[metadata.targets]]
 requires_python = ">=3.12"
@@ -504,15 +504,14 @@ files = [
 name = "fit-tool"
 version = "0.9.15"
 requires_python = ">=3.8"
+git = "https://github.com/shaonianche/python_fit_tool.git"
+revision = "dd060b067ce2901d9dd80d3d1d6121844bfbd608"
 summary = "A library for reading and writing Garmin FIT files."
 groups = ["default"]
 dependencies = [
     "bitstruct>=8.11.1",
+    "inflection>=0.5.1",
     "openpyxl>=2.5.12",
-]
-files = [
-    {file = "fit_tool-0.9.15-py3-none-any.whl", hash = "sha256:4d367e9fd146dc65288de2bfb9b63f54965485a7a3259fbaaadfefd1ba83e82e"},
-    {file = "fit_tool-0.9.15.tar.gz", hash = "sha256:366ffe75ec3c3313a4164a3205b0eff8b7146f3d5c9c3f6fad8291c88b986cb1"},
 ]
 
 [[package]]
@@ -691,6 +690,17 @@ groups = ["default"]
 files = [
     {file = "idna-3.11-py3-none-any.whl", hash = "sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea"},
     {file = "idna-3.11.tar.gz", hash = "sha256:795dafcc9c04ed0c1fb032c2aa73654d8e8c5023a7df64a53f39190ada629902"},
+]
+
+[[package]]
+name = "inflection"
+version = "0.5.1"
+requires_python = ">=3.5"
+summary = "A port of Ruby on Rails inflector to Python"
+groups = ["default"]
+files = [
+    {file = "inflection-0.5.1-py2.py3-none-any.whl", hash = "sha256:f38b2b640938a4f35ade69ac3d053042959b62a0f1076a5bbaa1b9526605a8a2"},
+    {file = "inflection-0.5.1.tar.gz", hash = "sha256:1a29730d366e996aaacffb2f1f1cb9593dc38e2ddd30c91250c6dde09ea9b417"},
 ]
 
 [[package]]
