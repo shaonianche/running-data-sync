@@ -102,8 +102,19 @@ jobs:
         if: env.RUN_TYPE == 'only_gpx'
         run: pdm run gpx_sync
 
+      - name: Check for data changes
+        id: data_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No new activity data"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "New activity data found"
+          fi
+
       - name: Make svg GitHub profile
-        if: env.RUN_TYPE != 'pass'
+        if: env.RUN_TYPE != 'pass' && steps.data_changes.outputs.has_changes == 'true'
         run: |
           pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --use-localtime --min-distance 0.5 --output public/assets/github.svg
           pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid.svg
@@ -111,6 +122,7 @@ jobs:
           pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid-light.svg
 
       - name: Save data to parquet
+        if: steps.data_changes.outputs.has_changes == 'true'
         run: pdm run save_to_parquet
 
       - name: Push new runs
