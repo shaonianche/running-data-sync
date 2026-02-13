@@ -12,7 +12,7 @@ interface ISiteMetadataResult {
 const data: ISiteMetadataResult = {
   siteTitle: 'Running',
   siteUrl: 'https://run.duanfei.org/',
-  logo: 'https://dgalywyr863hv.cloudfront.net/pictures/athletes/67102018/20181159/2/large.jpg',
+  logo: '/images/logo.jpg',
   description: 'Personal site and blog',
   navLinks: [
     {

@@ -11,7 +11,15 @@ function Header() {
         <div className="flex w-full md:w-auto items-center gap-3 md:gap-4">
           <Link to={siteUrl} className="flex items-center gap-3 md:gap-4">
             <picture>
-              <img className="h-10 w-10 md:h-16 md:w-16 rounded-full" alt="logo" src={logo} />
+              <img
+                className="h-10 w-10 md:h-16 md:w-16 rounded-full"
+                alt="logo"
+                src={logo}
+                onError={(e) => {
+                  e.currentTarget.onerror = null
+                  e.currentTarget.src = '/images/favicon.ico'
+                }}
+              />
             </picture>
             <h1 className="text-2xl md:text-4xl font-extrabold italic">
               {siteTitle}
