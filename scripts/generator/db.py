@@ -372,8 +372,9 @@ def update_flyby_activity_error(
         UPDATE activities_flyby_queue
         SET status = ?, last_error = ?, updated_at = NOW()
         WHERE activity_id = ?
+          AND (status IS DISTINCT FROM ? OR last_error IS DISTINCT FROM ?)
         """,
-        [status, last_error, activity_id],
+        [status, last_error, activity_id, status, last_error],
     )
 
 

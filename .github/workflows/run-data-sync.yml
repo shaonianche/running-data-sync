@@ -105,7 +105,7 @@ jobs:
       - name: Check for data changes
         id: data_changes
         run: |
-          if git diff --quiet; then
+          if git diff --quiet -- src/static/activities.json; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "No new activity data"
           else
@@ -127,13 +127,28 @@ jobs:
 
       - name: Push new runs
         run: |
-          if git diff --quiet; then
+          if [ "${{ steps.data_changes.outputs.has_changes }}" != "true" ]; then
+              echo "No new activity data, skip commit"
+              exit 0
+          fi
+          for path in \
+            src/static/activities.json \
+            public/assets/github.svg \
+            public/assets/grid.svg \
+            public/assets/github-light.svg \
+            public/assets/grid-light.svg \
+            public/db/activities.parquet \
+            public/db/activities_flyby.parquet; do
+            if [ -e "$path" ] || git ls-files --error-unmatch "$path" >/dev/null 2>&1; then
+              git add "$path"
+            fi
+          done
+          if git diff --cached --quiet; then
               echo "No changes to commit"
               exit 0
           fi
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
           git commit -m "sync running data $(date +'%Y-%m-%d')"
           git pull --rebase --autostash origin ${{ github.ref }}
           git push
