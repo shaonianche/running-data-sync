@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "ignoreCommand": "[ \"$VERCEL_GIT_PREVIOUS_SHA\" ]&&[ \"$VERCEL_GIT_COMMIT_SHA\" ]&&git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- src public assets index.html package.json pnpm-lock.yaml '*config*' .prettierrc.cjs vercel.json",
   "git": {
     "deploymentEnabled": {
       "gh-pages": false
