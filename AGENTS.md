@@ -21,21 +21,24 @@ This is a running/workout data synchronization and visualization project. It syn
 ## Project Structure
 
 ```
-scripts/           # Python scripts for data sync
-  ├── generator/   # Database and FIT file generation
-  ├── gpxtrackposter/  # GPX/TCX/FIT track processing and SVG generation
-  ├── garmin_sync.py   # Garmin data sync
-  ├── strava_sync.py   # Strava data sync
-  └── config.py        # Path configurations
-src/               # React frontend
-  ├── components/  # React components
-  ├── pages/       # Page components
-  ├── hooks/       # Custom React hooks
-  └── utils/       # Utility functions
-public/            # Static assets and generated SVGs
-GPX_OUT/           # Downloaded GPX files
-FIT_OUT/           # Downloaded FIT files
-activities/        # Processed activity data
+scripts/                     # Python scripts and modules
+  ├── cli/                   # CLI entrypoints (used by pdm scripts)
+  ├── generator/             # Database and FIT/TCX generation logic
+  ├── gpxtrackposter/        # GPX/TCX/FIT track processing and SVG generation
+  ├── config.py              # Shared path/constants configuration
+  └── data.duckdb            # Local DuckDB database
+src/                         # React frontend source
+  ├── components/            # UI components
+  ├── pages/                 # Route pages
+  ├── hooks/                 # Custom hooks
+  ├── utils/                 # Frontend utilities
+  └── static/activities.json # Processed activity data JSON
+public/                      # Static files served by Vite
+  ├── assets/                # Generated SVG visualizations
+  └── db/                    # Exported parquet files for frontend queries
+tests/                       # Python unit tests
+GPX_OUT/                     # Downloaded GPX files
+FIT_OUT/                     # Downloaded FIT files
 ```
 
 ## Commands
@@ -53,13 +56,13 @@ pdm run ruff check scripts/
 pdm run ruff format scripts/
 
 # Sync Garmin data
-python scripts/garmin_sync.py
+pdm run garmin_sync
 
 # Sync Strava data
-python scripts/strava_sync.py
+pdm run strava_sync
 
 # Generate SVG visualizations
-python scripts/gen_svg.py --from-db --type github --output public/assets/github.svg
+pdm run gen_svg --from-db --type github --output public/assets/github.svg
 ```
 
 ### Frontend
