@@ -61,8 +61,29 @@ pdm run garmin_sync
 # Sync Strava data
 pdm run strava_sync
 
+# Export FIT by activity ID
+pdm run export_fit 123456 --output FIT_OUT/123456.fit
+
+# Upload local FIT files to Garmin
+pdm run fit_to_garmin_sync --is-cn
+
+# Strava -> Garmin sync (API)
+pdm run strava_to_garmin_sync --client-id ... --client-secret ... --refresh-token ...
+
+# Strava web -> Garmin sync
+pdm run stravaweb_to_garmin_sync --client-id ... --client-secret ... --refresh-token ... <secret> <jwt>
+
 # Generate SVG visualizations
 pdm run gen_svg --from-db --type github --output public/assets/github.svg
+
+# Sync GPX files
+pdm run gpx_sync
+
+# Export DuckDB tables to Parquet
+pdm run save_to_parquet --tables activities activities_flyby
+
+# Get Garmin secret string
+pdm run get_garmin_secret <email> <password>
 ```
 
 ### Frontend
@@ -105,16 +126,19 @@ Environment variables are loaded from `.env.local`:
 STRAVA_CLIENT_ID=
 STRAVA_CLIENT_SECRET=
 STRAVA_REFRESH_TOKEN=
+STRAVA_JWT=
 GARMIN_EMAIL=
 GARMIN_PASSWORD=
+GARMIN_IS_CN=
 GARMIN_SECRET=
 GARMIN_SECRET_CN=
+DUCKDB_ENCRYPTION_KEY=
 ```
 
 ## Database
 
 - Uses DuckDB stored at `scripts/data.duckdb`
-- Main tables: `activities`, `activities_flyby`
+- Main tables: `activities`, `activities_flyby`, `activities_flyby_queue`
 - Exports to Parquet format in `public/db/` for frontend consumption
 
 ## Key Conventions
