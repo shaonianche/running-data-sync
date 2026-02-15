@@ -14,14 +14,13 @@ import gpxpy as mod_gpxpy
 import lxml
 import polyline
 import s2sphere as s2
-from ..config import run_map, start_point
 from garmin_fit_sdk import Decoder, Stream
 from garmin_fit_sdk.util import FIT_EPOCH_S
-from ..polyline_processor import filter_out
 from tcxreader.tcxreader import TCXReader
 
+from ..config import run_map, start_point
+from ..polyline_processor import filter_out
 from ..utils import get_logger
-
 from .exceptions import TrackLoadError
 from .utils import parse_datetime_to_local
 

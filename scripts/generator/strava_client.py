@@ -7,18 +7,21 @@ import time
 import arrow
 import stravalib
 
+from ..config import FIT_FOLDER
+from ..exceptions import FlybySyncError
 from .db import (
     convert_streams_to_flyby_dataframe,
+    enqueue_flyby_activities,
     get_dataframe_from_strava_activities,
     get_dataframes_for_fit_tables,
     get_db_connection,
     init_db,
-    enqueue_flyby_activities,
     list_pending_flyby_activities,
     mark_flyby_activity_done,
+    prune_activities_not_in_remote_ids,
     store_flyby_data,
-    update_or_create_activities,
     update_flyby_activity_error,
+    update_or_create_activities,
 )
 
 FLYBY_REQUEST_SLEEP_SECONDS = float(os.getenv("STRAVA_FLYBY_REQUEST_SLEEP", "0.5"))
@@ -41,13 +44,13 @@ class StravaClientMixin:
         self.client.access_token = response["access_token"]
         self.logger.info("Strava access token refreshed successfully.")
 
-    def sync(self, force):
+    def sync(self, force, prune=False):
         """
         Sync activities from Strava to the local DuckDB database.
         """
         self.check_access()
 
-        self.logger.info("Starting Strava DB sync.")
+        self.logger.info("Starting Strava DB sync. force=%s prune=%s", force, prune)
         if force:
             filters = {"before": datetime.datetime.now(datetime.timezone.utc)}
         else:
@@ -90,6 +93,15 @@ class StravaClientMixin:
         if self.db_connection is None:
             self.db_connection = init_db(self.db_path)
 
+        if prune:
+            # Prune requires a full remote ID snapshot, independent of incremental sync window.
+            all_remote_ids = {int(a.id) for a in self.client.get_activities()}
+            pruned = prune_activities_not_in_remote_ids(self.db_connection, all_remote_ids)
+            if pruned > 0:
+                self.logger.info("Pruned %d local activities missing on Strava.", pruned)
+            else:
+                self.logger.info("Prune completed. No stale local activities found.")
+
         if not activities_to_process:
             self.logger.info("No new activities to sync.")
             # Continue to process any pending flyby queue entries.
@@ -101,95 +113,100 @@ class StravaClientMixin:
 
             # Enqueue newly synced activities for flyby processing
             enqueue_flyby_activities(self.db_connection, [int(a.id) for a in activities_to_process])
-        try:
-            self.logger.info("Starting flyby data synchronization for queued activities...")
-            pending_ids = list_pending_flyby_activities(self.db_connection)
-            if not pending_ids:
-                self.logger.info("No flyby data available to sync for new activities.")
-                return
+        self.logger.info("Starting flyby data synchronization for queued activities...")
+        pending_ids = list_pending_flyby_activities(self.db_connection)
+        if not pending_ids:
+            self.logger.info("No flyby data available to sync for new activities.")
+            return
 
-            activity_map = {int(a.id): a for a in activities_to_process}
-            total_flyby_records = 0
+        activity_map = {int(a.id): a for a in activities_to_process}
+        total_flyby_records = 0
 
-            for activity_id in pending_ids:
-                activity = activity_map.get(int(activity_id))
-                if activity is None:
-                    try:
-                        if FLYBY_REQUEST_SLEEP_SECONDS > 0:
-                            time.sleep(FLYBY_REQUEST_SLEEP_SECONDS)
-                        activity = self.client.get_activity(activity_id)
-                    except stravalib.exc.RateLimitExceeded as e:
-                        retry_after = getattr(e, "retry_after", None)
-                        wait = retry_after if retry_after else 60
-                        update_flyby_activity_error(
-                            self.db_connection,
-                            int(activity_id),
-                            "rate_limited",
-                            str(e),
-                        )
-                        self.logger.warning(
-                            f"Rate limit exceeded while fetching activity {activity_id}. "
-                            f"Waiting {wait} seconds and stopping flyby sync."
-                        )
-                        time.sleep(wait)
-                        break
-                    except Exception as e:
-                        update_flyby_activity_error(
-                            self.db_connection,
-                            int(activity_id),
-                            "error",
-                            str(e),
-                        )
-                        self.logger.warning(f"Failed to fetch activity {activity_id}: {e}. Skipping.")
-                        continue
+        for activity_id in pending_ids:
+            activity = activity_map.get(int(activity_id))
+            if activity is None:
+                try:
+                    if FLYBY_REQUEST_SLEEP_SECONDS > 0:
+                        time.sleep(FLYBY_REQUEST_SLEEP_SECONDS)
+                    activity = self.client.get_activity(activity_id)
+                except stravalib.exc.RateLimitExceeded as e:
+                    retry_after = getattr(e, "retry_after", None)
+                    wait = retry_after if retry_after else 60
+                    update_flyby_activity_error(
+                        self.db_connection,
+                        int(activity_id),
+                        "rate_limited",
+                        str(e),
+                    )
+                    self.logger.warning(
+                        f"Rate limit exceeded while fetching activity {activity_id}. "
+                        f"Waiting {wait} seconds and stopping flyby sync."
+                    )
+                    time.sleep(wait)
+                    return
+                except Exception as e:
+                    update_flyby_activity_error(
+                        self.db_connection,
+                        int(activity_id),
+                        "error",
+                        str(e),
+                    )
+                    self.logger.warning(f"Failed to fetch activity {activity_id}: {e}. Keeping it queued.")
+                    continue
 
-                for attempt in range(FLYBY_MAX_RETRIES):
-                    try:
-                        if FLYBY_REQUEST_SLEEP_SECONDS > 0:
-                            time.sleep(FLYBY_REQUEST_SLEEP_SECONDS)
-                        records = self._sync_flyby_for_activity(activity)
-                        total_flyby_records += records
-                        # If we reach here, the attempt completed (even if 0 records). Mark done.
-                        mark_flyby_activity_done(self.db_connection, int(activity.id))
-                        break
-                    except stravalib.exc.RateLimitExceeded as e:
-                        retry_after = getattr(e, "retry_after", None)
-                        wait = retry_after if retry_after else min(60 * (2**attempt), 900)
-                        update_flyby_activity_error(
-                            self.db_connection,
-                            int(activity.id),
-                            "rate_limited",
-                            str(e),
-                        )
-                        self.logger.warning(
-                            f"Rate limit exceeded while syncing flyby for activity {activity.id}. "
-                            f"Waiting {wait} seconds (attempt {attempt + 1}/{FLYBY_MAX_RETRIES})."
-                        )
-                        time.sleep(wait)
-                        if attempt == FLYBY_MAX_RETRIES - 1:
-                            self.logger.warning(
-                                f"Rate limit persists. Leaving activity {activity.id} in the queue."
-                            )
-                            # Stop processing further activities; resume next run.
-                            return
-                    except Exception as activity_error:
-                        update_flyby_activity_error(
-                            self.db_connection,
-                            int(activity.id),
-                            "error",
-                            str(activity_error),
-                        )
-                        self.logger.warning(
-                            f"Flyby sync failed for activity {activity.id}: {activity_error}. Continuing."
-                        )
-                        break
+            for attempt in range(FLYBY_MAX_RETRIES):
+                try:
+                    if FLYBY_REQUEST_SLEEP_SECONDS > 0:
+                        time.sleep(FLYBY_REQUEST_SLEEP_SECONDS)
+                    records = self._sync_flyby_for_activity(activity)
+                    total_flyby_records += records
+                    mark_flyby_activity_done(self.db_connection, int(activity.id))
+                    break
+                except stravalib.exc.RateLimitExceeded as e:
+                    retry_after = getattr(e, "retry_after", None)
+                    wait = retry_after if retry_after else min(60 * (2**attempt), 900)
+                    update_flyby_activity_error(
+                        self.db_connection,
+                        int(activity.id),
+                        "rate_limited",
+                        str(e),
+                    )
+                    self.logger.warning(
+                        f"Rate limit exceeded while syncing flyby for activity {activity.id}. "
+                        f"Waiting {wait} seconds (attempt {attempt + 1}/{FLYBY_MAX_RETRIES})."
+                    )
+                    time.sleep(wait)
+                    if attempt == FLYBY_MAX_RETRIES - 1:
+                        self.logger.warning(f"Rate limit persists. Leaving activity {activity.id} in the queue.")
+                        return
+                except FlybySyncError as activity_error:
+                    update_flyby_activity_error(
+                        self.db_connection,
+                        int(activity.id),
+                        "error",
+                        str(activity_error),
+                    )
+                    self.logger.warning(
+                        f"Flyby sync failed for activity {activity.id}: {activity_error}. Keeping it queued."
+                    )
+                    break
+                except Exception as activity_error:
+                    update_flyby_activity_error(
+                        self.db_connection,
+                        int(activity.id),
+                        "error",
+                        str(activity_error),
+                    )
+                    self.logger.warning(
+                        f"Unexpected flyby sync failure for activity {activity.id}: {activity_error}. "
+                        "Keeping it queued."
+                    )
+                    break
 
-            if total_flyby_records > 0:
-                self.logger.info(f"Successfully synced {total_flyby_records} flyby records.")
-            else:
-                self.logger.info("No flyby data available to sync for queued activities.")
-        except Exception as e:
-            self.logger.warning(f"Flyby data synchronization failed: {e}, but main sync completed successfully.")
+        if total_flyby_records > 0:
+            self.logger.info(f"Successfully synced {total_flyby_records} flyby records.")
+        else:
+            self.logger.info("No flyby data available to sync for queued activities.")
 
     def _get_latest_gps_activity(self):
         """
@@ -237,36 +254,41 @@ class StravaClientMixin:
         """
         get the flyby data for the latest GPS activity and store it in the database.
         """
-        try:
-            self.logger.info("Starting flyby data synchronization...")
+        self.logger.info("Starting flyby data synchronization...")
+        retry_count = 0
 
-            # get the latest GPS activity
-            latest_gps_activity = self._get_latest_gps_activity()
-            if not latest_gps_activity:
-                self.logger.info("No GPS-enabled activities found, skipping flyby sync.")
-                return 0
-
-            return self._sync_flyby_for_activity(latest_gps_activity)
-
-        except stravalib.exc.RateLimitExceeded as e:
-            self.logger.warning(f"Strava API rate limit exceeded during flyby sync: {e}")
-            retry_after = getattr(e, "retry_after", 60)
-            self.logger.info(f"Waiting {retry_after} seconds before retrying...")
-            time.sleep(retry_after)
-
+        while retry_count <= FLYBY_MAX_RETRIES:
             try:
-                self.logger.info("Retrying flyby data synchronization after rate limit...")
-                return self.sync_flyby_data()
-            except Exception as retry_e:
-                self.logger.error(f"Retry failed for flyby sync: {retry_e}")
-                return 0
+                latest_gps_activity = self._get_latest_gps_activity()
+                if not latest_gps_activity:
+                    self.logger.info("No GPS-enabled activities found, skipping flyby sync.")
+                    return 0
 
-        except Exception as e:
-            self.logger.error(
-                f"Unexpected error during flyby data synchronization: {e}",
-                exc_info=True,
-            )
-            return 0
+                return self._sync_flyby_for_activity(latest_gps_activity)
+            except stravalib.exc.RateLimitExceeded as e:
+                retry_count += 1
+                if retry_count > FLYBY_MAX_RETRIES:
+                    self.logger.error(
+                        "Flyby sync failed due to repeated rate limiting after %d retries.",
+                        FLYBY_MAX_RETRIES,
+                    )
+                    return 0
+
+                retry_after = getattr(e, "retry_after", 60)
+                self.logger.warning(f"Strava API rate limit exceeded during flyby sync: {e}")
+                self.logger.info(
+                    "Waiting %s seconds before retrying flyby sync (%d/%d)...",
+                    retry_after,
+                    retry_count,
+                    FLYBY_MAX_RETRIES,
+                )
+                time.sleep(retry_after)
+            except Exception as e:
+                self.logger.error(
+                    f"Unexpected error during flyby data synchronization: {e}",
+                    exc_info=True,
+                )
+                return 0
 
     def _sync_flyby_for_activity(self, activity, force=False):
         """
@@ -362,18 +384,13 @@ class StravaClientMixin:
 
             return records_stored
 
-        except stravalib.exc.RateLimitExceeded as e:
-            # Re-raise to be handled by caller or allow retry logic here if we want specific retry for specific activity
-            raise e
+        except stravalib.exc.RateLimitExceeded:
+            # Re-raise for caller-level retry and queue persistence.
+            raise
         except stravalib.exc.ActivityUploadFailed as e:
-            self.logger.error(f"Strava activity access failed during flyby sync: {e}")
-            return 0
+            raise FlybySyncError(f"Strava activity access failed during flyby sync: {e}") from e
         except Exception as e:
-            self.logger.error(
-                f"Unexpected error during flyby data synchronization for {activity.id}: {e}",
-                exc_info=True,
-            )
-            return 0
+            raise FlybySyncError(f"Unexpected flyby sync error for {activity.id}: {e}") from e
 
     def sync_specific_activity(self, activity_id, force=False):
         """
@@ -419,8 +436,8 @@ class StravaClientMixin:
             existing_fit_files = set()
             # Check existing FIT files instead of database records
             try:
-                if os.path.exists("FIT_OUT"):
-                    existing_fit_files = {f.replace(".fit", "") for f in os.listdir("FIT_OUT") if f.endswith(".fit")}
+                if FIT_FOLDER.exists():
+                    existing_fit_files = {f.stem for f in FIT_FOLDER.iterdir() if f.is_file() and f.suffix == ".fit"}
 
                 if existing_fit_files:
                     self.logger.info(
@@ -464,7 +481,8 @@ class StravaClientMixin:
                 fit_byte_data = self.build_fit_file_from_dataframes(dataframes)
 
                 filename = f"{activity.id}.fit"
-                filepath = os.path.join("FIT_OUT", filename)
+                FIT_FOLDER.mkdir(parents=True, exist_ok=True)
+                filepath = FIT_FOLDER / filename
                 with open(filepath, "wb") as f:
                     f.write(fit_byte_data)
                 fit_files_generated.append(filename)

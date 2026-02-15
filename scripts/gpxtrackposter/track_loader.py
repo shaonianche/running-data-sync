@@ -10,9 +10,7 @@ import concurrent.futures
 import os
 
 from ..synced_data_file_logger import load_synced_file_list
-
 from ..utils import get_logger
-
 from .exceptions import ParameterError, TrackLoadError
 from .track import Track
 from .year_range import YearRange

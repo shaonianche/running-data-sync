@@ -4,11 +4,12 @@ Only the gpx files in GPX_OUT sync
 """
 
 from .config import GPX_FOLDER, JSON_FILE, SQL_FILE
+from .utils import get_logger, make_activities_file
 
-from .utils import make_activities_file
+logger = get_logger(__name__)
 
 def run_gpx_sync() -> None:
-    print("only sync gpx files in GPX_OUT")
+    logger.info("Only syncing GPX files in GPX_OUT.")
     make_activities_file(SQL_FILE, GPX_FOLDER, JSON_FILE)
 
 

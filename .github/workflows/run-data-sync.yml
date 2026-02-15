@@ -58,10 +58,10 @@ jobs:
         with:
           path: |
             public
-            GPX_OUT
-            TCX_OUT
-            FIT_OUT
-            scripts/data.duckdb
+            data/GPX_OUT
+            data/TCX_OUT
+            data/FIT_OUT
+            data/data.duckdb
             src/static/activities.json
             imported.json
           key: ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
@@ -81,9 +81,17 @@ jobs:
           pdm install
           echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
 
-      - name: Run sync Strava script
+      - name: Run sync Strava -> DuckDB
         if: env.RUN_TYPE == 'strava'
-        run: pdm run strava_sync --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
+        run: pdm run strava-cli sync db --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
+
+      - name: Sync DuckDB -> Garmin COM
+        if: env.RUN_TYPE == 'strava'
+        run: pdm run strava-cli vendor garmin --secret-string '${{ secrets.GARMIN_SECRET }}'
+
+      - name: Sync DuckDB -> Garmin CN
+        if: env.RUN_TYPE == 'strava'
+        run: pdm run strava-cli vendor garmin --is-cn --secret-string '${{ secrets.GARMIN_SECRET_CN }}'
 
       # - name: Run strava_to_garmin_sync script
       #   if: env.RUN_TYPE == 'strava'
@@ -98,14 +106,34 @@ jobs:
       #   if: env.RUN_TYPE == 'strava'
       #   run: pdm run fit_to_garmin_sync '${{ secrets.GARMIN_SECRET }}'
 
-      - name: Run sync Only GPX script
-        if: env.RUN_TYPE == 'only_gpx'
-        run: pdm run gpx_sync
+      - name: Rebuild derived data from DuckDB
+        if: env.RUN_TYPE != 'pass'
+        run: |
+          pdm run python - <<'PY'
+          import json
+          from scripts.config import JSON_FILE, SQL_FILE
+          from scripts.generator import Generator
+          from scripts.utils import ActivityJSONEncoder
+
+          generator = Generator(SQL_FILE)
+          activities_list = generator.load()
+          with open(JSON_FILE, "w") as f:
+              json.dump(activities_list, f, cls=ActivityJSONEncoder)
+          PY
+          pdm run save_to_parquet
+
+      - name: Validate exported data consistency
+        if: env.RUN_TYPE != 'pass'
+        run: pdm run validate_data_consistency
 
       - name: Check for data changes
         id: data_changes
         run: |
-          if git diff --quiet -- src/static/activities.json; then
+          if git diff --quiet -- \
+            data/data.duckdb \
+            src/static/activities.json \
+            public/db/activities.parquet \
+            public/db/activities_flyby.parquet; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "No new activity data"
           else
@@ -118,12 +146,8 @@ jobs:
         run: |
           pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --use-localtime --min-distance 0.5 --output public/assets/github.svg
           pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid.svg
-          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output public/assets/github-light.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity-color '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output public/assets/github-light.svg
           pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid-light.svg
-
-      - name: Save data to parquet
-        if: steps.data_changes.outputs.has_changes == 'true'
-        run: pdm run save_to_parquet
 
       - name: Push new runs
         run: |
@@ -132,6 +156,7 @@ jobs:
               exit 0
           fi
           for path in \
+            data/data.duckdb \
             src/static/activities.json \
             public/assets/github.svg \
             public/assets/grid.svg \

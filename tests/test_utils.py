@@ -1,11 +1,8 @@
 """Tests for utils.py module."""
 
 import json
-import tempfile
 from datetime import datetime
-from pathlib import Path
 from unittest.mock import MagicMock, patch
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pytest
@@ -91,8 +88,8 @@ class TestActivityJSONEncoder:
 
     def test_output_is_valid_json(self):
         """Test that the output is always valid JSON that can be parsed by standard parsers."""
+
         from scripts.utils import ActivityJSONEncoder
-        import math
 
         data = {
             "nan_value": float("nan"),
@@ -121,8 +118,9 @@ class TestSensitiveFilter:
 
     def test_filter_redacts_sensitive_info(self):
         """Test that sensitive information is redacted from logs."""
-        from scripts.utils import SensitiveFilter
         import logging
+
+        from scripts.utils import SensitiveFilter
 
         filter_ = SensitiveFilter()
         record = logging.LogRecord(
@@ -144,8 +142,9 @@ class TestSensitiveFilter:
 
     def test_filter_redacts_args_dict(self):
         """Test that sensitive information in args dictionary is redacted."""
-        from scripts.utils import SensitiveFilter
         import logging
+
+        from scripts.utils import SensitiveFilter
 
         filter_ = SensitiveFilter()
         args = {"client_id": "12345", "public_id": "999"}
@@ -166,8 +165,9 @@ class TestSensitiveFilter:
 
     def test_filter_redacts_multiline_string(self):
         """Test that sensitive information in multiline strings is redacted."""
-        from scripts.utils import SensitiveFilter
         import logging
+
+        from scripts.utils import SensitiveFilter
 
         filter_ = SensitiveFilter()
         msg = """
@@ -216,8 +216,9 @@ class TestGetLogger:
 
     def test_get_logger_has_handler(self):
         """Test that the logger (or root logger) has at least one handler."""
-        from scripts.utils import get_logger
         import logging
+
+        from scripts.utils import get_logger
 
         # Ensure logging is configured
         get_logger("handler_test")
@@ -232,7 +233,6 @@ class TestLoadEnvConfig:
 
     def test_load_env_config_missing_file(self):
         """Test that load_env_config returns None when file is missing."""
-        from scripts.utils import load_env_config
 
         with patch("utils.Path") as mock_path:
             mock_path.return_value.__truediv__.return_value.exists.return_value = False
@@ -351,7 +351,7 @@ class TestMakeStravaClient:
             mock_client.refresh_access_token.return_value = {"access_token": "new_token"}
             mock_client_class.return_value = mock_client
 
-            result = make_strava_client("client_id", "client_secret", "refresh_token")
+            make_strava_client("client_id", "client_secret", "refresh_token")
 
             mock_client.refresh_access_token.assert_called_once_with(
                 client_id="client_id",
@@ -436,9 +436,9 @@ class TestMakeActivitiesFile:
         data_dir.mkdir()
 
         # Mock the Generator class
-        with patch("scripts.generator.Generator") as MockGenerator:
+        with patch("scripts.generator.Generator") as mock_generator_class:
             # Setup the mock instance
-            mock_gen = MockGenerator.return_value
+            mock_gen = mock_generator_class.return_value
 
             # Create data with special values that would break standard JSON
             bad_data = [

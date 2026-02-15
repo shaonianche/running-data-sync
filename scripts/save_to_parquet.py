@@ -1,9 +1,9 @@
 import os
 
 import duckdb
+
 from .config import DB_FOLDER, SQL_FILE
 from .generator.db import get_db_connection
-
 from .utils import get_logger
 
 logger = get_logger(__name__)

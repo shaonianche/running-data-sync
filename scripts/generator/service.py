@@ -10,11 +10,10 @@ import geopy
 import pandas as pd
 import stravalib
 from geopy.geocoders import Nominatim
+
 from ..gpxtrackposter import track_loader
 from ..polyline_processor import filter_out
-
 from ..utils import get_logger
-
 from .db import (
     get_db_connection,
     init_db,

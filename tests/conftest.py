@@ -1,11 +1,9 @@
 """Pytest configuration and shared fixtures."""
 
-import os
 import sys
 import tempfile
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 

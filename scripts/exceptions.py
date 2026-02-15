@@ -21,6 +21,12 @@ class RateLimitError(SyncError):
         self.retry_after = retry_after
 
 
+class FlybySyncError(SyncError):
+    """Flyby 同步错误"""
+
+    pass
+
+
 class AuthenticationError(SyncError):
     """认证错误"""
 

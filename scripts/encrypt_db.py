@@ -2,8 +2,8 @@ import os
 import shutil
 
 import duckdb
-from .config import SQL_FILE
 
+from .config import SQL_FILE
 from .utils import get_logger, load_env_config
 
 logger = get_logger(__name__)

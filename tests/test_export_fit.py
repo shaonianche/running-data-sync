@@ -1,9 +1,11 @@
-import unittest
-from unittest.mock import MagicMock, patch, mock_open
-import pandas as pd
 import datetime
-from scripts.export_fit import construct_dataframes, validate_activity, calculate_laps_from_records
+import unittest
+from unittest.mock import MagicMock, patch
+
+import pandas as pd
 from fit_tool.profile.profile_type import Sport, SubSport
+
+from scripts.export_fit import calculate_laps_from_records, construct_dataframes, validate_activity
 
 
 class TestExportFit(unittest.TestCase):

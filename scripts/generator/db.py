@@ -9,10 +9,10 @@ import certifi
 import duckdb
 import geopy
 import pandas as pd
-from ..exceptions import StorageError
 from fit_tool.profile.profile_type import Sport, SubSport
 from geopy.geocoders import Nominatim
 
+from ..exceptions import StorageError
 from ..utils import get_logger, load_env_config
 
 logger = get_logger(__name__)
@@ -41,9 +41,9 @@ def transaction(con: duckdb.DuckDBPyConnection) -> Iterator[duckdb.DuckDBPyConne
     try:
         yield con
         con.execute("COMMIT")
-    except Exception as e:
+    except Exception:
         con.execute("ROLLBACK")
-        raise e
+        raise
 
 
 # Canonical schema for the activities table. This is the single source of truth.
@@ -183,6 +183,10 @@ def _migrate_schema(db_connection):
 
 
 def get_db_connection(database: str | Path, read_only: bool = False) -> duckdb.DuckDBPyConnection:
+    db_path = Path(database)
+    if not read_only:
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+
     env_config = load_env_config()
     key = env_config.get("duckdb_encryption_key") if env_config else None
 
@@ -196,9 +200,11 @@ def get_db_connection(database: str | Path, read_only: bool = False) -> duckdb.D
             # Use in-memory connection and attach the encrypted DB
             con = duckdb.connect()
             read_only_str = "TRUE" if read_only else "FALSE"
-            attach_sql = (
-                f"ATTACH '{database}' AS main_db (TYPE DUCKDB, READ_ONLY {read_only_str}, ENCRYPTION_KEY '{key}')"
-            )
+            escaped_key = key.replace("'", "''")
+            attach_sql = f"""
+                ATTACH '{database}' AS main_db
+                (TYPE DUCKDB, READ_ONLY {read_only_str}, ENCRYPTION_KEY '{escaped_key}')
+            """
             con.execute(attach_sql)
             con.execute("USE main_db")
             return con
@@ -301,7 +307,7 @@ def _ensure_primary_keys(db_connection):
         logger.error(f"Error checking/fixing database schema constraints: {e}")
         # We don't raise here to allow the script to try continuing,
         # but if this failed, subsequent operations might fail too.
-        raise e
+        raise
 
 
 def init_db(db_path: str | Path) -> duckdb.DuckDBPyConnection:
@@ -353,8 +359,8 @@ def list_pending_flyby_activities(db_connection: duckdb.DuckDBPyConnection) -> l
             "SELECT activity_id FROM activities_flyby_queue ORDER BY activity_id"
         ).fetchall()
         return [row[0] for row in rows]
-    except Exception:
-        return []
+    except Exception as e:
+        raise StorageError(f"Failed to list pending flyby activities: {e}") from e
 
 
 def mark_flyby_activity_done(db_connection: duckdb.DuckDBPyConnection, activity_id: int) -> None:
@@ -427,10 +433,66 @@ def update_or_create_activities(db_connection: duckdb.DuckDBPyConnection, activi
         return len(activities_df)
     except Exception as e:
         logger.error(f"Failed to upsert activities: {e}")
-        raise e
+        raise
     finally:
         # Unregister the temporary table to clean up
         db_connection.unregister("temp_activities_df")
+
+
+def prune_activities_not_in_remote_ids(
+    db_connection: duckdb.DuckDBPyConnection,
+    remote_ids: set[int],
+) -> int:
+    """
+    Delete local activities that no longer exist on Strava.
+    Also deletes related activities_flyby and queue rows.
+    """
+    if remote_ids:
+        remote_ids_df = pd.DataFrame({"run_id": sorted(remote_ids)})
+        db_connection.register("temp_remote_activity_ids", remote_ids_df)
+        stale_ids = db_connection.execute(
+            """
+            SELECT a.run_id
+            FROM activities a
+            LEFT JOIN temp_remote_activity_ids r ON a.run_id = r.run_id
+            WHERE r.run_id IS NULL
+            """
+        ).fetchall()
+        db_connection.unregister("temp_remote_activity_ids")
+    else:
+        stale_ids = db_connection.execute("SELECT run_id FROM activities").fetchall()
+
+    stale_id_values = [int(row[0]) for row in stale_ids]
+    if not stale_id_values:
+        return 0
+
+    stale_ids_df = pd.DataFrame({"activity_id": stale_id_values})
+    db_connection.register("temp_stale_activity_ids", stale_ids_df)
+    try:
+        # Execute deletions in separate statements (without a shared transaction) to work
+        # around DuckDB foreign key limitations when deleting parent/child rows together.
+        db_connection.execute(
+            """
+            DELETE FROM activities_flyby
+            WHERE activity_id IN (SELECT activity_id FROM temp_stale_activity_ids)
+            """
+        )
+        db_connection.execute(
+            """
+            DELETE FROM activities_flyby_queue
+            WHERE activity_id IN (SELECT activity_id FROM temp_stale_activity_ids)
+            """
+        )
+        db_connection.execute(
+            """
+            DELETE FROM activities
+            WHERE run_id IN (SELECT activity_id FROM temp_stale_activity_ids)
+            """
+        )
+    finally:
+        db_connection.unregister("temp_stale_activity_ids")
+
+    return len(stale_id_values)
 
 
 # Cache for geocoding results to avoid repeated API calls for the same location
@@ -749,7 +811,7 @@ def convert_streams_to_flyby_dataframe(activity, streams):
 
     except Exception as e:
         logger.error(f"Error converting streams to flyby dataframe for activity {activity.id}: {e}")
-        return pd.DataFrame()
+        raise StorageError(f"Error converting streams to flyby dataframe for activity {activity.id}: {e}") from e
 
 
 def store_flyby_data(db_connection, flyby_df):
@@ -766,7 +828,7 @@ def store_flyby_data(db_connection, flyby_df):
         if not expected_columns.issubset(df_columns):
             missing_columns = expected_columns - df_columns
             logger.error(f"Missing required columns in flyby DataFrame: {missing_columns}")
-            return 0
+            raise StorageError(f"Missing required columns in flyby DataFrame: {missing_columns}")
 
         ordered_columns = [col for col in ACTIVITIES_FLYBY_SCHEMA.keys() if col in flyby_df.columns]
         flyby_df_ordered = flyby_df[ordered_columns].copy()
@@ -799,7 +861,7 @@ def store_flyby_data(db_connection, flyby_df):
 
         except Exception as e:
             logger.error(f"Error converting flyby data types: {e}")
-            return 0
+            raise StorageError(f"Error converting flyby data types: {e}") from e
 
         temp_table_name = "temp_flyby_data"
         db_connection.register(temp_table_name, flyby_df_ordered)
@@ -845,7 +907,7 @@ def store_flyby_data(db_connection, flyby_df):
                 return records_inserted
             except Exception as e2:
                 logger.error(f"Fallback INSERT also failed: {e2}")
-                return 0
+                raise StorageError(f"Flyby UPSERT and fallback INSERT both failed: {e2}") from e2
 
         finally:
             try:
@@ -855,7 +917,7 @@ def store_flyby_data(db_connection, flyby_df):
 
     except Exception as e:
         logger.error(f"Unexpected error in store_flyby_data: {e}")
-        return 0
+        raise StorageError(f"Unexpected error in store_flyby_data: {e}") from e
 
 
 def write_fit_dataframes(db_connection, dataframes):

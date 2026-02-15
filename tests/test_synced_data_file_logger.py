@@ -1,12 +1,7 @@
 """Tests for scripts.synced_data_file_logger.py module."""
 
 import json
-import os
-import tempfile
-from pathlib import Path
 from unittest.mock import patch
-
-import pytest
 
 
 class TestSyncedDataFileLogger:
@@ -79,7 +74,6 @@ class TestSyncedDataFileLogger:
 
         with patch("scripts.synced_data_file_logger.SYNCED_FILE", str(synced_file)):
             from scripts.synced_data_file_logger import (
-                load_synced_file_list,
                 save_synced_data_file_list,
             )
 

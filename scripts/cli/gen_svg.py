@@ -1,7 +1,7 @@
 import sys
 
-from ..gpxtrackposter.exceptions import PosterError
 from ..gen_svg import main
+from ..gpxtrackposter.exceptions import PosterError
 
 
 def cli_main() -> None:

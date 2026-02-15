@@ -4,9 +4,10 @@ This project syncs activity data from platforms like Strava and Garmin, stores i
 
 ### Features
 
-- Sync Strava activities
-- Sync Garmin activities
-- Generate FIT/TCX/GPX outputs
+- Sync Strava activities into DuckDB
+- Export activities from DuckDB to FIT/TCX/GPX
+- Sync DuckDB activities to Garmin / Garmin CN
+- Reconcile Garmin remote data with local sync state
 - Export DuckDB tables to Parquet for the frontend
 - Visualize activities with maps and SVG posters
 
@@ -37,6 +38,7 @@ GARMIN_EMAIL=
 GARMIN_PASSWORD=
 GARMIN_SECRET=
 GARMIN_SECRET_CN=
+DUCKDB_ENCRYPTION_KEY=
 ```
 
 ### Common Commands
@@ -60,32 +62,39 @@ pnpm run lint
 
 ### CLI Usage (PDM Scripts)
 
-The CLI entrypoints live under `scripts/cli/`. Run them from the project root using PDM:
+Use the unified CLI from project root:
 
 ```bash
-# Strava sync
-pdm run strava_sync --client-id ... --client-secret ... --refresh-token ...
+# Show all CLI help
+pdm run strava-cli
 
-# Garmin sync
-pdm run garmin_sync --is-cn
+# Sync Strava -> DuckDB
+pdm run strava-cli sync db
+pdm run strava-cli sync db --force
+pdm run strava-cli sync db --prune
 
-# Export a FIT file by activity ID
-pdm run export_fit 123456 --output FIT_OUT/123456.fit
+# Export from DuckDB (no Strava credentials required)
+pdm run strava-cli export --format fit --id 123456
+pdm run strava-cli export --format gpx --id-range 100000:100100
+pdm run strava-cli export --format tcx --all
 
-# Upload local FIT files to Garmin
-pdm run fit_to_garmin_sync --is-cn
+# Sync DuckDB -> Garmin/Garmin CN
+pdm run strava-cli vendor garmin --secret-string <garmin_secret>
+pdm run strava-cli vendor garmin --is-cn --secret-string <garmin_secret>
+pdm run strava-cli vendor garmin --is-cn -f
 
-# Strava -> Garmin sync (API)
-pdm run strava_to_garmin_sync --client-id ... --client-secret ... --refresh-token ...
+# Reconcile local sync status with remote Garmin activities
+pdm run strava-cli vendor garmin-reconcile --secret-string <garmin_secret>
 
-# Strava web -> Garmin sync
-pdm run stravaweb_to_garmin_sync --client-id ... --client-secret ... --refresh-token ... <secret> <jwt>
+# Vendor sync status / retry failed
+pdm run strava-cli vendor status --vendor garmin --account garmin_com
+pdm run strava-cli vendor status --retry-failed --is-cn
+
+# Upload local .fit/.gpx/.tcx files directly to Garmin
+pdm run strava-cli vendor garmin-files --secret-string <garmin_secret> data/FIT_OUT data/GPX_OUT
 
 # Generate SVGs
 pdm run gen_svg --from-db --type github --output public/assets/github.svg
-
-# Sync GPX files
-pdm run gpx_sync
 
 # Export DuckDB tables to Parquet
 pdm run save_to_parquet --tables activities activities_flyby
@@ -96,9 +105,10 @@ pdm run get_garmin_secret <email> <password>
 
 ### Data Pipeline (High Level)
 
-1. Sync activities into `scripts/data.duckdb`
-2. Export tables to `public/db/*.parquet`
-3. Frontend loads Parquet via DuckDB-WASM
+1. `strava-cli sync db` pulls Strava data into `data/data.duckdb` (`activities`, `activities_flyby`)
+2. `strava-cli export` writes activity files under `data/FIT_OUT`, `data/GPX_OUT`, `data/TCX_OUT`
+3. `strava-cli vendor garmin` uploads DuckDB activities and records sync state in `vendor_activity_sync`
+4. `save_to_parquet` exports tables to `public/db/*.parquet` for frontend queries
 
 ### Acknowledgements
 

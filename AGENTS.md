@@ -26,6 +26,7 @@ scripts/                     # Python scripts and modules
   ├── generator/             # Database and FIT/TCX generation logic
   ├── gpxtrackposter/        # GPX/TCX/FIT track processing and SVG generation
   ├── config.py              # Shared path/constants configuration
+data/
   └── data.duckdb            # Local DuckDB database
 src/                         # React frontend source
   ├── components/            # UI components
@@ -58,8 +59,17 @@ pdm run ruff format scripts/
 # Sync Garmin data
 pdm run garmin_sync
 
-# Sync Strava data
-pdm run strava_sync
+# Unified Strava CLI (recommended)
+pdm run strava-cli sync db
+pdm run strava-cli export --format fit --id 123456
+pdm run strava-cli export --format gpx --id-range 100000:100100
+pdm run strava-cli export --format tcx --all
+pdm run strava-cli vendor garmin --secret-string <garmin_secret>
+pdm run strava-cli vendor garmin --is-cn --secret-string <garmin_secret>
+pdm run strava-cli vendor garmin-reconcile --secret-string <garmin_secret>
+pdm run strava-cli vendor status --vendor garmin --account garmin_com
+pdm run strava-cli vendor status --retry-failed --is-cn
+pdm run strava-cli vendor garmin-files --secret-string <garmin_secret> data/FIT_OUT data/GPX_OUT
 
 # Export FIT by activity ID
 pdm run export_fit 123456 --output FIT_OUT/123456.fit
@@ -69,9 +79,6 @@ pdm run fit_to_garmin_sync --is-cn
 
 # Strava -> Garmin sync (API)
 pdm run strava_to_garmin_sync --client-id ... --client-secret ... --refresh-token ...
-
-# Strava web -> Garmin sync
-pdm run stravaweb_to_garmin_sync --client-id ... --client-secret ... --refresh-token ... <secret> <jwt>
 
 # Generate SVG visualizations
 pdm run gen_svg --from-db --type github --output public/assets/github.svg
@@ -137,7 +144,7 @@ DUCKDB_ENCRYPTION_KEY=
 
 ## Database
 
-- Uses DuckDB stored at `scripts/data.duckdb`
+- Uses DuckDB stored at `data/data.duckdb`
 - Main tables: `activities`, `activities_flyby`, `activities_flyby_queue`
 - Exports to Parquet format in `public/db/` for frontend consumption
 

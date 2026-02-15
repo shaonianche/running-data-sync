@@ -2,7 +2,6 @@ import json
 import os
 
 from .config import SYNCED_FILE
-
 from .utils import get_logger
 
 logger = get_logger(__name__)

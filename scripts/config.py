@@ -4,17 +4,18 @@ from typing import Final
 
 # Project root directory
 PROJECT_ROOT: Final[Path] = Path(__file__).resolve().parent.parent
+DATA_ROOT: Final[Path] = PROJECT_ROOT / "data"
 
-GPX_FOLDER: Final[Path] = PROJECT_ROOT / "GPX_OUT"
-TCX_FOLDER: Final[Path] = PROJECT_ROOT / "TCX_OUT"
-FIT_FOLDER: Final[Path] = PROJECT_ROOT / "FIT_OUT"
+GPX_FOLDER: Final[Path] = DATA_ROOT / "GPX_OUT"
+TCX_FOLDER: Final[Path] = DATA_ROOT / "TCX_OUT"
+FIT_FOLDER: Final[Path] = DATA_ROOT / "FIT_OUT"
 DB_FOLDER: Final[Path] = PROJECT_ROOT / "public" / "db"
 FOLDER_DICT: Final[dict[str, Path]] = {
     "gpx": GPX_FOLDER,
     "tcx": TCX_FOLDER,
     "fit": FIT_FOLDER,
 }
-SQL_FILE: Final[Path] = PROJECT_ROOT / "scripts" / "data.duckdb"
+SQL_FILE: Final[Path] = DATA_ROOT / "data.duckdb"
 JSON_FILE: Final[Path] = PROJECT_ROOT / "src" / "static" / "activities.json"
 SYNCED_FILE: Final[Path] = PROJECT_ROOT / "imported.json"
 SYNCED_ACTIVITY_FILE: Final[Path] = PROJECT_ROOT / "synced_activity.json"

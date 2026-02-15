@@ -1,12 +1,9 @@
 """Tests for generator/db.py module."""
 
-import tempfile
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import duckdb
 import pandas as pd
-import pytest
 
 
 class TestDatabaseSchemas:
@@ -178,8 +175,9 @@ class TestInitDb:
 
     def test_init_db_migrates_missing_pk(self, temp_dir):
         """Test that init_db adds missing primary keys to existing tables."""
-        from scripts.generator.db import init_db
         import duckdb
+
+        from scripts.generator.db import init_db
 
         db_path = temp_dir / "test_migration.duckdb"
         con = duckdb.connect(str(db_path))
@@ -213,7 +211,7 @@ class TestUpdateOrCreateActivities:
 
     def test_insert_new_activities(self, temp_dir):
         """Test inserting new activities."""
-        from scripts.generator.db import ACTIVITIES_SCHEMA, init_db, update_or_create_activities
+        from scripts.generator.db import init_db, update_or_create_activities
 
         db_path = temp_dir / "test.duckdb"
         con = init_db(str(db_path))
@@ -319,12 +317,67 @@ class TestUpdateOrCreateActivities:
         con.close()
 
 
+class TestPruneActivities:
+    """Test cases for pruning local activities not present on Strava."""
+
+    def test_prune_activities_not_in_remote_ids_cascades_flyby(self, temp_dir):
+        """Pruning removes stale activities and related flyby/queue records."""
+        from scripts.generator.db import init_db, prune_activities_not_in_remote_ids
+
+        db_path = temp_dir / "test_prune.duckdb"
+        con = init_db(str(db_path))
+
+        con.execute("INSERT INTO activities (run_id, name) VALUES (1, 'A'), (2, 'B'), (3, 'C')")
+        con.execute(
+            """
+            INSERT INTO activities_flyby (activity_id, time_offset, pace)
+            VALUES (1, 0, 5.0), (2, 0, 6.0), (2, 10, 6.2), (3, 0, 4.5)
+            """
+        )
+        con.execute(
+            """
+            INSERT INTO activities_flyby_queue (activity_id, status, updated_at)
+            VALUES (2, 'pending', NOW()), (3, 'pending', NOW())
+            """
+        )
+
+        deleted = prune_activities_not_in_remote_ids(con, {1, 3})
+        assert deleted == 1
+
+        remaining_ids = {row[0] for row in con.execute("SELECT run_id FROM activities").fetchall()}
+        assert remaining_ids == {1, 3}
+
+        flyby_ids = {row[0] for row in con.execute("SELECT DISTINCT activity_id FROM activities_flyby").fetchall()}
+        assert flyby_ids == {1, 3}
+
+        queue_ids = {row[0] for row in con.execute("SELECT activity_id FROM activities_flyby_queue").fetchall()}
+        assert queue_ids == {3}
+
+        con.close()
+
+    def test_prune_activities_not_in_remote_ids_with_empty_remote_set(self, temp_dir):
+        """When remote set is empty, all local activities are pruned."""
+        from scripts.generator.db import init_db, prune_activities_not_in_remote_ids
+
+        db_path = temp_dir / "test_prune_empty.duckdb"
+        con = init_db(str(db_path))
+        con.execute("INSERT INTO activities (run_id, name) VALUES (1, 'A'), (2, 'B')")
+        con.execute("INSERT INTO activities_flyby (activity_id, time_offset, pace) VALUES (1, 0, 5.0), (2, 0, 5.0)")
+
+        deleted = prune_activities_not_in_remote_ids(con, set())
+        assert deleted == 2
+        assert con.execute("SELECT COUNT(*) FROM activities").fetchone()[0] == 0
+        assert con.execute("SELECT COUNT(*) FROM activities_flyby").fetchone()[0] == 0
+
+        con.close()
+
+
 class TestMigrateSchema:
     """Test cases for _migrate_schema function."""
 
     def test_migrate_schema_adds_missing_columns(self, temp_dir):
         """Test that migration adds missing columns."""
-        from scripts.generator.db import ACTIVITIES_SCHEMA, _migrate_schema
+        from scripts.generator.db import _migrate_schema
 
         db_path = temp_dir / "test.duckdb"
         con = duckdb.connect(str(db_path))

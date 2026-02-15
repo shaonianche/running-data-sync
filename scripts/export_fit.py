@@ -3,11 +3,11 @@ import sys
 
 import duckdb  # noqa: F401
 import pandas as pd
+
 from .config import FIT_FOLDER, SQL_FILE
 from .garmin_device_adaptor import GARMIN_DEVICE_PRODUCT_ID, GARMIN_SOFTWARE_VERSION, MANUFACTURER
 from .generator import Generator
 from .generator.db import get_db_connection
-
 from .utils import get_logger, load_env_config
 
 logger = get_logger(__name__)
@@ -158,6 +158,7 @@ def construct_dataframes(activity_row, flyby_df):
     """
     activity_id = activity_row["run_id"]
     start_date = pd.to_datetime(activity_row["start_date"])
+    activity_name = _fit_safe_activity_name(activity_row.get("name"), activity_id)
 
     # 1. File ID (Header)
     file_id_data = {
@@ -409,6 +410,7 @@ def construct_dataframes(activity_row, flyby_df):
 
     session_data = {
         "activity_id": [activity_id],
+        "name": [activity_name],
         "timestamp": [start_date + pd.Timedelta(seconds=int(elapsed_time))],
         "start_time": [start_date],
         "total_elapsed_time": [elapsed_time],
@@ -444,6 +446,25 @@ def construct_dataframes(activity_row, flyby_df):
             logger.info(f"  -> Mode: Detailed Tracks ({len(fit_lap)} Laps generated)")
 
     return {"fit_file_id": fit_file_id, "fit_record": fit_record, "fit_session": fit_session, "fit_lap": fit_lap}
+
+
+def _fit_safe_activity_name(raw_name, activity_id) -> str:
+    if raw_name is None:
+        return f"Strava {activity_id}"
+    name = str(raw_name).strip()
+    if not name:
+        return f"Strava {activity_id}"
+    clean_name = name.replace("\x00", "").strip()
+    if not clean_name:
+        return f"Strava {activity_id}"
+
+    # Prefer the prefix before colon to avoid non-ASCII truncation issues on some FIT readers.
+    for sep in (":", "："):
+        if sep in clean_name:
+            prefix = clean_name.split(sep, maxsplit=1)[0].strip()
+            if prefix:
+                return prefix
+    return clean_name
 
 
 def export_fit(activity_id, output_file=None, force=False):

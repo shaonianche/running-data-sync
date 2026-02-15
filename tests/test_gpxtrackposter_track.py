@@ -2,8 +2,6 @@
 
 import datetime
 import os
-import tempfile
-from collections import namedtuple
 from unittest.mock import MagicMock, patch
 
 import pytest

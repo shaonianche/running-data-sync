@@ -12,11 +12,11 @@ import zipfile
 import aiofiles
 import garth
 import httpx
+from lxml import etree
+
 from .config import FOLDER_DICT, JSON_FILE, SQL_FILE
 from .exceptions import AuthenticationError, RateLimitError, SyncError
 from .garmin_device_adaptor import add_fake_device_info, fix_heart_rate
-from lxml import etree
-
 from .utils import get_logger, load_env_config, make_activities_file
 
 logger = get_logger(__name__)
@@ -111,6 +111,14 @@ class Garmin:
         url = f"{self.modern_url}/activity-service/activity/{activity_id}"
         return await self.fetch_data(url)
 
+    async def delete_activity(self, activity_id):
+        """
+        Delete one activity by Garmin activity id.
+        """
+        url = f"{self.modern_url}/activity-service/activity/{activity_id}"
+        response = await self.req.delete(url, headers=self.headers)
+        response.raise_for_status()
+
     async def download_activity(self, activity_id, file_type="gpx"):
         if file_type == "fit":
             url = f"{self.modern_url}/download-service/files/activity/{activity_id}"
@@ -128,6 +136,8 @@ class Garmin:
             use_fake_garmin_device,
             fix_hr,
         )
+        failed_uploads = []
+        results = []
         for data in datas:
             try:
                 # Process content in memory
@@ -157,11 +167,13 @@ class Garmin:
                 # Handle successful upload with no content response
                 if res.status_code == 204:
                     logger.info("Garmin upload for %s success with status 204.", data.filename)
+                    results.append(None)
                     continue
 
                 try:
                     resp = res.json()["detailedImportResult"]
                     logger.info("Garmin upload success: %s", resp)
+                    results.append(resp)
                 except Exception as e:
                     logger.error(
                         "Failed to parse Garmin response, status: %d, response: %s",
@@ -171,8 +183,13 @@ class Garmin:
                     raise e
             except Exception as e:
                 logger.exception("Garmin upload for %s failed: %s", data.filename, e)
-                continue
+                failed_uploads.append(data.filename)
         await self.req.aclose()
+        if failed_uploads:
+            raise SyncError(
+                f"Garmin upload failed for {len(failed_uploads)} file(s): {', '.join(failed_uploads[:5])}"
+            )
+        return results
 
     async def upload_activity_from_file(self, file_path):
         logger.info("Uploading %s", file_path)

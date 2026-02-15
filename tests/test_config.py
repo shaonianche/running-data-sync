@@ -13,6 +13,7 @@ class TestConfig:
 
         assert GPX_FOLDER is not None
         assert isinstance(GPX_FOLDER, (str, Path))
+        assert "data" in str(GPX_FOLDER)
         assert "GPX_OUT" in str(GPX_FOLDER)
 
     def test_tcx_folder_exists(self):
@@ -21,6 +22,7 @@ class TestConfig:
 
         assert TCX_FOLDER is not None
         assert isinstance(TCX_FOLDER, (str, Path))
+        assert "data" in str(TCX_FOLDER)
         assert "TCX_OUT" in str(TCX_FOLDER)
 
     def test_fit_folder_exists(self):
@@ -29,6 +31,7 @@ class TestConfig:
 
         assert FIT_FOLDER is not None
         assert isinstance(FIT_FOLDER, (str, Path))
+        assert "data" in str(FIT_FOLDER)
         assert "FIT_OUT" in str(FIT_FOLDER)
 
     def test_folder_dict_contains_all_formats(self):

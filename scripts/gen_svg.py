@@ -14,7 +14,6 @@ from .gpxtrackposter import (
 )
 from .gpxtrackposter.exceptions import ParameterError
 from .gpxtrackposter.track import Track
-
 from .utils import get_logger
 
 logger = get_logger(__name__)

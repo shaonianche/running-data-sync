@@ -4,10 +4,10 @@ from collections import namedtuple
 from datetime import datetime, timezone
 
 import httpx
-from .config import FIT_FOLDER
 from garmin_fit_sdk import Decoder, Stream
-from .garmin_sync import Garmin
 
+from .config import FIT_FOLDER
+from .garmin_sync import Garmin
 from .utils import get_logger, load_env_config
 
 logger = get_logger(__name__)

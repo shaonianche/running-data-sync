@@ -3,8 +3,6 @@
 import os
 from unittest.mock import patch
 
-import pytest
-
 
 class TestPointDistanceInRange:
     """Test cases for point_distance_in_range function."""
@@ -217,10 +215,10 @@ class TestFilterOut:
 
     def test_filter_out_valid_polyline(self):
         """Test filtering a valid polyline string."""
-        from scripts.polyline_processor import filter_out
-
         # Create a simple encoded polyline (Beijing area)
         import polyline
+
+        from scripts.polyline_processor import filter_out
 
         coords = [
             (39.9000, 116.4000),
