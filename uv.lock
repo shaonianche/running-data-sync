@@ -394,7 +394,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/e7/a2/d48e4513355c92a32
 [[package]]
 name = "fit-tool"
 version = "0.9.15"
-source = { git = "https://github.com/shaonianche/python_fit_tool.git#dd060b067ce2901d9dd80d3d1d6121844bfbd608" }
+source = { git = "https://github.com/shaonianche/python_fit_tool.git?rev=main#42fbd5f483cc4a9a227f75d3fe678421abe1b193" }
 dependencies = [
     { name = "bitstruct" },
     { name = "inflection" },
@@ -1207,7 +1207,7 @@ requires-dist = [
     { name = "colour", specifier = ">=0.1.5" },
     { name = "duckdb" },
     { name = "eviltransform" },
-    { name = "fit-tool", git = "https://github.com/shaonianche/python_fit_tool.git" },
+    { name = "fit-tool", git = "https://github.com/shaonianche/python_fit_tool.git?rev=main" },
     { name = "garmin-fit-sdk" },
     { name = "garth" },
     { name = "geopy" },
