@@ -130,7 +130,6 @@ jobs:
         id: data_changes
         run: |
           if git diff --quiet -- \
-            data/data.duckdb \
             src/static/activities.json \
             public/db/activities.parquet \
             public/db/activities_flyby.parquet; then
