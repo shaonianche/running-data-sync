@@ -438,6 +438,7 @@ async def run_sync_garmin(
         if row.status in SYNCED_STATUSES and row.remote_activity_id is not None
     }
 
+    garmin_uploader = Garmin(garmin_credentials.secret_string, auth_domain)
     for _, activity_row in activities_df.iterrows():
         activity_id = int(activity_row["run_id"])
 
@@ -518,16 +519,11 @@ async def run_sync_garmin(
             fit_bytes = generator.build_fit_file_from_dataframes(dataframes)
             fit_record = FIT_UPLOAD_RECORD(filename=f"{activity_id}.fit", content=[fit_bytes])
 
-            garmin_uploader = Garmin(garmin_credentials.secret_string, auth_domain)
-            try:
-                upload_results = await garmin_uploader.upload_activities_original_from_strava(
-                    [fit_record],
-                    use_fake_garmin_device=use_fake_garmin_device,
-                    fix_hr=fix_hr,
-                )
-            finally:
-                if not garmin_uploader.req.is_closed:
-                    await garmin_uploader.req.aclose()
+            upload_results = await garmin_uploader.upload_activities_original_from_strava(
+                [fit_record],
+                use_fake_garmin_device=use_fake_garmin_device,
+                fix_hr=fix_hr,
+            )
 
             remote_activity_id = None
             if upload_results:
@@ -535,11 +531,7 @@ async def run_sync_garmin(
 
             # Some Garmin responses do not include an activity id. Re-fetch latest records as fallback.
             if remote_activity_id is None:
-                garmin_reader = Garmin(garmin_credentials.secret_string, auth_domain)
-                try:
-                    recent_activities = await _fetch_garmin_activities(garmin_reader, page_size=50, max_pages=2)
-                finally:
-                    await garmin_reader.req.aclose()
+                recent_activities = await _fetch_garmin_activities(garmin_uploader, page_size=50, max_pages=2)
                 garmin_activities = recent_activities
                 remote_activity_id = _is_existing_in_garmin(
                     activity_row,
@@ -581,6 +573,9 @@ async def run_sync_garmin(
             logger.error("Failed syncing activity %s to %s: %s", activity_id, account, exc, exc_info=True)
 
         state_map = load_vendor_sync_rows(db_con, vendor=VENDOR_NAME, account=account)
+
+    if not garmin_uploader.req.is_closed:
+        await garmin_uploader.req.aclose()
 
     if no_flyby_type_counts:
         logger.info("Activities without activities_flyby were processed as summary-only FIT files:")

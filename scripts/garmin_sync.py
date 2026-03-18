@@ -184,7 +184,6 @@ class Garmin:
             except Exception as e:
                 logger.exception("Garmin upload for %s failed: %s", data.filename, e)
                 failed_uploads.append(data.filename)
-        await self.req.aclose()
         if failed_uploads:
             raise SyncError(
                 f"Garmin upload failed for {len(failed_uploads)} file(s): {', '.join(failed_uploads[:5])}"
