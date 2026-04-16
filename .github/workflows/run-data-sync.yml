@@ -27,6 +27,7 @@ env:
   TRACK_COLOR_LIGHT: '#525252'
   SPECIAL_COLOR_LIGHT: '#024a70'
   SPECIAL_COLOR2_LIGHT: '#ff8904'
+  USE_CLOUDFLARE_WARP: true  # If you want to use Cloudflare WARP to bypass network restrictions, set it to `true`. Currently only Garmin needs this.
 
 jobs:
   sync:
@@ -68,6 +69,25 @@ jobs:
           restore-keys: |
             ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-
             ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-
+
+      - name: Install Cloudflare WARP
+        if: env.USE_CLOUDFLARE_WARP == 'true'
+        run: |
+          curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
+          sudo apt-get update && sudo apt-get install -y cloudflare-warp
+
+      - name: Connect Cloudflare WARP
+        if: env.USE_CLOUDFLARE_WARP == 'true'
+        run: |
+          warp-cli --accept-tos registration new
+          warp-cli --accept-tos mode warp
+          warp-cli --accept-tos connect
+          sleep 3
+          echo "WARP status:"
+          warp-cli --accept-tos status
+          echo "IP info:"
+          curl -s https://cloudflare.com/cdn-cgi/trace | grep -E "ip|warp"
 
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
@@ -147,6 +167,11 @@ jobs:
           pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid.svg
           pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity-color '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output public/assets/github-light.svg
           pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid-light.svg
+
+      - name: Disconnect Cloudflare WARP
+        if: env.USE_CLOUDFLARE_WARP == 'true'
+        run: |
+          warp-cli --accept-tos disconnect
 
       - name: Push new runs
         run: |
