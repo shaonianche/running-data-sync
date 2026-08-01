@@ -80,23 +80,26 @@ function formatRunTime(moving_time: number): string {
   }
 }
 
+/** Stable scroll target for map / total-stat panel (must match id in pages/index). */
+export const RUN_MAP_SCROLL_TARGET_ID = 'run-map'
+
 let scrollTargetEl: HTMLElement | null = null
 
 function getScrollTargetEl(): HTMLElement | null {
   if (scrollTargetEl && scrollTargetEl.isConnected) {
     return scrollTargetEl
   }
-  scrollTargetEl = document.querySelector('.fl.w-100.w-70-l')
+  scrollTargetEl = document.getElementById(RUN_MAP_SCROLL_TARGET_ID)
   return scrollTargetEl
 }
 
-// for scroll to the map
+// Scroll the map (or total SVG) panel into view after year/city/run selection.
 function scrollToMap() {
   const el = getScrollTargetEl()
-  const rect = el?.getBoundingClientRect()
-  if (rect) {
-    window.scroll(rect.left + window.scrollX, rect.top + window.scrollY)
+  if (!el) {
+    return
   }
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function extractCities(str: string): string[] {

@@ -17,6 +17,15 @@ interface YearlyRunDistanceData {
   total_distance_km: number
 }
 
+/** recharts@3 Tooltip formatter allows undefined values — keep the label stable. */
+function formatDistanceTooltip(label: string) {
+  return (value: number | string | ReadonlyArray<number | string> | undefined) => {
+    const numeric = Array.isArray(value) ? Number(value[0]) : Number(value)
+    const text = Number.isFinite(numeric) ? numeric.toFixed(2) : '0.00'
+    return [`${text} km`, label] as [string, string]
+  }
+}
+
 const ActivityChart: React.FC<ActivityChartProps> = ({ thisYear }) => {
   const [data, setData] = useState<MonthlyRunDistanceData[] | YearlyRunDistanceData[]>([])
   const [loading, setLoading] = useState(true)
@@ -159,7 +168,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ thisYear }) => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="year" name="年份" />
             <YAxis name="总跑量 (km)" unit=" km" />
-            <Tooltip formatter={(value: number) => [`${value.toFixed(2)} km`, '年跑量']} />
+            <Tooltip formatter={formatDistanceTooltip('年跑量')} />
             <Legend />
             <Bar dataKey="total_distance_km" fill="var(--color-svg-total-line)" name="年跑量 (km)" />
           </BarChart>
@@ -177,7 +186,7 @@ const ActivityChart: React.FC<ActivityChartProps> = ({ thisYear }) => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" name="月份" />
             <YAxis name="跑量 (km)" unit=" km" />
-            <Tooltip formatter={(value: number) => [`${value.toFixed(2)} km`, '月跑量']} />
+            <Tooltip formatter={formatDistanceTooltip('月跑量')} />
             <Legend />
             <Bar dataKey="total_distance_km" fill="var(--color-svg-line)" name="月跑量 (km)" />
           </BarChart>

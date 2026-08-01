@@ -220,7 +220,7 @@ function Index() {
               <YearsStat year={year} />
             )}
       </div>
-      <div className="w-full lg:w-2/3">
+      <div id="run-map" className="w-full lg:w-2/3">
         {year === 'Total'
           ? (
               <>
