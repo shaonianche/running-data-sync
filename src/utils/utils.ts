@@ -1,13 +1,8 @@
-import type { Feature, FeatureCollection, GeoJsonProperties, LineString } from 'geojson'
-import type { RPGeometry } from '@/static/run_countries'
-import * as duckdb from '@duckdb/duckdb-wasm'
+import type { FeatureCollection, LineString } from 'geojson'
 import * as mapboxPolyline from '@mapbox/polyline'
 import { WebMercatorViewport } from '@math.gl/web-mercator'
-
-import worldGeoJson from '@surbowl/world-geo-json-zh/world.zh.json'
 import gcoord from 'gcoord'
 import { chinaCities } from '@/static/city'
-import { chinaGeojson } from '@/static/run_countries'
 import {
   ACTIVITY_TYPES,
   CYCLING_TITLES,
@@ -275,16 +270,6 @@ function geoJsonForRuns(runs: Activity[]): FeatureCollection<LineString> {
   }
 }
 
-function geoJsonForMap(): FeatureCollection<RPGeometry> {
-  const combinedFeatures = (worldGeoJson.features as Feature<RPGeometry, GeoJsonProperties>[]).concat(
-    chinaGeojson.features as Feature<RPGeometry, GeoJsonProperties>[],
-  )
-  return {
-    type: 'FeatureCollection',
-    features: combinedFeatures as Feature<RPGeometry, GeoJsonProperties>[],
-  }
-}
-
 function getActivitySport(act: Activity): string {
   if (act.type === 'Run') {
     if (act.subtype === 'generic') {
@@ -486,42 +471,6 @@ function sortDateFunc(a: Activity, b: Activity) {
 }
 const sortDateFuncReverse = (a: Activity, b: Activity) => sortDateFunc(b, a)
 
-let duckdbInstance: duckdb.AsyncDuckDB | null = null
-let duckdbConn: duckdb.AsyncDuckDBConnection | null = null
-
-const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles()
-
-async function initDuckDB(): Promise<{ db: duckdb.AsyncDuckDB, conn: duckdb.AsyncDuckDBConnection }> {
-  if (duckdbInstance && duckdbConn) {
-    return { db: duckdbInstance, conn: duckdbConn }
-  }
-  const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES)
-  const worker_url = URL.createObjectURL(
-    new Blob([`importScripts("${bundle.mainWorker!}");`], { type: 'text/javascript' }),
-  )
-  const worker = new Worker(worker_url)
-  const logger = new duckdb.ConsoleLogger()
-  duckdbInstance = new duckdb.AsyncDuckDB(logger, worker)
-  await duckdbInstance.instantiate(bundle.mainModule, bundle.pthreadWorker)
-  duckdbConn = await duckdbInstance.connect()
-  URL.revokeObjectURL(worker_url)
-  return { db: duckdbInstance, conn: duckdbConn }
-}
-
-function getDuckDBConnection(): duckdb.AsyncDuckDBConnection | null {
-  return duckdbConn
-}
-
-async function loadDuckDBFile(db: duckdb.AsyncDuckDB, filePath: string = '/db/activities.parquet', dbName: string = 'activities.parquet') {
-  const response = await fetch(filePath)
-  if (!response.ok)
-    throw new Error(`Failed to fetch duckdb file: ${filePath}`)
-  const arrayBuffer = await response.arrayBuffer()
-  await db.registerFileBuffer(dbName, new Uint8Array(arrayBuffer))
-  const conn = await db.connect()
-  return conn
-}
-
 function getMainColor(): string {
   if (typeof window !== 'undefined') {
     return getComputedStyle(document.documentElement)
@@ -538,15 +487,11 @@ export {
   filterYearRuns,
   formatPace,
   formatRunTime,
-  geoJsonForMap,
   geoJsonForRuns,
   getBoundsForGeoData,
-  getDuckDBConnection,
   getMainColor,
   getRunTimestamp,
-  initDuckDB,
   intComma,
-  loadDuckDBFile,
   locationForRun,
   pathForRun,
   scrollToMap,

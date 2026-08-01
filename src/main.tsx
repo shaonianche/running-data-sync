@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import ReactGA from 'react-ga4'
 import { HelmetProvider } from 'react-helmet-async'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { ThemeProvider } from '@/hooks/useTheme'
 import Index from './pages'
 import NotFound from './pages/404'
 import {
@@ -33,7 +34,9 @@ const routes = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
-      <RouterProvider router={routes} />
+      <ThemeProvider>
+        <RouterProvider router={routes} />
+      </ThemeProvider>
     </HelmetProvider>
   </React.StrictMode>,
 )

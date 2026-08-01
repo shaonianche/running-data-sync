@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
-import { initDuckDB, loadDuckDBFile } from '@/utils/utils'
+import { initDuckDB, loadDuckDBFile } from '@/utils/duckdb'
 import styles from './style.module.css'
 
 interface ActivityChartProps {

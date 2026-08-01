@@ -5,7 +5,7 @@ import type {
 } from 'react-map-gl/maplibre'
 import type { RPGeometry } from '@/static/run_countries'
 import type { Coordinate, IViewState } from '@/utils/utils'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, {
   FullscreenControl,
   Layer,
@@ -13,6 +13,7 @@ import Map, {
   Source,
 } from 'react-map-gl/maplibre'
 import activitiesData from '@/hooks/useActivities'
+import { useTheme } from '@/hooks/useTheme'
 import {
   DISABLE_CHART,
   DISABLE_MAP,
@@ -26,12 +27,15 @@ import {
   ROAD_LABEL_DISPLAY,
   USE_DASH_LINE,
 } from '@/utils/const'
-import { geoJsonForMap, getMainColor } from '@/utils/utils'
-import ActivityChart from './ActivityChart'
+import { geoJsonForMap } from '@/utils/mapGeoJson'
+import { getMainColor } from '@/utils/utils'
 import RunMapButtons from './RunMapButtons'
 import RunMarker from './RunMarker'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './maplibre.css'
+
+// Only fetched when DISABLE_CHART is false — keeps recharts + duckdb-wasm out of the map chunk.
+const ActivityChart = lazy(() => import('./ActivityChart'))
 
 const PROVINCE_FILL_COLOR = getMainColor()
 const COUNTRY_FILL_COLOR = getMainColor()
@@ -64,45 +68,13 @@ function RunMap({
   thisYear,
 }: IRunMapProps) {
   const { countries, provinces } = activitiesData
+  const { isDark } = useTheme()
   const mapRef = useRef<MapRef | null>(null)
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedTheme = localStorage.getItem('theme')
-    if (savedTheme === 'dark')
-      return true
-    if (savedTheme === 'light')
-      return false
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-  })
   const [isMapVisible, setIsMapVisible] = useState(true)
   const [isSmallScreen, setIsSmallScreen] = useState(() => window.matchMedia('(max-width: 768px)').matches)
   const hasAppliedMobileDefaultZoom = useRef(false)
   const lastFittedBoundsKey = useRef<string | null>(null)
   const hasAppliedNoGpsMobileDefault = useRef(false)
-
-  useEffect(() => {
-    const updateTheme = () => {
-      const savedTheme = localStorage.getItem('theme')
-      if (savedTheme === 'dark') {
-        setIsDarkMode(true)
-      }
-      else if (savedTheme === 'light') {
-        setIsDarkMode(false)
-      }
-      else {
-        setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches)
-      }
-    }
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    mq.addEventListener('change', updateTheme)
-    const observer = new MutationObserver(updateTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    window.addEventListener('storage', updateTheme)
-    return () => {
-      mq.removeEventListener('change', updateTheme)
-      observer.disconnect()
-      window.removeEventListener('storage', updateTheme)
-    }
-  }, [])
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 768px)')
@@ -308,7 +280,11 @@ function RunMap({
         />
       )}
       {!DISABLE_CHART
-        ? <ActivityChart thisYear={thisYear} />
+        ? (
+            <Suspense fallback={null}>
+              <ActivityChart thisYear={thisYear} />
+            </Suspense>
+          )
         : (
             !DISABLE_MAP && isMapVisible && (
               <div style={{ position: 'relative' }}>
@@ -316,7 +292,7 @@ function RunMap({
                   {...viewState}
                   onMove={onMove}
                   style={style}
-                  mapStyle={isDarkMode ? MAPLIBRE_DARK_STYLE : MAPLIBRE_LIGHT_STYLE}
+                  mapStyle={isDark ? MAPLIBRE_DARK_STYLE : MAPLIBRE_LIGHT_STYLE}
                   ref={mapRefCallback}
                   doubleClickZoom={!isSmallScreen}
                   scrollZoom={!isSmallScreen}
