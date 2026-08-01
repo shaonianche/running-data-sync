@@ -17,19 +17,16 @@ function LoadingPlaceholder({ height = 200 }: { height?: number }) {
 }
 
 function SVGStat() {
-  const { theme } = useTheme()
+  const { theme, isDark } = useTheme()
 
   const { GithubSvg, GridSvg } = useMemo(() => {
-    const isDark = theme === 'system'
-      ? window.matchMedia('(prefers-color-scheme: dark)').matches
-      : theme === 'dark'
     const suffix = isDark ? '' : '-light'
 
     return {
       GithubSvg: lazy(() => loadSvgComponent(totalStat, `./github${suffix}.svg`)),
       GridSvg: lazy(() => loadSvgComponent(totalStat, `./grid${suffix}.svg`)),
     }
-  }, [theme])
+  }, [isDark])
 
   useEffect(() => {
     preloadOtherThemeSvgs(theme)

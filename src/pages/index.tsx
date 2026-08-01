@@ -4,10 +4,9 @@ import type {
   RunIds,
 } from '@/utils/utils'
 import { Analytics } from '@vercel/analytics/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Layout from '@/components/Layout'
 import LocationStat from '@/components/LocationStat'
-import RunMap from '@/components/RunMap'
 import RunMapButtons from '@/components/RunMap/RunMapButtons'
 import RunTable from '@/components/RunTable'
 import SVGStat from '@/components/SVGStat'
@@ -26,6 +25,20 @@ import {
   titleForShow,
 } from '@/utils/utils'
 
+// MapLibre stack is heavy — only load when viewing a year map (not Total SVG).
+const RunMap = lazy(() => import('@/components/RunMap'))
+
+function MapLoadingPlaceholder() {
+  return (
+    <div
+      className="w-full rounded bg-[var(--color-hr)]/40 animate-pulse"
+      style={{ height: 400 }}
+      aria-busy="true"
+      aria-label="Loading map"
+    />
+  )
+}
+
 function Index() {
   const { activities, thisYear } = activitiesData
   const [year, setYear] = useState(thisYear)
@@ -36,9 +49,12 @@ function Index() {
   const [viewStateOverride, setViewStateOverride] = useState<IViewState | null>(null)
   const prevYearRef = useRef(year)
 
+  // Only warm Total-view SVG assets when that view is active.
   useEffect(() => {
-    preloadTotalSvgs()
-  }, [])
+    if (year === 'Total') {
+      preloadTotalSvgs()
+    }
+  }, [year])
 
   const runs = useMemo(
     () => filterAndSortRuns(activities, year, filterYearRuns, sortDateFunc),
@@ -237,14 +253,16 @@ function Index() {
           : (
               <>
                 <div className="z-10 bg-[var(--color-background)] lg:sticky lg:top-0">
-                  <RunMap
-                    title={title}
-                    viewState={viewState}
-                    geoData={geoData}
-                    setViewState={handleViewStateChange}
-                    changeYear={changeYear}
-                    thisYear={year}
-                  />
+                  <Suspense fallback={<MapLoadingPlaceholder />}>
+                    <RunMap
+                      title={title}
+                      viewState={viewState}
+                      geoData={geoData}
+                      setViewState={handleViewStateChange}
+                      changeYear={changeYear}
+                      thisYear={year}
+                    />
+                  </Suspense>
                 </div>
                 <RunTable
                   runs={runs}

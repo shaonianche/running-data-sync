@@ -48,23 +48,15 @@ export default defineConfig({
       output: {
         manualChunks: (id: string) => {
           if (id.includes('node_modules')) {
-            // Keep React and map packages that call React.createContext in the
-            // same chunk. react-map-gl@8 re-exports from @vis.gl/react-maplibre;
-            // splitting that into "vendors" creates a circular ui↔vendors edge
-            // and crashes at runtime (createContext of undefined → blank page).
+            // Async-only stacks (must NOT be merged into the eager vendor chunk).
             if (
-              id.includes('/react/')
-              || id.includes('/react-dom/')
-              || id.includes('/scheduler/')
-              || id.includes('/react-router')
-              || id.includes('/react-helmet')
-              || id.includes('/react-ga')
-              || id.includes('/@vercel/analytics')
-              || id.includes('/react-map-gl/')
+              id.includes('/react-map-gl/')
               || id.includes('/@vis.gl/')
               || id.includes('/maplibre-gl/')
+              || id.includes('/world-geo-json')
             ) {
-              return 'ui'
+              // Leave unassigned → follows lazy(() => import(RunMap)).
+              return
             }
             if (id.includes('/@duckdb/duckdb-wasm/')) {
               return 'duckdb'
@@ -72,7 +64,10 @@ export default defineConfig({
             if (id.includes('/recharts/') || id.includes('/d3-')) {
               return 'charts'
             }
-            return 'vendors'
+            // Single eager vendor chunk (includes React). Splitting react into
+            // "ui" and everything else into "vendors" created a circular edge
+            // and blank pages (Cannot set properties of undefined 'Activity').
+            return 'vendor'
           }
           for (const item of individuallyPackages) {
             if (id.includes(item)) {
