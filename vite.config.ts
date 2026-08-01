@@ -48,6 +48,10 @@ export default defineConfig({
       output: {
         manualChunks: (id: string) => {
           if (id.includes('node_modules')) {
+            // Keep React and map packages that call React.createContext in the
+            // same chunk. react-map-gl@8 re-exports from @vis.gl/react-maplibre;
+            // splitting that into "vendors" creates a circular ui↔vendors edge
+            // and crashes at runtime (createContext of undefined → blank page).
             if (
               id.includes('/react/')
               || id.includes('/react-dom/')
@@ -57,6 +61,7 @@ export default defineConfig({
               || id.includes('/react-ga')
               || id.includes('/@vercel/analytics')
               || id.includes('/react-map-gl/')
+              || id.includes('/@vis.gl/')
               || id.includes('/maplibre-gl/')
             ) {
               return 'ui'
