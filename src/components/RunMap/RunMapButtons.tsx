@@ -1,4 +1,4 @@
-import activitiesData from '@/hooks/useActivities'
+import activitiesData from '@/data/activitiesData'
 import { DISABLE_MAP } from '@/utils/const'
 import styles from './style.module.css'
 

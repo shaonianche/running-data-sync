@@ -4,7 +4,7 @@ import type {
   RunIds,
 } from '@/utils/utils'
 import { Analytics } from '@vercel/analytics/react'
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import Layout from '@/components/Layout'
 import LocationStat from '@/components/LocationStat'
 import RunMapButtons from '@/components/RunMap/RunMapButtons'
@@ -12,7 +12,7 @@ import RunTable from '@/components/RunTable'
 import SVGStat from '@/components/SVGStat'
 import { preloadTotalSvgs } from '@/components/SVGStat/preload'
 import YearsStat from '@/components/YearsStat'
-import activitiesData from '@/hooks/useActivities'
+import activitiesData from '@/data/activitiesData'
 import { IS_CHINESE } from '@/utils/const'
 import {
   filterAndSortRuns,
@@ -45,9 +45,7 @@ function Index() {
   const [runIndex, setRunIndex] = useState(-1)
   const [title, setTitle] = useState('')
   const [selectedRunIds, setSelectedRunIds] = useState<RunIds>([])
-  const [zoom, setZoom] = useState(0)
   const [viewStateOverride, setViewStateOverride] = useState<IViewState | null>(null)
-  const prevYearRef = useRef(year)
 
   // Only warm Total-view SVG assets when that view is active.
   useEffect(() => {
@@ -90,25 +88,21 @@ function Index() {
       }
       setSelectedRunIds([])
       setRunIndex(-1)
+      setViewStateOverride(null)
       setTitle(`${item} ${name} Running Heatmap`)
     },
     [thisYear],
   )
 
-  const changeYear = useCallback(
-    (y: string) => {
-      setYear(y)
-
-      if ((zoom ?? 0) > 3 && bounds) {
-        setViewStateOverride({
-          ...bounds,
-        })
-      }
-
-      changeByItem(y, 'Year')
-    },
-    [zoom, bounds, changeByItem],
-  )
+  // Year switches clear selection/title in the event handler (not a follow-up effect).
+  const changeYear = useCallback((y: string) => {
+    setYear(y)
+    setSelectedRunIds([])
+    setRunIndex(-1)
+    setTitle('')
+    setViewStateOverride(null)
+    scrollToMap()
+  }, [])
 
   const changeCity = useCallback(
     (city: string) => {
@@ -151,31 +145,9 @@ function Index() {
     [runs],
   )
 
-  const handleViewStateChange = useCallback(
-    (newViewState: IViewState) => {
-      setViewStateOverride(newViewState)
-      if (newViewState.zoom !== undefined) {
-        setZoom(newViewState.zoom)
-      }
-    },
-    [],
-  )
-
-  useEffect(() => {
-    if (prevYearRef.current === year) {
-      return
-    }
-    prevYearRef.current = year
-    if (selectedRunIds.length > 0) {
-      setSelectedRunIds([])
-    }
-    if (title !== '') {
-      setTitle('')
-    }
-    if (viewStateOverride !== null) {
-      setViewStateOverride(null)
-    }
-  }, [year, selectedRunIds.length, title, viewStateOverride])
+  const handleViewStateChange = useCallback((newViewState: IViewState) => {
+    setViewStateOverride(newViewState)
+  }, [])
 
   useEffect(() => {
     if (year !== 'Total') {

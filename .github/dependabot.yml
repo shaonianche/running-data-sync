@@ -8,6 +8,27 @@ updates:
       # Prefix all commit messages with "npm"
       prefix: npm
     open-pull-requests-limit: 10
+    groups:
+      # Keep React runtime versions in lockstep (mismatched react/react-dom
+      # previously blanked production — see SHA-1 / #1087).
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+        update-types:
+          - minor
+          - patch
+      # Optional: major react upgrades still open as a group for review.
+      react-major:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+        update-types:
+          - major
 
   - package-ecosystem: pip
     directory: /
@@ -22,5 +43,5 @@ updates:
     schedule:
       interval: monthly
     commit-message:
-      # Prefix all commit messages with "npm"
+      # Prefix all commit messages with "github-actions"
       prefix: github-actions

@@ -1,7 +1,7 @@
 import { yearStats } from '@assets/index'
 import { lazy, Suspense, useMemo } from 'react'
 import Stat from '@/components/Stat'
-import activitiesData from '@/hooks/useActivities'
+import activitiesData from '@/data/activitiesData'
 import useHover from '@/hooks/useHover'
 import { loadSvgComponent } from '@/utils/svgUtils'
 import { formatPace } from '@/utils/utils'
