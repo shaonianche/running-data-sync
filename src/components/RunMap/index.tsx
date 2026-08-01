@@ -12,7 +12,7 @@ import Map, {
   NavigationControl,
   Source,
 } from 'react-map-gl/maplibre'
-import activitiesData from '@/hooks/useActivities'
+import activitiesData from '@/data/activitiesData'
 import { useTheme } from '@/hooks/useTheme'
 import {
   DISABLE_CHART,

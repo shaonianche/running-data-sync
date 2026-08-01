@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import RunMapButtons from '@/components/RunMap/RunMapButtons'
 import YearStat from '@/components/YearStat'
-import activitiesData from '@/hooks/useActivities'
+import activitiesData from '@/data/activitiesData'
 import { INFO_MESSAGE } from '@/utils/const'
 
 function YearsStat({

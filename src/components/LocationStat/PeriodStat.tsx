@@ -1,5 +1,5 @@
 import Stat from '@/components/Stat'
-import activitiesData from '@/hooks/useActivities'
+import activitiesData from '@/data/activitiesData'
 
 function PeriodStat({ onClick }: { onClick: (_period: string) => void }) {
   const { runPeriod } = activitiesData
