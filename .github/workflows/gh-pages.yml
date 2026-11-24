@@ -34,14 +34,15 @@ concurrency:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build_and_deploy:
+  # Build the site and upload it as a Pages artifact.
+  # The upload lives in its own job so that the deploy job looks the artifact up
+  # seconds later: looking it up in the same job intermittently returns an empty
+  # list right after the upload finalizes (actions/deploy-pages#451).
+  build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
-      id-token: write
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -105,8 +106,29 @@ jobs:
           # Upload dist repository
           name: pages-artifact
           path: './dist'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+        with:
+          artifact_name: pages-artifact
+
+      # The Pages API occasionally drops the deployment request or the artifact
+      # is not listed yet, so retry once instead of failing the whole sync run.
+      - name: Wait before retrying the deployment
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 15
+
+      - name: Deploy to GitHub Pages (retry)
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v5
         with:
           artifact_name: pages-artifact
