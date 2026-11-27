@@ -84,10 +84,17 @@ export async function openDuckDBConnection(options: DuckDBConnectionOptions = {}
     }
     closed = true
     try {
-      connection?.closeSync()
+      if (!isMemory && !readOnly && connection) {
+        await connection.run('CHECKPOINT;')
+      }
     }
     finally {
-      instance?.closeSync()
+      try {
+        connection?.closeSync()
+      }
+      finally {
+        instance?.closeSync()
+      }
     }
   }
 
