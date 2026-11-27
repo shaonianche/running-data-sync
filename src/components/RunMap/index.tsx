@@ -5,6 +5,8 @@ import type {
 } from 'react-map-gl/maplibre'
 import type { RPGeometry } from '@/static/run_countries'
 import type { Coordinate, IViewState } from '@/utils/utils'
+import { setWorkerUrl } from 'maplibre-gl'
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import React, { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, {
   FullscreenControl,
@@ -33,6 +35,8 @@ import RunMapButtons from './RunMapButtons'
 import RunMarker from './RunMarker'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './maplibre.css'
+
+setWorkerUrl(maplibreWorkerUrl)
 
 // Only fetched when DISABLE_CHART is false — keeps recharts + duckdb-wasm out of the map chunk.
 const ActivityChart = lazy(() => import('./ActivityChart'))
