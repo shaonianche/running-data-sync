@@ -28,7 +28,12 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
+  "dependencies": {
+    "@duckdb/node-api": "1.4.4-r.4",
+    "@mapbox/polyline": "^1.2.1"
+  },
   "devDependencies": {
+    "@types/mapbox__polyline": "^1.0.5",
     "@types/node": "^26.1.2",
     "typescript": "^5.8.3",
     "vitest": "^4.1.8"
