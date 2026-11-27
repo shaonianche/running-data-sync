@@ -24,6 +24,7 @@ import {
   sortDateFunc,
   titleForShow,
 } from '@/utils/utils'
+import styles from './index.module.css'
 
 // MapLibre stack is heavy — only load when viewing a year map (not Total SVG).
 const RunMap = lazy(() => import('@/components/RunMap'))
@@ -31,7 +32,7 @@ const RunMap = lazy(() => import('@/components/RunMap'))
 function MapLoadingPlaceholder() {
   return (
     <div
-      className="w-full rounded bg-[var(--color-hr)]/40 animate-pulse"
+      className={styles.mapPlaceholder}
       style={{ height: 400 }}
       aria-busy="true"
       aria-label="Loading map"
@@ -195,7 +196,7 @@ function Index() {
 
   return (
     <Layout>
-      <div className="w-full lg:w-1/3">
+      <div className={styles.sidebar}>
         {(viewState.zoom ?? 0) <= 1.5 && IS_CHINESE
           ? (
               <LocationStat
@@ -208,7 +209,7 @@ function Index() {
               <YearsStat year={year} />
             )}
       </div>
-      <div id="run-map" className="w-full lg:w-2/3">
+      <div id="run-map" className={styles.main}>
         {year === 'Total'
           ? (
               <>
@@ -224,7 +225,7 @@ function Index() {
             )
           : (
               <>
-                <div className="z-10 bg-[var(--color-background)] lg:sticky lg:top-0">
+                <div className={styles.stickyMap}>
                   <Suspense fallback={<MapLoadingPlaceholder />}>
                     <RunMap
                       title={title}

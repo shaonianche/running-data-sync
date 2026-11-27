@@ -1,0 +1,20 @@
+.container {
+  max-width: 80rem;
+  margin-inline: auto;
+  margin-bottom: 4rem;
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    display: flex;
+    gap: 4rem;
+    padding-inline: 4rem;
+  }
+}

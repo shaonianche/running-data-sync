@@ -5,6 +5,7 @@ import activitiesData from '@/data/activitiesData'
 import useHover from '@/hooks/useHover'
 import { loadSvgComponent } from '@/utils/svgUtils'
 import { formatPace } from '@/utils/utils'
+import styles from './style.module.css'
 
 function YearStat({
   year,
@@ -78,11 +79,11 @@ function YearStat({
   }, [yearRuns])
   return (
     <div
-      className={`cursor-pointer${disableClick ? ' cursor-not-allowed opacity-80' : ''}`}
+      className={`${styles.wrapper}${disableClick ? ` ${styles.disabled}` : ''}`}
       {...(!disableClick && onClick ? { onClick: () => onClick(year) } : {})}
       {...eventHandlers}
     >
-      <section className="grid grid-cols-2 gap-x-6 gap-y-3 md:block text-sm md:text-base">
+      <section className={styles.statsGrid}>
         <Stat value={year} description=" Journey" />
         <Stat value={stats.runsCount} description=" Runs" />
         <Stat value={stats.sumDistance} description=" KM" />
@@ -94,10 +95,10 @@ function YearStat({
       </section>
       {year !== 'Total' && hovered && !disableClick && (
         <Suspense fallback="loading...">
-          <YearSVG className="my-4 h-4/6 w-4/6 border-0 p-0" />
+          <YearSVG className={styles.yearSvg} />
         </Suspense>
       )}
-      <hr className="my-3 md:my-8" />
+      <hr className={styles.divider} />
     </div>
   )
 }

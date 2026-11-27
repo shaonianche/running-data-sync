@@ -1,5 +1,6 @@
 import Stat from '@/components/Stat'
 import activitiesData from '@/data/activitiesData'
+import styles from './style.module.css'
 
 function PeriodStat({ onClick }: { onClick: (_period: string) => void }) {
   const { runPeriod } = activitiesData
@@ -7,7 +8,7 @@ function PeriodStat({ onClick }: { onClick: (_period: string) => void }) {
   const periodArr = Object.entries(runPeriod)
   periodArr.sort((a, b) => b[1] - a[1])
   return (
-    <div className="cursor-pointer">
+    <div className={styles.clickable}>
       <section>
         {periodArr.map(([period, times]) => (
           <Stat

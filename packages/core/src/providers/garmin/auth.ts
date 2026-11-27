@@ -16,6 +16,10 @@ import { createOAuth1AuthorizationHeader } from './oauth1.js'
 import { redactGarminMessage, wrapGarminLogger } from './redaction.js'
 import { GarminAuthenticationError, GarminMfaRequiredError } from './types.js'
 
+// Garmin Connect SSO / OAuth1-to-OAuth2 protocol details, serialized token format
+// compatibility (`garth.client.dumps()`), and the default public OAuth consumer config
+// endpoint reference Python `garth` (https://github.com/matin/garth, MIT License).
+// Activity data itself is fetched directly from official Garmin Connect endpoints.
 export const GARMIN_SSO_CLIENT_ID = 'GCM_ANDROID_DARK'
 export const GARMIN_OAUTH_CONSUMER_URL = 'https://thegarth.s3.amazonaws.com/oauth_consumer.json'
 export const GARMIN_OAUTH_USER_AGENT = 'com.garmin.android.apps.connectmobile'

@@ -1,0 +1,23 @@
+.wrapper {
+  width: 100%;
+  padding-bottom: 4rem;
+}
+
+.intro {
+  padding-bottom: 0;
+}
+
+.lead {
+  line-height: 1.625;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .wrapper {
+    width: 100%;
+    padding-right: 4rem;
+  }
+}

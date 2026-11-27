@@ -2,6 +2,7 @@ import React from 'react'
 import { Helmet } from 'react-helmet-async'
 import Header from '@/components/Header'
 import getSiteMetadata from '@/hooks/useSiteMetadata'
+import styles from './style.module.css'
 
 function Layout({ children }: React.PropsWithChildren) {
   const { siteTitle, description } = getSiteMetadata()
@@ -19,7 +20,7 @@ function Layout({ children }: React.PropsWithChildren) {
         />
       </Helmet>
       <Header />
-      <div className="max-w-7xl mx-auto mb-16 px-4 md:px-6 lg:px-16 py-4 md:py-8 lg:flex lg:gap-16">{children}</div>
+      <div className={styles.container}>{children}</div>
     </>
   )
 }

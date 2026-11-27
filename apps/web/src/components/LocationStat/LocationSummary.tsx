@@ -1,11 +1,12 @@
 import Stat from '@/components/Stat'
 import activitiesData from '@/data/activitiesData'
+import styles from './style.module.css'
 
 // only support China for now
 function LocationSummary() {
   const { years, countries, provinces, cities } = activitiesData
   return (
-    <div className="cursor-pointer">
+    <div className={styles.clickable}>
       <section>
         {years
           ? (

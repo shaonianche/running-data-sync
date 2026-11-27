@@ -1,0 +1,16 @@
+.heading {
+  margin-block: 0.625rem;
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.muted {
+  color: #9ca3af;
+}
+
+.link {
+  font-weight: 700;
+  color: #9ca3af;
+}

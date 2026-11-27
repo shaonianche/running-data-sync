@@ -1,4 +1,5 @@
 import { intComma } from '@/utils/utils'
+import styles from './style.module.css'
 
 interface IStatProperties {
   value: string | number
@@ -9,20 +10,20 @@ interface IStatProperties {
 }
 
 const textSizeClass: Record<number, string> = {
-  3: 'md:text-3xl',
-  4: 'md:text-4xl',
-  5: 'md:text-5xl',
-  6: 'md:text-6xl',
+  3: styles.size3,
+  4: styles.size4,
+  5: styles.size5,
+  6: styles.size6,
 }
 
 function Stat({
   value,
   description,
-  className = 'pb-2 w-full',
+  className = styles.root,
   citySize,
   onClick,
 }: IStatProperties) {
-  const sizeClass = textSizeClass[citySize ?? 5] || 'md:text-5xl'
+  const sizeClass = textSizeClass[citySize ?? 5] || styles.size5
   const isClickable = !!onClick
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -40,10 +41,10 @@ function Stat({
       tabIndex={isClickable ? 0 : undefined}
       onKeyDown={isClickable ? handleKeyDown : undefined}
     >
-      <span className={`font-bold italic text-3xl sm:text-4xl ${sizeClass}`}>
+      <span className={`${styles.value} ${sizeClass}`}>
         {intComma(value.toString())}
       </span>
-      <span className="font-semibold italic text-sm sm:text-base md:text-lg">{description}</span>
+      <span className={styles.description}>{description}</span>
     </div>
   )
 }

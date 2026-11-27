@@ -1,0 +1,57 @@
+.root {
+  padding-bottom: 0.5rem;
+  width: 100%;
+}
+
+.value {
+  font-weight: 700;
+  font-style: italic;
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+}
+
+.description {
+  font-weight: 600;
+  font-style: italic;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .value {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .description {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .size3 {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+
+  .size4 {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .size5 {
+    font-size: 3rem;
+    line-height: 1;
+  }
+
+  .size6 {
+    font-size: 3.75rem;
+    line-height: 1;
+  }
+
+  .description {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}

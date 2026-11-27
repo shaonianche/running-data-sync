@@ -1,5 +1,6 @@
 import Stat from '@/components/Stat'
 import activitiesData from '@/data/activitiesData'
+import styles from './style.module.css'
 
 // only support China for now
 function CitiesStat({ onClick }: { onClick: (_city: string) => void }) {
@@ -8,7 +9,7 @@ function CitiesStat({ onClick }: { onClick: (_city: string) => void }) {
   const citiesArr = Object.entries(cities)
   citiesArr.sort((a, b) => b[1] - a[1])
   return (
-    <div className="cursor-pointer">
+    <div className={styles.clickable}>
       <section>
         {citiesArr.map(([city, distance]) => (
           <Stat
