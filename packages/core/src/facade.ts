@@ -1,4 +1,4 @@
-import type { ActivityFileFormat, ActivityFormatPort, PosterOptions, SvgPosterGenerator } from './contracts/index.js'
+import type { ActivityFileFormat, ActivityFormatPort, ActivityStorePort, PosterOptions, SvgPosterGenerator } from './contracts/index.js'
 import type { BatchExportResult, ExportActivitiesOptions } from './formats/exporter.js'
 import type { CredentialInput, RuntimeConfig, StravaCredentials } from './foundation/types.js'
 import type {
@@ -9,6 +9,10 @@ import type {
   SyncGarminToStoreResult,
   SyncStoreToGarminOptions,
   SyncStoreToGarminResult,
+  UploadFilesToGarminOptions,
+  UploadFilesToGarminResult,
+  VendorStatusOptions,
+  VendorStatusSummary,
 } from './providers/garmin/types.js'
 import type { SyncStravaOptions, SyncStravaResult } from './providers/strava/types.js'
 import type { DuckDBActivityStoreOptions } from './storage/duckdb-store.js'
@@ -19,14 +23,16 @@ import { exportActivities as exportActivitiesFromRepository } from './formats/ex
 import { createActivityFormatPort } from './formats/format-port.js'
 import { resolveRuntimeConfig, resolveStravaCredentials } from './foundation/config.js'
 import { syncGarminToStore } from './providers/garmin/download.js'
+import { getVendorStatus } from './providers/garmin/status.js'
 import { reconcileGarmin as reconcileGarminWithStore, syncStoreToGarmin } from './providers/garmin/sync.js'
+import { uploadFilesToGarmin } from './providers/garmin/upload-files.js'
 import { StravaClient } from './providers/strava/client.js'
 import { syncStravaToStore } from './providers/strava/sync.js'
 import { DuckDBActivityStore } from './storage/duckdb-store.js'
-import { renderPosterFromRepository } from './svg/adapters.js'
+import { renderPosterFromDirectory, renderPosterFromRepository } from './svg/adapters.js'
 
 export interface StoreBackedOptions {
-  readonly store?: DuckDBActivityStore
+  readonly store?: ActivityStorePort
   readonly storeOptions?: DuckDBActivityStoreOptions
   readonly runtimeConfig?: Partial<RuntimeConfig>
 }
@@ -34,7 +40,7 @@ export interface StoreBackedOptions {
 async function withManagedStore<T>(
   options: StoreBackedOptions,
   readOnly: boolean,
-  fn: (store: DuckDBActivityStore, runtime: RuntimeConfig) => Promise<T>,
+  fn: (store: ActivityStorePort, runtime: RuntimeConfig) => Promise<T>,
 ): Promise<T> {
   const runtime = resolveRuntimeConfig(options.runtimeConfig)
   if (options.store) {
@@ -160,11 +166,35 @@ export async function exportActivitiesFromDb(
   })
 }
 
+export interface GetVendorStatusFromDbOptions
+  extends StoreBackedOptions,
+  Omit<VendorStatusOptions, 'store'> {}
+
+export async function getVendorStatusFromDb(
+  options: GetVendorStatusFromDbOptions = {},
+): Promise<VendorStatusSummary> {
+  return withManagedStore(options, !options.retryFailed, async (store) => {
+    return getVendorStatus({
+      ...options,
+      store,
+    })
+  })
+}
+
+export async function uploadLocalFilesToGarmin(
+  options: UploadFilesToGarminOptions,
+): Promise<UploadFilesToGarminResult> {
+  return uploadFilesToGarmin(options)
+}
+
 export interface GeneratePosterSvgOptions
   extends StoreBackedOptions,
   Omit<RenderPosterFromRepositoryOptions, 'type'>,
   Pick<PosterOptions, 'type'>,
   Pick<LoadPosterTracksFromRepositoryOptions, 'onlyRun' | 'types' | 'hasPolyline' | 'specialRunIds'> {
+  readonly gpxDir?: string
+  readonly formatPort?: ActivityFormatPort
+  readonly withAnimation?: boolean
   readonly outputPath?: string
   readonly generator?: SvgPosterGenerator
 }
@@ -175,9 +205,21 @@ export interface GeneratePosterSvgResult {
 }
 
 export async function generatePosterSvg(options: GeneratePosterSvgOptions): Promise<GeneratePosterSvgResult> {
-  const svg = await withManagedStore(options, true, async (store) => {
-    return renderPosterFromRepository(store, options, options.generator)
-  })
+  let svg: string
+  if (options.gpxDir) {
+    const formatPort = options.formatPort ?? createActivityFormatPort()
+    svg = await renderPosterFromDirectory(
+      path.resolve(options.gpxDir),
+      formatPort,
+      options,
+      options.generator,
+    )
+  }
+  else {
+    svg = await withManagedStore(options, true, async (store) => {
+      return renderPosterFromRepository(store, options, options.generator)
+    })
+  }
 
   if (options.outputPath) {
     const resolvedOutput = path.resolve(options.outputPath)
