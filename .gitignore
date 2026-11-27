@@ -1,21 +1,24 @@
-# Project dependencies
+# Dependencies and caches
+node_modules
+.cache
+
+# Build and test output
+dist/
+coverage/
+
+# Editors and local tooling
+.vscode/
 .idea
 .zed
-.cache
-node_modules
-yarn-error.log
-dist/
+.cursor/
 .claude
-
-# Build directory
-/build
-.DS_Store
-.sass-cache/
-_posts/
-_site/
-db.csv
-danpalmer.sql
 .kiro
+*.swp
+*.swo
+*~
 
+# OS files
+.DS_Store
+
+# Local environment
 .env*
-config.yaml
