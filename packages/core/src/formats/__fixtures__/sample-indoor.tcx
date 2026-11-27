@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Activities>
+    <Activity Sport="Other">
+      <Id>2025-04-03T11:00:00+08:00</Id>
+      <Lap StartTime="2025-04-03T11:00:00+08:00">
+        <TotalTimeSeconds>1200</TotalTimeSeconds>
+        <DistanceMeters>0</DistanceMeters>
+        <AverageHeartRateBpm><Value>132</Value></AverageHeartRateBpm>
+        <Intensity>Active</Intensity>
+        <TriggerMethod>Manual</TriggerMethod>
+        <Track>
+          <Trackpoint>
+            <Time>2025-04-03T11:00:00+08:00</Time>
+            <HeartRateBpm><Value>120</Value></HeartRateBpm>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2025-04-03T11:10:00+08:00</Time>
+            <HeartRateBpm><Value>138</Value></HeartRateBpm>
+          </Trackpoint>
+          <Trackpoint>
+            <Time>2025-04-03T11:20:00+08:00</Time>
+            <HeartRateBpm><Value>138</Value></HeartRateBpm>
+          </Trackpoint>
+        </Track>
+      </Lap>
+      <Notes>Indoor Core Session</Notes>
+      <Creator xsi:type="Device_t">
+        <Name>Garmin HRM</Name>
+      </Creator>
+    </Activity>
+  </Activities>
+</TrainingCenterDatabase>

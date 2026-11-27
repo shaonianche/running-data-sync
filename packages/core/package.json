@@ -32,5 +32,10 @@
     "@types/node": "^26.1.2",
     "typescript": "^5.8.3",
     "vitest": "^4.1.8"
+  },
+  "dependencies": {
+    "@garmin/fitsdk": "^21.222.0",
+    "fast-xml-parser": "^5.12.1",
+    "fflate": "^0.8.3"
   }
 }
