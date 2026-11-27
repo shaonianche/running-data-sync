@@ -104,7 +104,6 @@ export function loadEnvConfig(options: LoadEnvConfigOptions = {}): EnvConfig {
     garminIsCn: readKey('GARMIN_IS_CN'),
     garminSecret: readKey('GARMIN_SECRET'),
     garminSecretCn: readKey('GARMIN_SECRET_CN'),
-    duckdbEncryptionKey: readKey('DUCKDB_ENCRYPTION_KEY'),
   }
 }
 

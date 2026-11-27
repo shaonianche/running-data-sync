@@ -62,7 +62,6 @@ describe('loadEnvConfig & credential resolution precedence', () => {
         'STRAVA_JWT=legacy-jwt-should-not-appear',
         'GARMIN_SECRET=file-garmin-com',
         'GARMIN_SECRET_CN=file-garmin-cn',
-        'DUCKDB_ENCRYPTION_KEY=file-db-key',
       ].join('\n'),
     )
 
@@ -79,7 +78,6 @@ describe('loadEnvConfig & credential resolution precedence', () => {
     expect(env.stravaRefreshToken).toBe('file-refresh')
     expect(env.garminSecret).toBe('file-garmin-com')
     expect(env.garminSecretCn).toBe('file-garmin-cn')
-    expect(env.duckdbEncryptionKey).toBe('file-db-key')
     expect('stravaJwt' in env).toBe(false)
   })
 

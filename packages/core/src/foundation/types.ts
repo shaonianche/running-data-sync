@@ -102,5 +102,4 @@ export interface EnvConfig {
   garminIsCn?: string
   garminSecret?: string
   garminSecretCn?: string
-  duckdbEncryptionKey?: string
 }

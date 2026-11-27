@@ -5,7 +5,6 @@ export {
   escapeSqlString,
   formatDuckDBTimestamp,
   openDuckDBConnection,
-  resolveEncryptionKey,
   toNullableInt,
   toNullableNumber,
   toNumber,
@@ -16,12 +15,6 @@ export {
   DuckDBActivityStore,
   type DuckDBActivityStoreOptions,
 } from './duckdb-store.js'
-export {
-  encryptDatabase,
-  type EncryptDatabaseOptions,
-  type EncryptDatabaseResult,
-  type EncryptDatabaseStatus,
-} from './encryption.js'
 export {
   type ActivityJsonRecord,
   computeActivityStreaks,

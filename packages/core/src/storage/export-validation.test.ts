@@ -151,17 +151,16 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
   it('returns empty list when loading activities from a missing DB file', async () => {
     const dir = makeTempDir()
     const missingDb = path.join(dir, 'absent.duckdb')
-    expect(await loadActivities({ dbPath: missingDb, encryptionKey: null })).toEqual([])
+    expect(await loadActivities({ dbPath: missingDb })).toEqual([])
   })
 
-  it('exports JSON + Parquet and passes/fails validateDataConsistency accurately (encrypted & unencrypted)', async () => {
+  it('exports JSON + Parquet and passes/fails validateDataConsistency accurately', async () => {
     const dir = makeTempDir()
     const dbPath = path.join(dir, 'data.duckdb')
-    const encryptionKey = 'export-validation-secret'
     const parquetDir = path.join(dir, 'db')
     const jsonPath = path.join(dir, 'static', 'activities.json')
 
-    const store = new DuckDBActivityStore({ dbPath, encryptionKey })
+    const store = new DuckDBActivityStore({ dbPath })
     await store.upsertActivities([
       createOutdoorRunActivity({
         run_id: 100001,
@@ -184,13 +183,12 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     await store.close()
 
     // Test onlyRun filter in loadActivities
-    const runsOnly = await loadActivities({ dbPath, encryptionKey, onlyRun: true })
+    const runsOnly = await loadActivities({ dbPath, onlyRun: true })
     expect(runsOnly.map(a => a.run_id)).toEqual([100001, 100003])
 
     // Export full activities.json
     const jsonResult = await exportActivitiesJson({
       dbPath,
-      encryptionKey,
       outputPath: jsonPath,
       polylineOptions: { ignoreRangeMeters: 0, ignoreStartEndRangeMeters: 0, ignorePoints: [] },
     })
@@ -201,7 +199,6 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     // Export Parquet (including a nonexistent table to verify graceful skip)
     const pqResult = await exportParquet({
       dbPath,
-      encryptionKey,
       outputDir: parquetDir,
       tables: ['activities', 'activities_flyby', 'nonexistent_table'],
     })
@@ -214,7 +211,6 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     // Validate 3-way consistency -> passes
     const report = await validateDataConsistency({
       dbPath,
-      encryptionKey,
       parquetPath: path.join(parquetDir, 'activities.parquet'),
       jsonPath,
     })
@@ -231,7 +227,6 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     fs.writeFileSync(jsonPath, JSON.stringify(tamperedCount), 'utf8')
     await expect(validateDataConsistency({
       dbPath,
-      encryptionKey,
       parquetPath: path.join(parquetDir, 'activities.parquet'),
       jsonPath,
     })).rejects.toThrow(/count mismatch/)
@@ -242,14 +237,13 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     fs.writeFileSync(jsonPath, JSON.stringify(tamperedMax), 'utf8')
     await expect(validateDataConsistency({
       dbPath,
-      encryptionKey,
       parquetPath: path.join(parquetDir, 'activities.parquet'),
       jsonPath,
     })).rejects.toThrow(/max start_date_local mismatch/)
 
     // Restore JSON, tamper Parquet -> fails
     fs.writeFileSync(jsonPath, originalJson, 'utf8')
-    const memHandle = await openDuckDBConnection({ dbPath: ':memory:', encryptionKey: null })
+    const memHandle = await openDuckDBConnection({ dbPath: ':memory:' })
     try {
       const pqPath = path.join(parquetDir, 'activities.parquet')
       await memHandle.connection.run(
@@ -262,7 +256,6 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     }
     await expect(validateDataConsistency({
       dbPath,
-      encryptionKey,
       parquetPath: path.join(parquetDir, 'activities.parquet'),
       jsonPath,
     })).rejects.toThrow(/count mismatch/)
@@ -270,7 +263,6 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     // Missing file -> throws StorageError
     await expect(validateDataConsistency({
       dbPath,
-      encryptionKey,
       parquetPath: path.join(parquetDir, 'missing.parquet'),
       jsonPath,
     })).rejects.toThrow(StorageError)
