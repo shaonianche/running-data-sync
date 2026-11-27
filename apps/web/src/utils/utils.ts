@@ -231,11 +231,21 @@ function pathForRun(run: Activity): Coordinate[] {
   }
 }
 
+function parseLocalWallClockMs(value: string): number {
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return Number.NaN
+  }
+  const normalized = trimmed.replace(' ', 'T')
+  const hasExplicitZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(normalized)
+  return Date.parse(hasExplicitZone ? normalized : `${normalized}Z`)
+}
+
 function getRunTimestamp(run: Activity): number {
   if (runTimestampCache.has(run.run_id)) {
     return runTimestampCache.get(run.run_id)!
   }
-  const ts = Date.parse(run.start_date_local)
+  const ts = parseLocalWallClockMs(run.start_date_local)
   runTimestampCache.set(run.run_id, ts)
   return ts
 }
@@ -454,10 +464,12 @@ function filterAndSortRuns(activities: Activity[], item: string, filterFunc: (_r
 }
 
 function sortDateFunc(a: Activity, b: Activity) {
-  return (
-    new Date(b.start_date_local.replace(' ', 'T')).getTime()
-      - new Date(a.start_date_local.replace(' ', 'T')).getTime()
-  )
+  const aKey = a.start_date_local.trim().replace(' ', 'T')
+  const bKey = b.start_date_local.trim().replace(' ', 'T')
+  if (bKey === aKey) {
+    return 0
+  }
+  return bKey > aKey ? 1 : -1
 }
 const sortDateFuncReverse = (a: Activity, b: Activity) => sortDateFunc(b, a)
 
