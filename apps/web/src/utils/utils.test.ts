@@ -6,6 +6,7 @@ import {
   formatPace,
   formatRunTime,
   getMainColor,
+  getRunTimestamp,
   intComma,
   sortDateFunc,
   sortDateFuncReverse,
@@ -175,6 +176,27 @@ describe('sortDateFunc', () => {
   it('should return 0 for same date', () => {
     const result = sortDateFunc(activity1, activity1)
     expect(result).toBe(0)
+  })
+
+  it('compares naive start_date_local deterministically across space/T separators and DST boundaries', () => {
+    const springGapA: Activity = {
+      ...activity1,
+      run_id: 101,
+      start_date: '2025-03-09 06:15:00',
+      start_date_local: '2025-03-09 02:15:00',
+    }
+    const springGapB: Activity = {
+      ...activity2,
+      run_id: 102,
+      start_date: '2025-03-09 06:45:00',
+      start_date_local: '2025-03-09T02:45:00',
+    }
+
+    expect(sortDateFunc(springGapA, springGapB)).toBeGreaterThan(0)
+    expect(sortDateFunc(springGapB, springGapA)).toBeLessThan(0)
+    expect(getRunTimestamp(springGapB)).toBeGreaterThan(getRunTimestamp(springGapA))
+    expect(getRunTimestamp(springGapA)).toBe(Date.UTC(2025, 2, 9, 2, 15, 0))
+    expect(getRunTimestamp(springGapB)).toBe(Date.UTC(2025, 2, 9, 2, 45, 0))
   })
 })
 

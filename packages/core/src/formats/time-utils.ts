@@ -61,7 +61,8 @@ export function formatLocalDateTime(date: Date, timeZone: string = BASE_TIMEZONE
   for (const part of parts) {
     map[part.type] = part.value
   }
-  return `${map.year}-${map.month}-${map.day}T${map.hour}:${map.minute}:${map.second}`
+  const hour = map.hour === '24' ? '00' : map.hour
+  return `${map.year}-${map.month}-${map.day}T${hour}:${map.minute}:${map.second}`
 }
 
 /**
