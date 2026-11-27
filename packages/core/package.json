@@ -32,6 +32,7 @@
     "@duckdb/node-api": "1.4.4-r.4",
     "@garmin/fitsdk": "^21.222.0",
     "@mapbox/polyline": "^1.2.1",
+    "@photostructure/tz-lookup": "^11.8.0",
     "fast-xml-parser": "^5.12.1",
     "fflate": "^0.8.3"
   },
