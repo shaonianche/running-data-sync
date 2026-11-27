@@ -6,8 +6,6 @@ export default antfu({
   ignores: [
     'apps/web/src/static/activities.json',
     'apps/web/public/**',
-    'scripts/**',
-    'tests/**',
     'data/**',
     '**/*.md',
     '**/*.toml',

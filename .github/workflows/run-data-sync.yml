@@ -8,18 +8,18 @@ on:
     branches:
       - main
     paths:
-      - scripts/**
-      - pdm.lock
+      - packages/**
+      - package.json
+      - pnpm-lock.yaml
+      - .github/workflows/run-data-sync.yml
 
 env:
-  RUN_TYPE: strava
   ATHLETE: FRIENDSA
   TITLE: Running
   MIN_GRID_DISTANCE: 5
   TITLE_GRID: Over 5km Runs
   GITHUB_NAME: shaonianche
   GITHUB_EMAIL: github@duanfei.org
-  DUCKDB_ENCRYPTION_KEY: ${{ secrets.DUCKDB_ENCRYPTION_KEY }}
 
   BACKGROUND_COLOR_LIGHT: '#e5e5e5'
   NO_ACTIVITY_COLOR_LIGHT: '#d4d4d4'
@@ -64,7 +64,6 @@ jobs:
             data/FIT_OUT
             data/data.duckdb
             apps/web/src/static/activities.json
-            imported.json
           key: ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
             ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-
@@ -107,62 +106,48 @@ jobs:
           echo "IP info:"
           curl -s --retry 5 --retry-delay 2 --retry-all-errors https://cloudflare.com/cdn-cgi/trace | grep -E "ip|warp"
 
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
         with:
-          python-version: 3.12
-          cache: true
-          cache-dependency-path: ./pdm.lock
+          node-version: '26'
+
+      - name: Enable corepack / pnpm
+        run: npm install -g corepack@latest && corepack enable pnpm
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: |
-          pdm install
-          echo "${{ github.workspace }}/.venv/bin" >> $GITHUB_PATH
+        run: pnpm install --frozen-lockfile
+
+      - name: Build core and CLI packages
+        run: pnpm --filter @running-data-sync/core --filter @running-data-sync/cli build
 
       - name: Run sync Strava -> DuckDB
-        if: env.RUN_TYPE == 'strava'
-        run: pdm run strava-cli sync db --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
+        run: node packages/cli/dist/cli.js sync db --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
 
       - name: Sync DuckDB -> Garmin COM
-        if: env.RUN_TYPE == 'strava'
-        run: pdm run strava-cli vendor garmin --secret-string '${{ secrets.GARMIN_SECRET }}'
+        run: node packages/cli/dist/cli.js vendor garmin --secret-string '${{ secrets.GARMIN_SECRET }}'
 
       - name: Sync DuckDB -> Garmin CN
-        if: env.RUN_TYPE == 'strava'
-        run: pdm run strava-cli vendor garmin --is-cn --secret-string '${{ secrets.GARMIN_SECRET_CN }}'
-
-      # - name: Run strava_to_garmin_sync script
-      #   if: env.RUN_TYPE == 'strava'
-      #   continue-on-error: true
-      #   run: pdm run strava_to_garmin_sync --is-cn '${{ secrets.GARMIN_SECRET_CN }}' --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
-
-      # - name: Fit to garmin cn sync
-      #   if: env.RUN_TYPE == 'strava'
-      #   run: pdm run fit_to_garmin_sync '${{ secrets.GARMIN_SECRET_CN }}' --is-cn
-
-      # - name: Fit to garmin sync
-      #   if: env.RUN_TYPE == 'strava'
-      #   run: pdm run fit_to_garmin_sync '${{ secrets.GARMIN_SECRET }}'
+        run: node packages/cli/dist/cli.js vendor garmin --is-cn --secret-string '${{ secrets.GARMIN_SECRET_CN }}'
 
       - name: Rebuild derived data from DuckDB
-        if: env.RUN_TYPE != 'pass'
         run: |
-          pdm run python - <<'PY'
-          import json
-          from scripts.config import JSON_FILE, SQL_FILE
-          from scripts.generator import Generator
-          from scripts.utils import ActivityJSONEncoder
-
-          generator = Generator(SQL_FILE)
-          activities_list = generator.load()
-          with open(JSON_FILE, "w") as f:
-              json.dump(activities_list, f, cls=ActivityJSONEncoder)
-          PY
-          pdm run save_to_parquet
+          node packages/cli/dist/cli.js data json
+          node packages/cli/dist/cli.js data parquet
 
       - name: Validate exported data consistency
-        if: env.RUN_TYPE != 'pass'
-        run: pdm run validate_data_consistency
+        run: node packages/cli/dist/cli.js data validate
 
       - name: Check for data changes
         id: data_changes
@@ -179,12 +164,12 @@ jobs:
           fi
 
       - name: Make svg GitHub profile
-        if: env.RUN_TYPE != 'pass' && steps.data_changes.outputs.has_changes == 'true'
+        if: steps.data_changes.outputs.has_changes == 'true'
         run: |
-          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --use-localtime --min-distance 0.5 --output apps/web/public/assets/github.svg
-          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output apps/web/public/assets/grid.svg
-          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity-color '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output apps/web/public/assets/github-light.svg
-          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output apps/web/public/assets/grid-light.svg
+          node packages/cli/dist/cli.js svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --min-distance 0.5 --output apps/web/public/assets/github.svg
+          node packages/cli/dist/cli.js svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --output apps/web/public/assets/grid.svg
+          node packages/cli/dist/cli.js svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --min-distance 0.5 --output apps/web/public/assets/github-light.svg
+          node packages/cli/dist/cli.js svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --output apps/web/public/assets/grid-light.svg
 
       - name: Disconnect Cloudflare WARP
         if: env.USE_CLOUDFLARE_WARP == 'true'
@@ -221,11 +206,13 @@ jobs:
           git push
 
   publish_github_pages:
-    if: needs.sync.result == 'success'
+    # Only deploy production GitHub Pages on the default branch so manual
+    # workflow_dispatch runs on dev-v2 remain isolated from production.
+    if: needs.sync.result == 'success' && github.ref == 'refs/heads/main'
     name: Build and publish Github Pages
     uses: ./.github/workflows/gh-pages.yml
     with:
-      save_data_in_github_cache: ${{needs.sync.outputs.SAVE_DATA_IN_GITHUB_CACHE == 'true'}}
-      data_cache_prefix: ${{needs.sync.outputs.DATA_CACHE_PREFIX}}
+      save_data_in_github_cache: ${{ needs.sync.outputs.SAVE_DATA_IN_GITHUB_CACHE == 'true' }}
+      data_cache_prefix: ${{ needs.sync.outputs.DATA_CACHE_PREFIX }}
     needs:
       - sync

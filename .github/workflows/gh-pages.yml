@@ -59,15 +59,12 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            activities
             apps/web/public
-            GPX_OUT
-            TCX_OUT
-            FIT_OUT
-            Workouts
-            run_page/data.db
+            data/GPX_OUT
+            data/TCX_OUT
+            data/FIT_OUT
+            data/data.duckdb
             apps/web/src/static/activities.json
-            imported.json
           key: ${{ inputs.data_cache_prefix }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
             ${{ inputs.data_cache_prefix }}-${{ github.sha }}-
