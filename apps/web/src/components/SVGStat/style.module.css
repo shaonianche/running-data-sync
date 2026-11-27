@@ -9,7 +9,10 @@
   width: 100%;
   background: linear-gradient(to right, var(--color-hr), var(--color-background), var(--color-hr));
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: shimmer 1.5s infinite;
+  }
 }
 
 .container {

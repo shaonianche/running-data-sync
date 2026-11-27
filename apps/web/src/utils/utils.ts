@@ -12,6 +12,7 @@ import {
   RICH_TITLE,
   RUN_TITLES,
 } from './const'
+import { prefersReducedMotion } from './motion'
 
 export type { Activity }
 
@@ -80,7 +81,10 @@ function scrollToMap() {
   if (!el) {
     return
   }
-  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  el.scrollIntoView({
+    behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    block: 'start',
+  })
 }
 
 function extractCities(str: string): string[] {

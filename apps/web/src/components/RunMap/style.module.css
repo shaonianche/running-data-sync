@@ -24,16 +24,30 @@
   text-align: center;
   color: var(--color-run-date);
   border-radius: 0.25rem;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      transform 0.2s ease;
+  }
 }
 
 .button:hover {
   background-color: var(--color-run-row-hover-background);
-  transform: translateY(-1px);
+
+  @media (prefers-reduced-motion: no-preference) {
+    transform: translateY(-1px);
+  }
 }
 
 .button:active {
-  transform: translateY(0);
+  @media (prefers-reduced-motion: no-preference) {
+    transform: translateY(0);
+  }
 }
 
 .button:focus-visible {
@@ -49,7 +63,9 @@
 }
 
 .selected:hover {
-  transform: translateY(-1px);
+  @media (prefers-reduced-motion: no-preference) {
+    transform: translateY(-1px);
+  }
 }
 
 .runTitle {
@@ -106,11 +122,14 @@
   border-radius: 5px;
   border: none;
   margin: 6px 0 3px 0;
-  transition:
-    background 0.18s,
-    transform 0.15s,
-    box-shadow 0.18s;
+  transition: background-color 0.18s ease;
   outline: none;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      background-color 0.18s ease,
+      transform 0.15s ease;
+  }
 }
 
 .mapVisibleBar:focus-visible {
@@ -119,11 +138,16 @@
 
 .mapVisibleBar:hover {
   background: var(--color-run-row-hover-background);
-  transform: scale(1.02);
+
+  @media (prefers-reduced-motion: no-preference) {
+    transform: scale(1.02);
+  }
 }
 
 .mapVisibleBar:active {
-  transform: scale(0.98);
+  @media (prefers-reduced-motion: no-preference) {
+    transform: scale(0.98);
+  }
 }
 
 .mapVisibleArrow {
@@ -131,14 +155,21 @@
   margin-right: 6px;
   font-size: 1.1rem;
   color: var(--color-selected);
-  transition:
-    transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
-    color 0.15s;
-  will-change: transform;
+  transition: color 0.15s ease;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      transform 0.28s cubic-bezier(0.23, 1, 0.32, 1),
+      color 0.15s ease;
+  }
 }
 
 .mapVisibleArrow.open {
-  transform: rotate(180deg) scale(1.1);
+  transform: rotate(180deg);
+
+  @media (prefers-reduced-motion: no-preference) {
+    transform: rotate(180deg) scale(1.1);
+  }
 }
 
 .mapVisibleBar:hover .mapVisibleArrow {
@@ -266,7 +297,6 @@
   top: 50%;
   backface-visibility: hidden;
   transform-style: preserve-3d;
-  will-change: left, top;
 }
 
 .markerStart img {
