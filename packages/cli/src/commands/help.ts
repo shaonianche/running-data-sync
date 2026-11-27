@@ -80,9 +80,14 @@ export function formatSubcommandHelp(topic: string): string {
         'Usage: running-data-sync data <json|parquet|validate> [options]',
         '',
         'Subcommands:',
-        '  json             Export activities.json from DuckDB',
-        '  parquet          Export DuckDB tables to Parquet files',
+        '  json             Export sanitized public activities.json from DuckDB',
+        '  parquet          Export approved public DuckDB tables to Parquet files',
         '  validate         Validate 3-way consistency across DuckDB, JSON, and Parquet',
+        '',
+        'Parquet options:',
+        '  --tables <list>  Comma-separated public tables (activities, activities_flyby)',
+        '  --output-dir <d> Output directory override',
+        '  --exclude-flyby  Omit activities_flyby.parquet from public export',
         '',
       ].join('\n')
     case 'db':

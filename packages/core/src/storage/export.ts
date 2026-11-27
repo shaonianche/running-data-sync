@@ -21,6 +21,78 @@ import { tableExists } from './schema.js'
 export const DEFAULT_PARQUET_TABLES = ['activities', 'activities_flyby'] as const
 
 /**
+ * Explicit allowlist of DuckDB tables that may be projected to public Parquet files.
+ * Internal operational tables (e.g. `vendor_activity_sync`, `activities_flyby_queue`)
+ * are private authoritative state and must not be exported to public web assets.
+ */
+export const PUBLIC_PARQUET_TABLES = ['activities', 'activities_flyby'] as const
+export type PublicParquetTable = (typeof PUBLIC_PARQUET_TABLES)[number]
+
+/**
+ * Explicit contract distinguishing public web projections from private authoritative storage.
+ *
+ * Public web projections are derived, sanitized artifacts consumed by `apps/web`.
+ * Private authoritative data (`data/data.duckdb`, raw `FIT`/`GPX`/`TCX`) remains off-limits
+ * to public web publishing.
+ */
+export const PUBLIC_PROJECTION_BOUNDARY = Object.freeze({
+  publicProjections: Object.freeze({
+    activitiesJson: 'apps/web/src/static/activities.json',
+    parquetDir: 'apps/web/public/db',
+    parquetTables: PUBLIC_PARQUET_TABLES,
+    svgAssetsDir: 'apps/web/public/assets',
+  }),
+  privateAuthoritative: Object.freeze({
+    duckdb: 'data/data.duckdb',
+    rawWorkoutFormats: Object.freeze(['fit', 'gpx', 'tcx'] as const),
+    privateTables: Object.freeze(['vendor_activity_sync', 'activities_flyby_queue'] as const),
+  }),
+})
+
+export function isPublicParquetTable(tableName: string): tableName is PublicParquetTable {
+  return (PUBLIC_PARQUET_TABLES as readonly string[]).includes(tableName)
+}
+
+/**
+ * Resolves the effective list of public Parquet tables to export.
+ *
+ * - Rejects non-allowlisted / private tables (e.g. `vendor_activity_sync`, `activities_flyby_queue`)
+ *   when `allowNonPublicTables` is not explicitly enabled.
+ * - Honors `includeFlyby` (defaults to `true` for compatibility until user decides;
+ *   can also be toggled via `EXCLUDE_FLYBY_PARQUET` env flag).
+ */
+export function resolvePublicParquetTables(options: {
+  readonly tables?: readonly string[]
+  readonly includeFlyby?: boolean
+  readonly allowNonPublicTables?: boolean
+  readonly env?: Readonly<Record<string, string | undefined>>
+} = {}): string[] {
+  const env = options.env ?? process.env
+  const includeFlyby = options.includeFlyby ?? !isTruthyEnvFlag(env.EXCLUDE_FLYBY_PARQUET)
+
+  const requested = options.tables && options.tables.length > 0
+    ? options.tables.map(t => assertValidIdentifier(t, 'table name'))
+    : [...DEFAULT_PARQUET_TABLES]
+
+  const deduplicated: string[] = []
+  for (const table of requested) {
+    if (!options.allowNonPublicTables && !isPublicParquetTable(table)) {
+      throw new StorageError(
+        `Table "${table}" is not an approved public Parquet projection. Allowed tables: ${PUBLIC_PARQUET_TABLES.join(', ')}.`,
+      )
+    }
+    if (!includeFlyby && table === 'activities_flyby') {
+      continue
+    }
+    if (!deduplicated.includes(table)) {
+      deduplicated.push(table)
+    }
+  }
+
+  return deduplicated
+}
+
+/**
  * Serialized activity shape written to `apps/web/src/static/activities.json`.
  * Preserves the exact 15-field schema emitted by Python's `Generator.load()` + `ActivityJSONEncoder`.
  */
@@ -75,8 +147,27 @@ export interface ExportParquetOptions {
   readonly dbPath?: string
   /** Optional pre-opened DuckDB connection. Caller retains ownership. */
   readonly connection?: DuckDBConnection
-  /** Tables to export. Defaults to `['activities', 'activities_flyby']`. */
+  /** Tables to export. Defaults to `['activities', 'activities_flyby']` (subject to `includeFlyby`). */
   readonly tables?: readonly string[]
+  /**
+   * Whether to include `activities_flyby` in the Parquet export.
+   * Defaults to `true` (unless `EXCLUDE_FLYBY_PARQUET` is truthy in env) to preserve current public scope.
+   * Set to `false` to omit raw GPS flyby points from public Parquet exports.
+   */
+  readonly includeFlyby?: boolean
+  /**
+   * Whether to allow exporting non-public tables outside `PUBLIC_PARQUET_TABLES`.
+   * Defaults to `false` to prevent accidentally publishing internal tables (e.g. `vendor_activity_sync`).
+   */
+  readonly allowNonPublicTables?: boolean
+  /**
+   * Whether to apply privacy polyline filtering (`filterPolyline`) to `activities.summary_polyline`
+   * when exporting `activities.parquet`.
+   * Defaults to `true` unless `IGNORE_BEFORE_SAVING` is truthy in env.
+   */
+  readonly applyPolylineFilter?: boolean
+  /** Privacy polyline filtering options. */
+  readonly polylineOptions?: PolylinePrivacyOptions
   /** Output directory for `.parquet` files. Defaults to `resolveRuntimeConfig().dbDir` (`apps/web/public/db`). */
   readonly outputDir?: string
   readonly logger?: Logger
@@ -295,13 +386,83 @@ export async function exportActivitiesJson(
   }
 }
 
+async function exportSanitizedActivitiesParquet(
+  connection: DuckDBConnection,
+  escapedTempPath: string,
+  options: ExportParquetOptions,
+): Promise<void> {
+  const result = await connection.runAndReadAll(
+    'SELECT run_id, summary_polyline FROM activities WHERE summary_polyline IS NOT NULL',
+  )
+  const rows = result.getRowObjects()
+  const filteredPairs: { runId: number, summaryPolyline: string | null }[] = []
+  for (const row of rows) {
+    const runId = toNumber(row.run_id)
+    const rawPolyline = String(row.summary_polyline)
+    const sanitized = filterPolyline(rawPolyline, options.polylineOptions)
+    if (sanitized !== rawPolyline) {
+      filteredPairs.push({ runId, summaryPolyline: sanitized })
+    }
+  }
+
+  if (filteredPairs.length === 0) {
+    await connection.run(`COPY (SELECT * FROM "activities") TO '${escapedTempPath}' (FORMAT PARQUET);`)
+    return
+  }
+
+  const memHandle = await openDuckDBConnection({ dbPath: ':memory:' })
+  try {
+    const rawTempPath = `${escapedTempPath.replace(/''/g, '\'')}.raw`
+    const escapedRawTempPath = escapeSqlString(rawTempPath)
+    try {
+      await connection.run(`COPY (SELECT * FROM "activities") TO '${escapedRawTempPath}' (FORMAT PARQUET);`)
+      await memHandle.connection.run(
+        `CREATE TABLE activities_sanitized AS SELECT * FROM read_parquet('${escapedRawTempPath}');`,
+      )
+      const stmt = await memHandle.connection.prepare(
+        'UPDATE activities_sanitized SET summary_polyline = ? WHERE run_id = ?',
+      )
+      try {
+        for (const pair of filteredPairs) {
+          if (pair.summaryPolyline === null) {
+            stmt.bindNull(1)
+          }
+          else {
+            stmt.bindVarchar(1, pair.summaryPolyline)
+          }
+          stmt.bindBigInt(2, BigInt(pair.runId))
+          await stmt.run()
+        }
+      }
+      finally {
+        stmt.destroySync()
+      }
+      await memHandle.connection.run(
+        `COPY (SELECT * FROM activities_sanitized) TO '${escapedTempPath}' (FORMAT PARQUET);`,
+      )
+    }
+    finally {
+      if (fs.existsSync(rawTempPath)) {
+        fs.rmSync(rawTempPath, { force: true })
+      }
+    }
+  }
+  finally {
+    await memHandle.close()
+  }
+}
+
 async function exportParquetFromConnection(
   connection: DuckDBConnection,
   tables: readonly string[],
   outputDir: string,
+  options: ExportParquetOptions,
   logger: Logger,
 ): Promise<ExportParquetResult> {
   fs.mkdirSync(outputDir, { recursive: true })
+
+  const env = options.polylineOptions?.env ?? process.env
+  const shouldFilterPolyline = options.applyPolylineFilter ?? !isTruthyEnvFlag(env.IGNORE_BEFORE_SAVING)
 
   const exportedFiles: string[] = []
   const skippedTables: string[] = []
@@ -320,7 +481,12 @@ async function exportParquetFromConnection(
 
     try {
       logger.info(`Exporting table "${tableName}" to "${parquetPath}"...`)
-      await connection.run(`COPY (SELECT * FROM "${tableName}") TO '${escapedTempPath}' (FORMAT PARQUET);`)
+      if (tableName === 'activities' && shouldFilterPolyline) {
+        await exportSanitizedActivitiesParquet(connection, escapedTempPath, options)
+      }
+      else {
+        await connection.run(`COPY (SELECT * FROM "${tableName}") TO '${escapedTempPath}' (FORMAT PARQUET);`)
+      }
       fs.renameSync(tempParquetPath, parquetPath)
       exportedFiles.push(parquetPath)
       logger.info(`Successfully exported "${tableName}".`)
@@ -346,14 +512,25 @@ async function exportParquetFromConnection(
 /**
  * Exports DuckDB tables to Parquet files (defaults to `activities` and `activities_flyby`
  * under `apps/web/public/db`).
+ *
+ * Enforces the public projection boundary:
+ * - Rejects non-public tables unless `allowNonPublicTables: true` is passed.
+ * - Applies `filterPolyline` to `activities.summary_polyline` by default so Parquet
+ *   matches `activities.json` privacy clipping.
+ * - Supports omitting `activities_flyby` via `includeFlyby: false` or `EXCLUDE_FLYBY_PARQUET=1`.
  */
 export async function exportParquet(options: ExportParquetOptions = {}): Promise<ExportParquetResult> {
   const logger = options.logger ?? createLogger('storage.export')
-  const tables = options.tables && options.tables.length > 0 ? options.tables : DEFAULT_PARQUET_TABLES
+  const tables = resolvePublicParquetTables({
+    tables: options.tables,
+    includeFlyby: options.includeFlyby,
+    allowNonPublicTables: options.allowNonPublicTables,
+    env: options.polylineOptions?.env,
+  })
   const outputDir = path.resolve(options.outputDir ?? resolveRuntimeConfig().dbDir)
 
   if (options.connection) {
-    return exportParquetFromConnection(options.connection, tables, outputDir, logger)
+    return exportParquetFromConnection(options.connection, tables, outputDir, options, logger)
   }
 
   const dbPath = options.dbPath ?? resolveRuntimeConfig().sqlFile
@@ -362,7 +539,7 @@ export async function exportParquet(options: ExportParquetOptions = {}): Promise
     readOnly: true,
   })
   try {
-    return await exportParquetFromConnection(handle.connection, tables, outputDir, logger)
+    return await exportParquetFromConnection(handle.connection, tables, outputDir, options, logger)
   }
   finally {
     await handle.close()

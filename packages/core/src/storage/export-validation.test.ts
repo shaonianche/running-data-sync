@@ -16,7 +16,11 @@ import {
   computeActivityStreaks,
   exportActivitiesJson,
   exportParquet,
+  isPublicParquetTable,
   loadActivities,
+  PUBLIC_PARQUET_TABLES,
+  PUBLIC_PROJECTION_BOUNDARY,
+  resolvePublicParquetTables,
   serializeActivitiesJson,
 } from './export.js'
 import { filterPolyline, haversineDistanceKm } from './polyline.js'
@@ -196,11 +200,12 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
     expect(jsonResult.activities.map(a => a.streak)).toEqual([1, 2, 3])
     expect(fs.existsSync(jsonPath)).toBe(true)
 
-    // Export Parquet (including a nonexistent table to verify graceful skip)
+    // Export Parquet (explicitly allowing a nonexistent table to verify graceful skip when allowNonPublicTables is set)
     const pqResult = await exportParquet({
       dbPath,
       outputDir: parquetDir,
       tables: ['activities', 'activities_flyby', 'nonexistent_table'],
+      allowNonPublicTables: true,
     })
     expect(pqResult.exportedFiles).toEqual([
       path.join(parquetDir, 'activities.parquet'),
@@ -265,6 +270,105 @@ describe('activities.json export, Parquet export, and 3-way consistency validato
       dbPath,
       parquetPath: path.join(parquetDir, 'missing.parquet'),
       jsonPath,
+    })).rejects.toThrow(StorageError)
+  })
+})
+
+describe('public web projection boundary & sanitization consistency', () => {
+  it('defines explicit public vs private projection boundary and rejects non-public tables by default', () => {
+    expect(PUBLIC_PROJECTION_BOUNDARY.publicProjections.parquetTables).toEqual(PUBLIC_PARQUET_TABLES)
+    expect(PUBLIC_PROJECTION_BOUNDARY.privateAuthoritative.privateTables).toContain('vendor_activity_sync')
+    expect(isPublicParquetTable('activities')).toBe(true)
+    expect(isPublicParquetTable('activities_flyby')).toBe(true)
+    expect(isPublicParquetTable('vendor_activity_sync')).toBe(false)
+    expect(isPublicParquetTable('activities_flyby_queue')).toBe(false)
+
+    // Default preserves compatibility (activities + activities_flyby)
+    expect(resolvePublicParquetTables({ env: {} })).toEqual(['activities', 'activities_flyby'])
+
+    // Opt-in toggle omits activities_flyby cleanly
+    expect(resolvePublicParquetTables({ includeFlyby: false, env: {} })).toEqual(['activities'])
+    expect(resolvePublicParquetTables({ env: { EXCLUDE_FLYBY_PARQUET: '1' } })).toEqual(['activities'])
+
+    // Rejects private/internal tables
+    expect(() => resolvePublicParquetTables({ tables: ['activities', 'vendor_activity_sync'] }))
+      .toThrow(StorageError)
+    expect(() => resolvePublicParquetTables({ tables: ['activities_flyby_queue'] }))
+      .toThrow(StorageError)
+  })
+
+  it('applies identical filterPolyline privacy clipping to activities.json and activities.parquet, and toggles flyby cleanly', async () => {
+    const dir = makeTempDir()
+    const dbPath = path.join(dir, 'data.duckdb')
+    const parquetDir = path.join(dir, 'db')
+    const jsonPath = path.join(dir, 'static', 'activities.json')
+
+    const store = new DuckDBActivityStore({ dbPath })
+    await store.upsertActivities([
+      createOutdoorRunActivity({
+        run_id: 200001,
+        start_date: '2025-04-01T00:00:00Z',
+        start_date_local: '2025-04-01T08:00:00',
+        summary_polyline: FIXTURE_OUTDOOR_RUN_POLYLINE,
+      }),
+    ])
+    await store.storeFlybyPoints(createOutdoorRunFlybyPoints(200001))
+    await store.close()
+
+    const polylineOptions = {
+      ignoreStartEndRangeMeters: 700,
+      ignoreRangeMeters: 0,
+      ignorePoints: [],
+    }
+    const expectedClipped = filterPolyline(FIXTURE_OUTDOOR_RUN_POLYLINE, polylineOptions)
+    expect(expectedClipped).not.toBeNull()
+    expect(expectedClipped).not.toBe(FIXTURE_OUTDOOR_RUN_POLYLINE)
+
+    // Export JSON with privacy clipping
+    const jsonResult = await exportActivitiesJson({
+      dbPath,
+      outputPath: jsonPath,
+      polylineOptions,
+    })
+    expect(jsonResult.activities[0]?.summary_polyline).toBe(expectedClipped)
+
+    // Export Parquet with privacy clipping and includeFlyby: false
+    const pqResult = await exportParquet({
+      dbPath,
+      outputDir: parquetDir,
+      includeFlyby: false,
+      polylineOptions,
+    })
+    expect(pqResult.exportedFiles).toEqual([path.join(parquetDir, 'activities.parquet')])
+    expect(fs.existsSync(path.join(parquetDir, 'activities_flyby.parquet'))).toBe(false)
+
+    // Verify activities.parquet has the exact same clipped summary_polyline as activities.json
+    const memHandle = await openDuckDBConnection({ dbPath: ':memory:' })
+    try {
+      const pqPath = path.join(parquetDir, 'activities.parquet')
+      const rows = (await memHandle.connection.runAndReadAll(
+        `SELECT run_id, summary_polyline FROM read_parquet('${pqPath}')`,
+      )).getRowObjects()
+      expect(rows).toHaveLength(1)
+      expect(rows[0]?.summary_polyline).toBe(expectedClipped)
+    }
+    finally {
+      await memHandle.close()
+    }
+
+    // 3-way consistency check still passes when activities_flyby.parquet is omitted
+    const report = await validateDataConsistency({
+      dbPath,
+      parquetPath: path.join(parquetDir, 'activities.parquet'),
+      jsonPath,
+    })
+    expect(report.ok).toBe(true)
+
+    // Attempting to export private table fails with StorageError
+    await expect(exportParquet({
+      dbPath,
+      outputDir: parquetDir,
+      tables: ['vendor_activity_sync'],
     })).rejects.toThrow(StorageError)
   })
 })

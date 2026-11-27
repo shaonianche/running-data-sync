@@ -225,13 +225,18 @@ describe('cli command handlers with in-memory doubles', () => {
     expect(JSON.parse(jsonBuf.getStdout())).toMatchObject({ count: 3 })
 
     const parquetBuf = createBufferIO()
-    expect(await runCli(['data', 'parquet', '--tables', 'activities,activities_flyby'], parquetBuf.io, {
-      exportParquetFn: async () => ({
-        outputDir: '/tmp/db',
-        exportedFiles: ['/tmp/db/activities.parquet'],
-        skippedTables: [],
-      }),
+    let capturedIncludeFlyby: boolean | undefined
+    expect(await runCli(['data', 'parquet', '--tables', 'activities,activities_flyby', '--exclude-flyby'], parquetBuf.io, {
+      exportParquetFn: async (opts) => {
+        capturedIncludeFlyby = opts?.includeFlyby
+        return {
+          outputDir: '/tmp/db',
+          exportedFiles: ['/tmp/db/activities.parquet'],
+          skippedTables: [],
+        }
+      },
     })).toBe(0)
+    expect(capturedIncludeFlyby).toBe(false)
     expect(JSON.parse(parquetBuf.getStdout())).toMatchObject({ outputDir: '/tmp/db' })
 
     const validateBuf = createBufferIO()
