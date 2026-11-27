@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Marker } from 'react-map-gl/maplibre'
+import { prefersReducedMotion } from '@/utils/motion'
 import styles from './style.module.css'
 
 interface IRunMarkerProperties {
@@ -10,13 +11,25 @@ interface IRunMarkerProperties {
   coordinates: number[][]
 }
 
+function getFinalPosition(coordinates: number[][], startLon: number, startLat: number, endLon: number, endLat: number) {
+  if (coordinates?.length) {
+    const last = coordinates[coordinates.length - 1]
+    return { longitude: last[0], latitude: last[1] }
+  }
+  return { longitude: endLon ?? startLon, latitude: endLat ?? startLat }
+}
+
 function RunMarker({
   startLon,
   startLat,
+  endLon,
+  endLat,
   coordinates,
 }: IRunMarkerProperties) {
-  const [currentPosition, setCurrentPosition] = useState({ longitude: startLon, latitude: startLat })
-  const [isAnimating, setIsAnimating] = useState(true)
+  const reducedMotion = prefersReducedMotion()
+  const finalPosition = getFinalPosition(coordinates, startLon, startLat, endLon, endLat)
+  const [animatedPosition, setAnimatedPosition] = useState({ longitude: startLon, latitude: startLat })
+  const [isAnimating, setIsAnimating] = useState(!reducedMotion)
 
   const getDistance = useCallback((point1: { longitude: number, latitude: number }, point2: { longitude: number, latitude: number }) => {
     const dx = point2.longitude - point1.longitude
@@ -55,10 +68,10 @@ function RunMarker({
   }, [coordinates, startLon, startLat, getDistance])
 
   useEffect(() => {
-    if (!isAnimating || !coordinates?.length)
+    if (reducedMotion || !isAnimating || !coordinates?.length)
       return
 
-    let animationFrameId: number
+    let animationFrameId: number | null = null
     let startTime: number | null = null
     let lastTime: number | null = null
     let currentDist = 0
@@ -69,6 +82,9 @@ function RunMarker({
         { longitude: coordinates[i + 1][0], latitude: coordinates[i + 1][1] },
       )
     }, 0)
+
+    if (totalLength === 0)
+      return
 
     const SPEED = 0.000002
 
@@ -84,7 +100,7 @@ function RunMarker({
 
       const progress = Math.min(currentDist / totalLength, 1)
 
-      setCurrentPosition(getPositionOnPath(progress))
+      setAnimatedPosition(getPositionOnPath(progress))
 
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(animate)
@@ -97,11 +113,13 @@ function RunMarker({
     animationFrameId = requestAnimationFrame(animate)
 
     return () => {
-      if (animationFrameId) {
+      if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [isAnimating, coordinates, getDistance, getPositionOnPath])
+  }, [reducedMotion, isAnimating, coordinates, getDistance, getPositionOnPath])
+
+  const currentPosition = reducedMotion ? finalPosition : animatedPosition
 
   return (
     <Marker

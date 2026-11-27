@@ -30,6 +30,7 @@ import {
   USE_DASH_LINE,
 } from '@/utils/const'
 import { geoJsonForMap } from '@/utils/mapGeoJson'
+import { prefersReducedMotion } from '@/utils/motion'
 import { getMainColor } from '@/utils/utils'
 import RunMapButtons from './RunMapButtons'
 import RunMarker from './RunMarker'
@@ -265,7 +266,7 @@ function RunMap({
         {
           padding,
           maxZoom: isSmallScreen ? 14 : 15,
-          duration: 300,
+          duration: prefersReducedMotion() ? 0 : 300,
         },
       )
     }
