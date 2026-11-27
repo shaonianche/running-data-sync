@@ -1,3 +1,4 @@
+import type { Activity } from '@running-data-sync/core/types'
 import type { FeatureCollection, LineString } from 'geojson'
 import * as mapboxPolyline from '@mapbox/polyline'
 import { WebMercatorViewport } from '@math.gl/web-mercator'
@@ -12,26 +13,11 @@ import {
   RUN_TITLES,
 } from './const'
 
+export type { Activity }
+
 export type Coordinate = [number, number]
 
 export type RunIds = Array<number> | []
-
-export interface Activity {
-  run_id: number
-  name: string
-  distance: number
-  moving_time: number
-  type: string
-  subtype: string
-  start_date: string
-  start_date_local: string
-  location_country?: string | null
-  summary_polyline?: string | null
-  average_heartrate?: number | null
-  elevation_gain: number | null
-  average_speed: number
-  streak: number
-}
 
 function titleForShow(run: Activity): string {
   const date = run.start_date_local.slice(0, 11)

@@ -95,3 +95,10 @@ class TestConfig:
 
         for path in paths:
             assert os.path.isabs(str(path)), f"Path {path} should be absolute"
+
+    def test_web_output_paths_point_to_apps_web(self):
+        """Test that derived web output paths point under apps/web."""
+        from scripts.config import DB_FOLDER, JSON_FILE
+
+        assert DB_FOLDER.parts[-4:] == ("apps", "web", "public", "db")
+        assert JSON_FILE.parts[-5:] == ("apps", "web", "src", "static", "activities.json")

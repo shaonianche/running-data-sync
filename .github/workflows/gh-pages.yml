@@ -60,13 +60,13 @@ jobs:
         with:
           path: |
             activities
-            public
+            apps/web/public
             GPX_OUT
             TCX_OUT
             FIT_OUT
             Workouts
             run_page/data.db
-            src/static/activities.json
+            apps/web/src/static/activities.json
             imported.json
           key: ${{ inputs.data_cache_prefix }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
@@ -88,24 +88,24 @@ jobs:
       - uses: actions/cache@v6
         name: Setup pnpm cache
         with:
-          path: ${{ github.workspace }}/.pnpm-store
+          path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Build
         env:
           REPO_NAME: ${{ github.event.repository.name }}
-        run: PATH_PREFIX=/$REPO_NAME pnpm build
+        run: PATH_PREFIX=/$REPO_NAME pnpm --filter web build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
           # Upload dist repository
           name: pages-artifact
-          path: './dist'
+          path: './apps/web/dist'
 
   deploy:
     needs: build
