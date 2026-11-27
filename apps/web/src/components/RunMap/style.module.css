@@ -253,7 +253,7 @@
 .noDataText {
   padding: 20px;
   text-align: center;
-  color: var(--color-text-secondary, #555);
+  color: var(--color-text-secondary);
 }
 
 .markerStart {

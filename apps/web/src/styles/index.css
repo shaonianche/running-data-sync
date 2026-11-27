@@ -47,27 +47,32 @@
 
 @layer tokens {
   :root {
+    color-scheme: light dark;
     --color-primary: var(--color-brand);
     --color-background: var(--color-bg);
     --color-text-primary: var(--color-tx);
     --color-hr-primary: var(--color-hr);
-    --color-selected: var(--color-selected);
-    --color-svg-background: var(--color-svg-background);
-    --color-svg-line: var(--color-svg-line);
-    --color-svg-total-line: var(--color-svg-total-line);
-    --color-run-date: var(--color-run-date);
-    --color-run-table-thead: var(--color-run-table-thead);
-    --color-run-row-hover-background: var(--color-run-row-hover-background);
-    --font-sans: var(--font-sans);
-    --font-mono: var(--font-mono);
+    --font-sans: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  :root:has(> head > meta[name='color-scheme'][content='dark']) {
+    color-scheme: dark;
+  }
+
+  :root:has(> head > meta[name='color-scheme'][content='light']) {
+    color-scheme: light;
   }
 
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
       --color-brand: #e0ed5e;
       --color-bg: #1a1a1a;
+      --color-bg-secondary: #262626;
       --color-tx: #e0ed5e;
+      --color-text-secondary: #b3b3b3;
       --color-hr: #262626;
+      --color-border: #3a3a3a;
       --color-selected: #e0ed5e;
       --color-svg-background: #262626;
       --color-svg-total-line: #4dd2ff;
@@ -75,8 +80,6 @@
       --color-run-date: #dddddd;
       --color-run-table-thead: #9f9f9f;
       --color-run-row-hover-background: #262626;
-      --font-sans: 'IBM Plex Sans', sans-serif;
-      --font-mono: 'IBM Plex Mono', monospace;
     }
   }
 
@@ -84,25 +87,30 @@
     :root:not([data-theme]) {
       --color-brand: #024a70;
       --color-bg: #f5f5f5;
+      --color-bg-secondary: #e5e5e5;
       --color-tx: #024a70;
+      --color-text-secondary: #595959;
       --color-hr: #d4d4d4;
+      --color-border: #d4d4d4;
       --color-selected: #024a70;
       --color-svg-background: #e5e5e5;
       --color-svg-line: #0069a8;
       --color-svg-total-line: #525252;
       --color-run-date: #262626;
-      --color-run-table-thead: #9f9f9f;
+      --color-run-table-thead: #595959;
       --color-run-row-hover-background: #e5e5e5;
-      --font-sans: 'IBM Plex Sans', sans-serif;
-      --font-mono: 'IBM Plex Mono', monospace;
     }
   }
 
   [data-theme='dark'] {
+    color-scheme: dark;
     --color-brand: #e0ed5e;
     --color-bg: #1a1a1a;
+    --color-bg-secondary: #262626;
     --color-tx: #e0ed5e;
+    --color-text-secondary: #b3b3b3;
     --color-hr: #262626;
+    --color-border: #3a3a3a;
     --color-selected: #e0ed5e;
     --color-svg-background: #262626;
     --color-svg-total-line: #4dd2ff;
@@ -110,24 +118,24 @@
     --color-run-date: #dddddd;
     --color-run-table-thead: #9f9f9f;
     --color-run-row-hover-background: #262626;
-    --font-sans: 'IBM Plex Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
   }
 
   [data-theme='light'] {
+    color-scheme: light;
     --color-brand: #024a70;
     --color-bg: #f5f5f5;
+    --color-bg-secondary: #e5e5e5;
     --color-tx: #024a70;
+    --color-text-secondary: #595959;
     --color-hr: #d4d4d4;
+    --color-border: #d4d4d4;
     --color-selected: #024a70;
     --color-svg-background: #e5e5e5;
     --color-svg-line: #0069a8;
     --color-svg-total-line: #525252;
     --color-run-date: #262626;
-    --color-run-table-thead: #9f9f9f;
+    --color-run-table-thead: #595959;
     --color-run-row-hover-background: #e5e5e5;
-    --font-sans: 'IBM Plex Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
   }
 }
 
