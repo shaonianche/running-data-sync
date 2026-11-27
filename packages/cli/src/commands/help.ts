@@ -69,6 +69,7 @@ export function formatSubcommandHelp(topic: string): string {
         '  --id <id>                Export specific activity ID (repeatable)',
         '  --id-range <start:end>   Export inclusive activity ID range',
         '  --output-dir <dir>       Output directory override',
+        '  --upload-private         Upload exported files to private R2/S3 object store',
         '',
       ].join('\n')
     case 'data':

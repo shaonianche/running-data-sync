@@ -1,4 +1,23 @@
 export {
+  assertValidActivityId,
+  assertValidSha256,
+  assertValidWorkoutFormat,
+  buildRawStravaArtifactKey,
+  buildWorkoutArtifactKey,
+  type CommitArtifactReferenceFn,
+  computeArtifactSha256,
+  type GetWorkoutArtifactResult,
+  type ParsedRawStravaArtifactKey,
+  type ParsedWorkoutArtifactKey,
+  type PrivateArtifactNamespace,
+  PrivateArtifactStore,
+  type PutWorkoutArtifactOptions,
+  type PutWorkoutArtifactResult,
+  resolveWorkoutContentType,
+  type WorkoutArtifactFormat,
+  type WorkoutArtifactReference,
+} from './artifact-store.js'
+export {
   assertValidIdentifier,
   type DuckDBConnectionOptions,
   type DuckDBHandle,
