@@ -169,9 +169,15 @@ importers:
 
   packages/core:
     dependencies:
+      '@duckdb/node-api':
+        specifier: 1.4.4-r.4
+        version: 1.4.4-r.4
       '@garmin/fitsdk':
         specifier: ^21.222.0
         version: 21.222.0
+      '@mapbox/polyline':
+        specifier: ^1.2.1
+        version: 1.2.1
       fast-xml-parser:
         specifier: ^5.12.1
         version: 5.12.1
@@ -179,6 +185,9 @@ importers:
         specifier: ^0.8.3
         version: 0.8.3
     devDependencies:
+      '@types/mapbox__polyline':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@types/node':
         specifier: ^26.1.2
         version: 26.6.11
@@ -404,6 +413,42 @@ packages:
 
   '@duckdb/duckdb-wasm@1.29.1-dev132.0':
     resolution: {integrity: sha512-OUkJuH9564GQ/OgggdgJ/Yxmlk5PYnWiJe0rrNkEs0Sfsi00nK6WZgJmWGGAtCK6le2KJxFWZ4Z2MjUKGBzLuQ==}
+
+  '@duckdb/node-api@1.4.4-r.4':
+    resolution: {integrity: sha512-yUotG8wPSmmEFxAODt07rXJZgV2fhvzhnZX3wrMspQNEaNVwXArzakgKyfakZkYL9me7SK9eDnXYv/XbdifWEg==}
+
+  '@duckdb/node-bindings-darwin-arm64@1.4.4-r.4':
+    resolution: {integrity: sha512-ozQbuBlV+01WzyXcqXjEV3TbN+qQ8UcelwPmQaqBn86pdXQHuYGuS8K9a5yATsg+JvivqHQSb95OBHdP7FYDkA==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@duckdb/node-bindings-darwin-x64@1.4.4-r.4':
+    resolution: {integrity: sha512-quoPmg26/fpLM80UNMXYSYKGnXJUiqKTSlDIgONQiMVYXJqPc2yz9qwcTuZgaQx7JhD2m1D/cc+h/4d8yVD79Q==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@duckdb/node-bindings-linux-arm64@1.4.4-r.4':
+    resolution: {integrity: sha512-Ve+kJ9+IqF5VBNWDzlUeg1xxKGHGqT9MJPxjRTSULgCpguL9ok13Klhw7WJQOs5ycB+osQe/40t5hOZk3cK82g==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@duckdb/node-bindings-linux-x64@1.4.4-r.4':
+    resolution: {integrity: sha512-jBTL/WvfwxLToFa/pVHfT6elMtltJGnc3wSuxZD9OfMltit9YUdVFS37vBFQzXMT1Z8OWjtSjMh+zPKxOwHLHA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@duckdb/node-bindings-win32-arm64@1.4.4-r.4':
+    resolution: {integrity: sha512-4tqE7r1c4wCqgm1iBfW/rP6B67nkHK1Pyj6dT8T3aqupKk2eV0QgKPBYtGOqOlE+jdhj4El9WKye7eTJ59yjZQ==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@duckdb/node-bindings-win32-x64@1.4.4-r.4':
+    resolution: {integrity: sha512-lclo7ZibsYuCHd0ru5j9sw9x+wfXWOiNWIOjW3rcX9675xD7j4CB3RlWfZkBgdajLuXtRuo5FFfQZY249a7IlA==}
+    cpu: [x64]
+    os: [win32]
+
+  '@duckdb/node-bindings@1.4.4-r.4':
+    resolution: {integrity: sha512-JYjCaZmqvqrjFBjT3Q6jnb3OFz26lAUTFXUka/HQRxWRy23ZiURZwPYMLkyFBLHa696hNlC85M/EWXDRFnDIfg==}
 
   '@es-joy/jsdoccomment@0.50.2':
     resolution: {integrity: sha512-YAdE/IJSpwbOTiaURNCKECdAwqrJuFiZhylmesBcIRawtYKnBR2wxPhoIewMg+Yu+QuYvHfJNReWpoxGBKOChA==}
@@ -2287,7 +2332,6 @@ packages:
   eslint@9.34.0:
     resolution: {integrity: sha512-RNCHRX5EwdrESy3Jc9o8ie8Bog+PeYvvSR8sDGoZxNFTvZ4dlxUB3WzQ3bQMztFrSRODGrLLj8g6OFuGY/aiQg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -4129,6 +4173,37 @@ snapshots:
   '@duckdb/duckdb-wasm@1.29.1-dev132.0':
     dependencies:
       apache-arrow: 17.0.0
+
+  '@duckdb/node-api@1.4.4-r.4':
+    dependencies:
+      '@duckdb/node-bindings': 1.4.4-r.4
+
+  '@duckdb/node-bindings-darwin-arm64@1.4.4-r.4':
+    optional: true
+
+  '@duckdb/node-bindings-darwin-x64@1.4.4-r.4':
+    optional: true
+
+  '@duckdb/node-bindings-linux-arm64@1.4.4-r.4':
+    optional: true
+
+  '@duckdb/node-bindings-linux-x64@1.4.4-r.4':
+    optional: true
+
+  '@duckdb/node-bindings-win32-arm64@1.4.4-r.4':
+    optional: true
+
+  '@duckdb/node-bindings-win32-x64@1.4.4-r.4':
+    optional: true
+
+  '@duckdb/node-bindings@1.4.4-r.4':
+    optionalDependencies:
+      '@duckdb/node-bindings-darwin-arm64': 1.4.4-r.4
+      '@duckdb/node-bindings-darwin-x64': 1.4.4-r.4
+      '@duckdb/node-bindings-linux-arm64': 1.4.4-r.4
+      '@duckdb/node-bindings-linux-x64': 1.4.4-r.4
+      '@duckdb/node-bindings-win32-arm64': 1.4.4-r.4
+      '@duckdb/node-bindings-win32-x64': 1.4.4-r.4
 
   '@es-joy/jsdoccomment@0.50.2':
     dependencies:
