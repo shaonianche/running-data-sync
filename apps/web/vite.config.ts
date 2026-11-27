@@ -1,4 +1,5 @@
 import process from 'node:process'
+import svgo from '@svgr/plugin-svgo'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
@@ -19,7 +20,7 @@ export default defineConfig({
       svgrOptions: {
         exportType: 'named',
         namedExport: 'ReactComponent',
-        plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
+        plugins: [svgo, '@svgr/plugin-jsx'],
         svgoConfig: {
           floatPrecision: 2,
           plugins: [
