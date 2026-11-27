@@ -52,7 +52,7 @@ const factories: readonly StoreFactory[] = [
   {
     name: 'DuckDBActivityStore (:memory:)',
     async create() {
-      const store = new DuckDBActivityStore({ dbPath: ':memory:', encryptionKey: null })
+      const store = new DuckDBActivityStore({ dbPath: ':memory:' })
       return {
         store,
         async cleanup() {
@@ -62,14 +62,11 @@ const factories: readonly StoreFactory[] = [
     },
   },
   {
-    name: 'DuckDBActivityStore (encrypted file)',
+    name: 'DuckDBActivityStore (file)',
     async create() {
       const dir = makeTempDir()
-      const dbPath = path.join(dir, 'contract-encrypted.duckdb')
-      const store = new DuckDBActivityStore({
-        dbPath,
-        encryptionKey: 'contract-test-secret-key-2026',
-      })
+      const dbPath = path.join(dir, 'contract.duckdb')
+      const store = new DuckDBActivityStore({ dbPath })
       return {
         store,
         async cleanup() {

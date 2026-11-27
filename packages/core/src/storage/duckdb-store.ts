@@ -7,7 +7,6 @@ import type {
   VendorSyncFilter,
   VendorSyncUpsertInput,
 } from '../contracts/storage.js'
-import type { LoadEnvConfigOptions } from '../foundation/config.js'
 import type { Logger } from '../foundation/logger.js'
 import type { Activity, FlybyPoint, VendorSyncRow } from '../foundation/types.js'
 import type { DuckDBHandle } from './connection.js'
@@ -32,15 +31,6 @@ export interface DuckDBActivityStoreOptions {
   readonly dbPath?: string
   /** Open the database in read-only mode. Defaults to `false`. */
   readonly readOnly?: boolean
-  /**
-   * Explicit encryption key for DuckDB encrypted databases.
-   * - Non-empty string: attach using this key.
-   * - `null` or `''`: explicitly open unencrypted (skip `.env.local` / `process.env`).
-   * - `undefined`: resolve `DUCKDB_ENCRYPTION_KEY` via `loadEnvConfig(envOptions)` for file-backed DBs.
-   */
-  readonly encryptionKey?: string | null
-  /** Optional overrides when resolving `DUCKDB_ENCRYPTION_KEY`. */
-  readonly envOptions?: LoadEnvConfigOptions
   /** Automatically create/migrate tables & primary keys on first writable open. Defaults to `true`. */
   readonly autoMigrate?: boolean
   readonly logger?: Logger
@@ -136,8 +126,6 @@ function wrapStorageError(action: string, error: unknown): StorageError {
 export class DuckDBActivityStore implements ActivityStorePort {
   readonly dbPath: string
   readonly readOnly: boolean
-  private readonly encryptionKey: string | null | undefined
-  private readonly envOptions: LoadEnvConfigOptions | undefined
   private readonly autoMigrate: boolean
   private readonly logger: Logger
   private handle: DuckDBHandle | null = null
@@ -147,8 +135,6 @@ export class DuckDBActivityStore implements ActivityStorePort {
   constructor(options: DuckDBActivityStoreOptions = {}) {
     this.dbPath = options.dbPath ?? resolveRuntimeConfig().sqlFile
     this.readOnly = options.readOnly ?? false
-    this.encryptionKey = options.encryptionKey
-    this.envOptions = options.envOptions
     this.autoMigrate = options.autoMigrate ?? true
     this.logger = options.logger ?? createLogger('storage.duckdb')
   }
@@ -176,8 +162,6 @@ export class DuckDBActivityStore implements ActivityStorePort {
         const handle = await openDuckDBConnection({
           dbPath: this.dbPath,
           readOnly: this.readOnly,
-          encryptionKey: this.encryptionKey,
-          envOptions: this.envOptions,
         })
         try {
           if (!this.readOnly && this.autoMigrate) {

@@ -1,5 +1,4 @@
 import type { DuckDBConnection } from '@duckdb/node-api'
-import type { LoadEnvConfigOptions } from '../foundation/config.js'
 import type { Logger } from '../foundation/logger.js'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -34,10 +33,6 @@ export interface ValidateDataConsistencyOptions {
   readonly parquetPath?: string
   /** Path to `activities.json`. Defaults to `resolveRuntimeConfig().jsonFile`. */
   readonly jsonPath?: string
-  /** Encryption key override when opening `dbPath`. */
-  readonly encryptionKey?: string | null
-  /** Optional `.env.local` / `process.env` options when resolving `DUCKDB_ENCRYPTION_KEY`. */
-  readonly envOptions?: LoadEnvConfigOptions
   readonly logger?: Logger
 }
 
@@ -90,7 +85,7 @@ async function readDbStats(connection: DuckDBConnection): Promise<ConsistencySou
 }
 
 async function readParquetStats(parquetPath: string): Promise<ConsistencySourceStats> {
-  const handle = await openDuckDBConnection({ dbPath: ':memory:', encryptionKey: null })
+  const handle = await openDuckDBConnection({ dbPath: ':memory:' })
   try {
     const escapedPath = escapeSqlString(parquetPath)
     const result = await handle.connection.runAndReadAll(
@@ -137,8 +132,6 @@ export async function validateDataConsistency(
     const handle = await openDuckDBConnection({
       dbPath,
       readOnly: true,
-      encryptionKey: options.encryptionKey,
-      envOptions: options.envOptions,
     })
     try {
       dbStats = await readDbStats(handle.connection)

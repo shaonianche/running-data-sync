@@ -1,5 +1,4 @@
 import type { DuckDBConnection } from '@duckdb/node-api'
-import type { LoadEnvConfigOptions } from '../foundation/config.js'
 import type { Logger } from '../foundation/logger.js'
 import type { PolylinePrivacyOptions } from './polyline.js'
 import fs from 'node:fs'
@@ -48,10 +47,6 @@ export interface LoadActivitiesOptions {
   readonly dbPath?: string
   /** Optional pre-opened DuckDB connection. Caller retains ownership. */
   readonly connection?: DuckDBConnection
-  /** Encryption key override (same semantics as `openDuckDBConnection`). */
-  readonly encryptionKey?: string | null
-  /** Optional `.env.local` / `process.env` options when resolving `DUCKDB_ENCRYPTION_KEY`. */
-  readonly envOptions?: LoadEnvConfigOptions
   /** Restrict exported records to `type === 'Run'`. Defaults to `false`. */
   readonly onlyRun?: boolean
   /**
@@ -80,10 +75,6 @@ export interface ExportParquetOptions {
   readonly dbPath?: string
   /** Optional pre-opened DuckDB connection. Caller retains ownership. */
   readonly connection?: DuckDBConnection
-  /** Encryption key override (same semantics as `openDuckDBConnection`). */
-  readonly encryptionKey?: string | null
-  /** Optional `.env.local` / `process.env` options when resolving `DUCKDB_ENCRYPTION_KEY`. */
-  readonly envOptions?: LoadEnvConfigOptions
   /** Tables to export. Defaults to `['activities', 'activities_flyby']`. */
   readonly tables?: readonly string[]
   /** Output directory for `.parquet` files. Defaults to `resolveRuntimeConfig().dbDir` (`apps/web/public/db`). */
@@ -261,8 +252,6 @@ export async function loadActivities(options: LoadActivitiesOptions = {}): Promi
   const handle = await openDuckDBConnection({
     dbPath,
     readOnly: true,
-    encryptionKey: options.encryptionKey,
-    envOptions: options.envOptions,
   })
   try {
     return await loadFromConnection(handle.connection, options)
@@ -371,8 +360,6 @@ export async function exportParquet(options: ExportParquetOptions = {}): Promise
   const handle = await openDuckDBConnection({
     dbPath,
     readOnly: true,
-    encryptionKey: options.encryptionKey,
-    envOptions: options.envOptions,
   })
   try {
     return await exportParquetFromConnection(handle.connection, tables, outputDir, logger)

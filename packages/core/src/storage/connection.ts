@@ -1,9 +1,8 @@
 import type { DuckDBConnection, DuckDBInstance } from '@duckdb/node-api'
-import type { LoadEnvConfigOptions } from '../foundation/config.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { DuckDBDecimalValue, DuckDBInstance as DuckDBInstanceClass, DuckDBTimestampValue } from '@duckdb/node-api'
-import { loadEnvConfig, resolveRuntimeConfig } from '../foundation/config.js'
+import { resolveRuntimeConfig } from '../foundation/config.js'
 import { StorageError } from '../foundation/errors.js'
 
 const IDENTIFIER_PATTERN = /^[A-Z_]\w*$/i
@@ -13,21 +12,11 @@ export interface DuckDBConnectionOptions {
   readonly dbPath?: string
   /** Open database in read-only mode. Defaults to `false`. */
   readonly readOnly?: boolean
-  /**
-   * Explicit encryption key for DuckDB encrypted databases.
-   * - Non-empty string: attach using this key.
-   * - `null` or `''`: explicitly open unencrypted (skip `.env.local` / `process.env` lookup).
-   * - `undefined`: automatically resolve `DUCKDB_ENCRYPTION_KEY` via `loadEnvConfig(envOptions)` for file-backed DBs.
-   */
-  readonly encryptionKey?: string | null
-  /** Optional overrides when resolving `DUCKDB_ENCRYPTION_KEY` from `.env.local` / environment variables. */
-  readonly envOptions?: LoadEnvConfigOptions
 }
 
 export interface DuckDBHandle {
   readonly dbPath: string
   readonly readOnly: boolean
-  readonly encrypted: boolean
   readonly instance: DuckDBInstance
   readonly connection: DuckDBConnection
   close: () => Promise<void>
@@ -44,39 +33,10 @@ export function assertValidIdentifier(identifier: string, label = 'SQL identifie
   return identifier
 }
 
-export function resolveEncryptionKey(
-  options: Pick<DuckDBConnectionOptions, 'dbPath' | 'encryptionKey' | 'envOptions'> = {},
-): string | undefined {
-  if (options.dbPath === ':memory:') {
-    return undefined
-  }
-  if (options.encryptionKey === null) {
-    return undefined
-  }
-  if (typeof options.encryptionKey === 'string') {
-    const trimmed = options.encryptionKey.trim()
-    return trimmed.length > 0 ? trimmed : undefined
-  }
-  return loadEnvConfig(options.envOptions).duckdbEncryptionKey
-}
-
-function sanitizeErrorMessage(error: unknown, secret?: string): string {
-  const raw = error instanceof Error ? error.message : String(error)
-  if (!secret) {
-    return raw
-  }
-  return raw.split(secret).join('***')
-}
-
 export async function openDuckDBConnection(options: DuckDBConnectionOptions = {}): Promise<DuckDBHandle> {
   const dbPath = options.dbPath ?? resolveRuntimeConfig().sqlFile
   const readOnly = options.readOnly ?? false
   const isMemory = dbPath === ':memory:'
-  const encryptionKey = resolveEncryptionKey({
-    dbPath,
-    encryptionKey: options.encryptionKey,
-    envOptions: options.envOptions,
-  })
 
   if (!isMemory && !readOnly) {
     fs.mkdirSync(path.dirname(dbPath), { recursive: true })
@@ -86,18 +46,7 @@ export async function openDuckDBConnection(options: DuckDBConnectionOptions = {}
   let connection: DuckDBConnection | null = null
 
   try {
-    if (encryptionKey) {
-      instance = await DuckDBInstanceClass.create(':memory:')
-      connection = await instance.connect()
-      const readOnlyFlag = readOnly ? 'TRUE' : 'FALSE'
-      const escapedPath = escapeSqlString(dbPath)
-      const escapedKey = escapeSqlString(encryptionKey)
-      await connection.run(
-        `ATTACH '${escapedPath}' AS main_db (TYPE DUCKDB, READ_ONLY ${readOnlyFlag}, ENCRYPTION_KEY '${escapedKey}')`,
-      )
-      await connection.run('USE main_db')
-    }
-    else if (isMemory) {
+    if (isMemory) {
       instance = await DuckDBInstanceClass.create(':memory:')
       connection = await instance.connect()
     }
@@ -124,11 +73,8 @@ export async function openDuckDBConnection(options: DuckDBConnectionOptions = {}
         // Ignore cleanup failure when open fails.
       }
     }
-    const detail = sanitizeErrorMessage(error, encryptionKey)
-    const context = encryptionKey
-      ? `Failed to open encrypted DuckDB database "${dbPath}": ${detail}`
-      : `Failed to open DuckDB database "${dbPath}": ${detail}`
-    throw new StorageError(context, { cause: error })
+    const detail = error instanceof Error ? error.message : String(error)
+    throw new StorageError(`Failed to open DuckDB database "${dbPath}": ${detail}`, { cause: error })
   }
 
   let closed = false
@@ -148,7 +94,6 @@ export async function openDuckDBConnection(options: DuckDBConnectionOptions = {}
   return {
     dbPath,
     readOnly,
-    encrypted: Boolean(encryptionKey),
     instance,
     connection,
     close,
