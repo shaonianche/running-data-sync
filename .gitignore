@@ -22,3 +22,9 @@ coverage/
 
 # Local environment
 .env*
+
+# Private DuckDB snapshots & WAL sidecars (forward-only untracking)
+data/data.duckdb
+*.duckdb.wal
+*.duckdb.tmp
+*.snapshot-state.json

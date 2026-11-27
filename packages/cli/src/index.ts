@@ -7,6 +7,7 @@ import {
   RunningDataSyncError,
 } from '@running-data-sync/core'
 import { handleData } from './commands/data.js'
+import { handleDb } from './commands/db.js'
 import { handleExport } from './commands/export.js'
 import { handleGarmin } from './commands/garmin.js'
 import { formatUsage } from './commands/help.js'
@@ -72,6 +73,10 @@ export async function runCli(
         return await handleExport(rest, ctx)
       case 'data':
         return await handleData(rest, ctx)
+      case 'db':
+        return await handleDb(rest, ctx, ctx.deps.createObjectStore
+          ? { createObjectStore: () => ctx.deps.createObjectStore!() }
+          : undefined)
       case 'svg':
         return await handleSvg(rest, ctx)
       default:

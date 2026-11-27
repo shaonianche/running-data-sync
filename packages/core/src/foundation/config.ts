@@ -116,10 +116,15 @@ export function resolveRuntimeConfig(overrides: Partial<RuntimeConfig> = {}): Ru
     : path.join(projectRoot, 'data')
   const webRoot = path.join(projectRoot, 'apps', 'web')
 
+  const envSqlFile = process.env.RUNNING_DATA_SYNC_DB_PATH?.trim()
   return {
     projectRoot,
     dataRoot,
-    sqlFile: overrides.sqlFile ? path.resolve(overrides.sqlFile) : path.join(dataRoot, 'data.duckdb'),
+    sqlFile: overrides.sqlFile
+      ? path.resolve(overrides.sqlFile)
+      : envSqlFile
+        ? path.resolve(envSqlFile)
+        : path.join(dataRoot, 'data.duckdb'),
     fitDir: overrides.fitDir ? path.resolve(overrides.fitDir) : path.join(dataRoot, 'FIT_OUT'),
     tcxDir: overrides.tcxDir ? path.resolve(overrides.tcxDir) : path.join(dataRoot, 'TCX_OUT'),
     gpxDir: overrides.gpxDir ? path.resolve(overrides.gpxDir) : path.join(dataRoot, 'GPX_OUT'),
