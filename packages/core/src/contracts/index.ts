@@ -9,6 +9,15 @@ export type {
   ParseTrackOptions,
   TrackPoint,
 } from './formats.js'
+export {
+  type ObjectStoreGetResult,
+  type ObjectStoreHeadResult,
+  type ObjectStoreListItem,
+  type ObjectStorePort,
+  type ObjectStorePutOptions,
+  type ObjectStorePutResult,
+  PreconditionFailedError,
+} from './object-store.js'
 export type {
   ActivityIdRange,
   ActivityQueryFilter,

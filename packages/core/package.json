@@ -33,6 +33,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1178.0",
     "@duckdb/node-api": "1.4.4-r.4",
     "@garmin/fitsdk": "^21.222.0",
     "@mapbox/polyline": "^1.2.1",
