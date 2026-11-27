@@ -4,12 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { parseArgs } from 'node:util'
-import { ConfigurationError, R2ObjectStore } from '@running-data-sync/core'
-// NOTE for integration lead: once `DuckDBSnapshotManager` is re-exported from
-// `@running-data-sync/core` (via `packages/core/src/storage/index.ts` and
-// `packages/core/src/index.ts`), switch this import to `@running-data-sync/core`.
-// eslint-disable-next-line antfu/no-import-dist
-import { DuckDBSnapshotManager } from '../../../core/dist/storage/snapshot.js'
+import { ConfigurationError, DuckDBSnapshotManager, R2ObjectStore } from '@running-data-sync/core'
 import { parseIntegerOption } from './context.js'
 
 export const DB_COMMAND_HELP = `Usage: running-data-sync db <subcommand> [options]

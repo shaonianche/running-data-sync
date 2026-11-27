@@ -1,3 +1,5 @@
+import { DB_COMMAND_HELP } from './db.js'
+
 export function formatUsage(): string {
   return [
     'Usage: running-data-sync <command> [options]',
@@ -14,6 +16,7 @@ export function formatUsage(): string {
     '  data json            Export activities.json from DuckDB',
     '  data parquet         Export Parquet tables from DuckDB',
     '  data validate        Validate 3-way consistency (DuckDB, JSON, Parquet)',
+    '  db <subcommand>      Manage versioned DuckDB snapshots in private R2/S3',
     '  svg                  Generate GitHub / Grid SVG posters',
     '',
     'Options:',
@@ -82,6 +85,8 @@ export function formatSubcommandHelp(topic: string): string {
         '  validate         Validate 3-way consistency across DuckDB, JSON, and Parquet',
         '',
       ].join('\n')
+    case 'db':
+      return DB_COMMAND_HELP
     case 'svg':
       return [
         'Usage: running-data-sync svg [--from-db | --gpx-dir <dir>] --type <github|grid> --output <file> [options]',

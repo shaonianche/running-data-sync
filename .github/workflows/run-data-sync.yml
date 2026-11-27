@@ -29,6 +29,10 @@ env:
   SPECIAL_COLOR2_LIGHT: '#ff8904'
   USE_CLOUDFLARE_WARP: true  # If you want to use Cloudflare WARP to bypass network restrictions, set it to `true`. Currently only Garmin needs this.
 
+concurrency:
+  group: strava-sync
+  cancel-in-progress: false
+
 jobs:
   sync:
     name: Sync
@@ -59,10 +63,6 @@ jobs:
         with:
           path: |
             apps/web/public
-            data/GPX_OUT
-            data/TCX_OUT
-            data/FIT_OUT
-            data/data.duckdb
             apps/web/src/static/activities.json
           key: ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
@@ -132,6 +132,18 @@ jobs:
       - name: Build core and CLI packages
         run: pnpm --filter @running-data-sync/core --filter @running-data-sync/cli build
 
+      - name: Pull DuckDB snapshot from private R2
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: |
+          DB_PATH="${{ runner.temp }}/data.duckdb"
+          echo "RUNNING_DATA_SYNC_DB_PATH=$DB_PATH" >> "$GITHUB_ENV"
+          node packages/cli/dist/cli.js db pull --output "$DB_PATH" >/dev/null
+
       - name: Run sync Strava -> DuckDB
         run: node packages/cli/dist/cli.js sync db --client-id '${{ secrets.S_CLIENT_ID }}' --client-secret '${{ secrets.S_CLIENT_SECRET }}' --refresh-token '${{ secrets.S_REFRESH_TOKEN }}'
 
@@ -171,6 +183,15 @@ jobs:
           node packages/cli/dist/cli.js svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --min-distance 0.5 --output apps/web/public/assets/github-light.svg
           node packages/cli/dist/cli.js svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --output apps/web/public/assets/grid-light.svg
 
+      - name: Push DuckDB snapshot to private R2
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+        run: node packages/cli/dist/cli.js db push --input "$RUNNING_DATA_SYNC_DB_PATH" >/dev/null
+
       - name: Disconnect Cloudflare WARP
         if: env.USE_CLOUDFLARE_WARP == 'true'
         run: |
@@ -183,7 +204,6 @@ jobs:
               exit 0
           fi
           for path in \
-            data/data.duckdb \
             apps/web/src/static/activities.json \
             apps/web/public/assets/github.svg \
             apps/web/public/assets/grid.svg \
@@ -195,6 +215,7 @@ jobs:
               git add "$path"
             fi
           done
+          node scripts/check-private-data-leak.mjs --staged
           if git diff --cached --quiet; then
               echo "No changes to commit"
               exit 0
