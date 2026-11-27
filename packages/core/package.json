@@ -30,7 +30,10 @@
   },
   "dependencies": {
     "@duckdb/node-api": "1.4.4-r.4",
-    "@mapbox/polyline": "^1.2.1"
+    "@garmin/fitsdk": "^21.222.0",
+    "@mapbox/polyline": "^1.2.1",
+    "fast-xml-parser": "^5.12.1",
+    "fflate": "^0.8.3"
   },
   "devDependencies": {
     "@types/mapbox__polyline": "^1.0.5",
