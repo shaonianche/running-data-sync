@@ -32,5 +32,8 @@
     "@types/node": "^26.1.2",
     "typescript": "^5.8.3",
     "vitest": "^4.1.8"
+  },
+  "dependencies": {
+    "@photostructure/tz-lookup": "^11.8.0"
   }
 }
