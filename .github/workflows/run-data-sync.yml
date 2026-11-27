@@ -58,12 +58,12 @@ jobs:
         uses: actions/cache@v6
         with:
           path: |
-            public
+            apps/web/public
             data/GPX_OUT
             data/TCX_OUT
             data/FIT_OUT
             data/data.duckdb
-            src/static/activities.json
+            apps/web/src/static/activities.json
             imported.json
           key: ${{ steps.set_output.outputs.DATA_CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
@@ -168,9 +168,9 @@ jobs:
         id: data_changes
         run: |
           if git diff --quiet -- \
-            src/static/activities.json \
-            public/db/activities.parquet \
-            public/db/activities_flyby.parquet; then
+            apps/web/src/static/activities.json \
+            apps/web/public/db/activities.parquet \
+            apps/web/public/db/activities_flyby.parquet; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
             echo "No new activity data"
           else
@@ -181,10 +181,10 @@ jobs:
       - name: Make svg GitHub profile
         if: env.RUN_TYPE != 'pass' && steps.data_changes.outputs.has_changes == 'true'
         run: |
-          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --use-localtime --min-distance 0.5 --output public/assets/github.svg
-          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid.svg
-          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity-color '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output public/assets/github-light.svg
-          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output public/assets/grid-light.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --special-color yellow --special-color2 red --use-localtime --min-distance 0.5 --output apps/web/public/assets/github.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --special-color yellow --special-color2 red --special-distance 10 --special-distance2 20 --use-localtime --output apps/web/public/assets/grid.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE }}' --type github --athlete '${{ env.ATHLETE }}' --special-distance 10 --special-distance2 20 --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --no-activity-color '${{ env.NO_ACTIVITY_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --use-localtime --min-distance 0.5 --output apps/web/public/assets/github-light.svg
+          pdm run gen_svg --from-db --title '${{ env.TITLE_GRID }}' --type grid --athlete '${{ env.ATHLETE }}' --min-distance '${{ env.MIN_GRID_DISTANCE }}' --background-color '${{ env.BACKGROUND_COLOR_LIGHT }}' --text-color '${{ env.TEXT_COLOR_LIGHT }}' --track-color '${{ env.TRACK_COLOR_LIGHT }}' --special-color '${{ env.SPECIAL_COLOR_LIGHT }}' --special-color2 '${{ env.SPECIAL_COLOR2_LIGHT }}' --special-distance 10 --special-distance2 20 --use-localtime --output apps/web/public/assets/grid-light.svg
 
       - name: Disconnect Cloudflare WARP
         if: env.USE_CLOUDFLARE_WARP == 'true'
@@ -199,13 +199,13 @@ jobs:
           fi
           for path in \
             data/data.duckdb \
-            src/static/activities.json \
-            public/assets/github.svg \
-            public/assets/grid.svg \
-            public/assets/github-light.svg \
-            public/assets/grid-light.svg \
-            public/db/activities.parquet \
-            public/db/activities_flyby.parquet; do
+            apps/web/src/static/activities.json \
+            apps/web/public/assets/github.svg \
+            apps/web/public/assets/grid.svg \
+            apps/web/public/assets/github-light.svg \
+            apps/web/public/assets/grid-light.svg \
+            apps/web/public/db/activities.parquet \
+            apps/web/public/db/activities_flyby.parquet; do
             if [ -e "$path" ] || git ls-files --error-unmatch "$path" >/dev/null 2>&1; then
               git add "$path"
             fi

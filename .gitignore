@@ -5,7 +5,7 @@
 *.pyc
 node_modules
 yarn-error.log
-/dist
+dist/
 .claude
 
 # Build directory

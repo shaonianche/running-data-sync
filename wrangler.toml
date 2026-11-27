@@ -2,14 +2,14 @@ name = "running-data-sync"
 compatibility_date = "2025-06-09"
 
 [assets]
-directory = "./dist"
+directory = "./apps/web/dist"
 html_handling = "auto-trailing-slash"
 not_found_handling = "single-page-application"
 
 [build]
-command = "pnpm install && pnpm run build"
+command = "pnpm install && pnpm --filter web build"
 cwd = "."
-watch_dir = "src"
+watch_dir = "apps/web/src"
 
 [env.production]
 name = "running-data-sync"

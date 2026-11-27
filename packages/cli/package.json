@@ -1,0 +1,37 @@
+{
+  "name": "@running-data-sync/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CLI wrapper for running-data-sync",
+  "license": "MIT",
+  "bin": {
+    "running-data-sync": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@running-data-sync/core": "workspace:*"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.8"
+  }
+}

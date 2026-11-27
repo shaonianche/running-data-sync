@@ -3,28 +3,24 @@ name: Frontend CI
 on:
   pull_request:
     paths:
-      - 'src/**'
-      - 'public/**'
-      - 'index.html'
+      - 'apps/web/**'
+      - 'packages/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
-      - 'vite.config.ts'
-      - 'vitest.config.ts'
-      - 'tsconfig.json'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
       - 'eslint.config.*'
       - '.github/workflows/frontend-ci.yml'
   push:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'public/**'
-      - 'index.html'
+      - 'apps/web/**'
+      - 'packages/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
-      - 'vite.config.ts'
-      - 'vitest.config.ts'
-      - 'tsconfig.json'
+      - 'pnpm-workspace.yaml'
+      - 'tsconfig.base.json'
       - 'eslint.config.*'
       - '.github/workflows/frontend-ci.yml'
 
