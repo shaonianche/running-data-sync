@@ -75,7 +75,15 @@ jobs:
         run: |
           curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
           echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflare-client.list
-          sudo apt-get update && sudo apt-get install -y cloudflare-warp
+          # apt sometimes cannot resolve the Ubuntu mirrors; retry instead of burning the whole run.
+          for attempt in 1 2 3; do
+            if sudo apt-get update && sudo apt-get install -y cloudflare-warp; then
+              exit 0
+            fi
+            echo "Installing cloudflare-warp failed (attempt $attempt), retrying in 15s..."
+            sleep 15
+          done
+          exit 1
 
       - name: Connect Cloudflare WARP
         if: env.USE_CLOUDFLARE_WARP == 'true'
@@ -83,11 +91,21 @@ jobs:
           warp-cli --accept-tos registration new
           warp-cli --accept-tos mode warp
           warp-cli --accept-tos connect
-          sleep 3
+          # `connect` returns before the tunnel is up, so wait for it instead of a fixed sleep.
+          for attempt in $(seq 1 30); do
+            if warp-cli --accept-tos status 2>&1 | grep -q "Status update: Connected"; then
+              break
+            fi
+            sleep 2
+          done
           echo "WARP status:"
           warp-cli --accept-tos status
+          warp-cli --accept-tos status 2>&1 | grep -q "Status update: Connected" || {
+            echo "Cloudflare WARP did not connect within 60s"
+            exit 1
+          }
           echo "IP info:"
-          curl -s https://cloudflare.com/cdn-cgi/trace | grep -E "ip|warp"
+          curl -s --retry 5 --retry-delay 2 --retry-all-errors https://cloudflare.com/cdn-cgi/trace | grep -E "ip|warp"
 
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
