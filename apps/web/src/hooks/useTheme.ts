@@ -24,9 +24,14 @@ function readStoredTheme(): Theme {
   if (typeof window === 'undefined') {
     return 'system'
   }
-  const stored = localStorage.getItem('theme')
-  if (stored === 'light' || stored === 'dark' || stored === 'system') {
-    return stored
+  try {
+    const stored = localStorage.getItem('theme')
+    if (stored === 'light' || stored === 'dark' || stored === 'system') {
+      return stored
+    }
+  }
+  catch {
+    return 'system'
   }
   return 'system'
 }
@@ -47,13 +52,20 @@ export function resolveIsDark(theme: Theme, systemDark = readSystemDark()): bool
   return systemDark
 }
 
-function applyDataTheme(theme: Theme) {
+function applyThemeToDocument(theme: Theme) {
   const root = window.document.documentElement
+  const meta = window.document.querySelector('meta[name="color-scheme"]')
   if (theme === 'system') {
     root.removeAttribute('data-theme')
+    if (meta) {
+      meta.setAttribute('content', 'light dark')
+    }
   }
   else {
     root.setAttribute('data-theme', theme)
+    if (meta) {
+      meta.setAttribute('content', theme)
+    }
   }
 }
 
@@ -62,7 +74,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [systemDark, setSystemDark] = useState(readSystemDark)
 
   useEffect(() => {
-    applyDataTheme(theme)
+    applyThemeToDocument(theme)
   }, [theme])
 
   useEffect(() => {
@@ -75,7 +87,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Cross-tab / external localStorage updates
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key === 'theme') {
+      if (e.key === 'theme' || e.key === null) {
         setThemeState(readStoredTheme())
       }
     }
@@ -85,8 +97,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme)
-    localStorage.setItem('theme', newTheme)
-    applyDataTheme(newTheme)
+    try {
+      if (newTheme === 'system') {
+        localStorage.removeItem('theme')
+      }
+      else {
+        localStorage.setItem('theme', newTheme)
+      }
+    }
+    catch {
+      // Storage may be blocked; still apply theme to the active document.
+    }
+    applyThemeToDocument(newTheme)
   }, [])
 
   const value = useMemo<ThemeContextValue>(() => ({

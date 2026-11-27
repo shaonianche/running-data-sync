@@ -8,6 +8,22 @@
     ></script>
     <meta name="google-adsense-account" content="ca-pub-7699645677735403" />
     <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      ;(function () {
+        try {
+          var t = localStorage.getItem('theme')
+          var m = document.querySelector('meta[name="color-scheme"]')
+          if (t === 'light' || t === 'dark') {
+            document.documentElement.setAttribute('data-theme', t)
+            if (m) m.content = t
+          } else {
+            document.documentElement.removeAttribute('data-theme')
+            if (m) m.content = 'light dark'
+          }
+        } catch {}
+      })()
+    </script>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Running Page</title>

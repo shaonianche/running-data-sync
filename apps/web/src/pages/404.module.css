@@ -7,10 +7,10 @@
 }
 
 .muted {
-  color: #9ca3af;
+  color: var(--color-text-secondary);
 }
 
 .link {
   font-weight: 700;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
 }
