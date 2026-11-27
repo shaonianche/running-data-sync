@@ -3,6 +3,7 @@ import RunMapButtons from '@/components/RunMap/RunMapButtons'
 import YearStat from '@/components/YearStat'
 import activitiesData from '@/data/activitiesData'
 import { INFO_MESSAGE } from '@/utils/const'
+import styles from './style.module.css'
 
 function YearsStat({
   year,
@@ -46,9 +47,9 @@ function YearsStat({
 
   // for short solution need to refactor
   return (
-    <div className="w-full pr-0 md:pr-14 md:pb-16">
+    <div className={styles.wrapper}>
       <section>
-        <p className="leading-relaxed">
+        <p className={styles.lead}>
           {INFO_MESSAGE(years.length, isSmallScreen ? (selectedYear || year) : year)}
           <br />
         </p>
@@ -58,7 +59,7 @@ function YearsStat({
         isSmallScreen
           ? (
               <>
-                <div className="mb-2">
+                <div className={styles.mobileButtons}>
                   <RunMapButtons
                     changeYear={(y) => {
                       setSelectedYear(y)

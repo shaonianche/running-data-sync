@@ -1,26 +1,104 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
 
-@import 'tailwindcss';
+@layer reset, tokens, base, animations;
 
-:root {
-  --color-primary: var(--color-brand);
-  --color-background: var(--color-bg);
-  --color-text-primary: var(--color-tx);
-  --color-hr-primary: var(--color-hr);
-  --color-selected: var(--color-selected);
-  --color-svg-background: var(--color-svg-background);
-  --color-svg-line: var(--color-svg-line);
-  --color-svg-total-line: var(--color-svg-total-line);
-  --color-run-date: var(--color-run-date);
-  --color-run-table-thead: var(--color-run-table-thead);
-  --color-run-row-hover-background: var(--color-run-row-hover-background);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-mono);
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  p,
+  ul {
+    margin: 0;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
+@layer tokens {
+  :root {
+    --color-primary: var(--color-brand);
+    --color-background: var(--color-bg);
+    --color-text-primary: var(--color-tx);
+    --color-hr-primary: var(--color-hr);
+    --color-selected: var(--color-selected);
+    --color-svg-background: var(--color-svg-background);
+    --color-svg-line: var(--color-svg-line);
+    --color-svg-total-line: var(--color-svg-total-line);
+    --color-run-date: var(--color-run-date);
+    --color-run-table-thead: var(--color-run-table-thead);
+    --color-run-row-hover-background: var(--color-run-row-hover-background);
+    --font-sans: var(--font-sans);
+    --font-mono: var(--font-mono);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --color-brand: #e0ed5e;
+      --color-bg: #1a1a1a;
+      --color-tx: #e0ed5e;
+      --color-hr: #262626;
+      --color-selected: #e0ed5e;
+      --color-svg-background: #262626;
+      --color-svg-total-line: #4dd2ff;
+      --color-svg-line: #e0ed5e;
+      --color-run-date: #dddddd;
+      --color-run-table-thead: #9f9f9f;
+      --color-run-row-hover-background: #262626;
+      --font-sans: 'IBM Plex Sans', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme]) {
+      --color-brand: #024a70;
+      --color-bg: #f5f5f5;
+      --color-tx: #024a70;
+      --color-hr: #d4d4d4;
+      --color-selected: #024a70;
+      --color-svg-background: #e5e5e5;
+      --color-svg-line: #0069a8;
+      --color-svg-total-line: #525252;
+      --color-run-date: #262626;
+      --color-run-table-thead: #9f9f9f;
+      --color-run-row-hover-background: #e5e5e5;
+      --font-sans: 'IBM Plex Sans', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+    }
+  }
+
+  [data-theme='dark'] {
     --color-brand: #e0ed5e;
     --color-bg: #1a1a1a;
     --color-tx: #e0ed5e;
@@ -35,10 +113,8 @@
     --font-sans: 'IBM Plex Sans', sans-serif;
     --font-mono: 'IBM Plex Mono', monospace;
   }
-}
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) {
+  [data-theme='light'] {
     --color-brand: #024a70;
     --color-bg: #f5f5f5;
     --color-tx: #024a70;
@@ -55,38 +131,6 @@
   }
 }
 
-[data-theme='dark'] {
-  --color-brand: #e0ed5e;
-  --color-bg: #1a1a1a;
-  --color-tx: #e0ed5e;
-  --color-hr: #262626;
-  --color-selected: #e0ed5e;
-  --color-svg-background: #262626;
-  --color-svg-total-line: #4dd2ff;
-  --color-svg-line: #e0ed5e;
-  --color-run-date: #dddddd;
-  --color-run-table-thead: #9f9f9f;
-  --color-run-row-hover-background: #262626;
-  --font-sans: 'IBM Plex Sans', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-}
-
-[data-theme='light'] {
-  --color-brand: #024a70;
-  --color-bg: #f5f5f5;
-  --color-tx: #024a70;
-  --color-hr: #d4d4d4;
-  --color-selected: #024a70;
-  --color-svg-background: #e5e5e5;
-  --color-svg-line: #0069a8;
-  --color-svg-total-line: #525252;
-  --color-run-date: #262626;
-  --color-run-table-thead: #9f9f9f;
-  --color-run-row-hover-background: #e5e5e5;
-  --font-sans: 'IBM Plex Sans', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-}
-
 @layer base {
   html,
   body {
@@ -96,38 +140,47 @@
       background-color 0.1s ease,
       color 0.1s ease;
     font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  body {
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img::selection {
+    background: transparent;
+  }
+
+  img::-moz-selection {
+    background: transparent;
+  }
+
+  iframe {
+    border: none;
+  }
+
+  hr {
+    border-top: none;
+    border-bottom: 1px solid var(--color-hr-primary);
+    margin: 2rem 0;
   }
 }
 
-img::selection {
-  background: transparent;
-}
-
-img::-moz-selection {
-  background: transparent;
-}
-
-body {
-  text-rendering: optimizeLegibility;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-}
-
-iframe {
-  border: none;
-}
-
-hr {
-  border-top: none;
-  border-bottom: 1px solid var(--color-hr-primary);
-  margin: 2rem 0;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
+@layer animations {
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
-  100% {
-    background-position: -200% 0;
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.5;
+    }
   }
 }

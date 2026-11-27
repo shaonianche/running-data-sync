@@ -3,15 +3,16 @@ import { lazy, memo, Suspense, useEffect, useMemo } from 'react'
 import { useTheme } from '@/hooks/useTheme'
 import { loadSvgComponent } from '@/utils/svgUtils'
 import { preloadOtherThemeSvgs } from './preload'
+import styles from './style.module.css'
 
 function LoadingPlaceholder({ height = 200 }: { height?: number }) {
   return (
     <div
-      className="mt-4 rounded overflow-hidden"
+      className={styles.placeholder}
       style={{ height }}
       aria-live="polite"
     >
-      <div className="h-full w-full bg-gradient-to-r from-[var(--color-hr)] via-[var(--color-background)] to-[var(--color-hr)] bg-[length:200%_100%] animate-[shimmer_1.5s_infinite]" />
+      <div className={styles.shimmer} />
     </div>
   )
 }
@@ -33,12 +34,12 @@ function SVGStat() {
   }, [theme])
 
   return (
-    <div id="svgStat" className="transition-colors duration-200">
+    <div id="svgStat" className={styles.container}>
       <Suspense fallback={<LoadingPlaceholder height={150} />}>
-        <GithubSvg className="mt-4 h-auto w-full" />
+        <GithubSvg className={styles.svg} />
       </Suspense>
       <Suspense fallback={<LoadingPlaceholder height={400} />}>
-        <GridSvg className="mt-4 h-auto w-full" />
+        <GridSvg className={styles.svg} />
       </Suspense>
     </div>
   )

@@ -6,6 +6,7 @@ import {
 import CitiesStat from './CitiesStat'
 import LocationSummary from './LocationSummary'
 import PeriodStat from './PeriodStat'
+import styles from './style.module.css'
 
 interface ILocationStatProps {
   changeYear: (_year: string) => void
@@ -19,9 +20,9 @@ function LocationStat({
   changeTitle,
 }: ILocationStatProps) {
   return (
-    <div className="w-full pb-16 lg:w-full lg:pr-16">
-      <section className="pb-0">
-        <p className="leading-relaxed">
+    <div className={styles.wrapper}>
+      <section className={styles.intro}>
+        <p className={styles.lead}>
           {CHINESE_LOCATION_INFO_MESSAGE_FIRST}
           .
           <br />
