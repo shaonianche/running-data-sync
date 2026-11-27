@@ -6,6 +6,7 @@ import type {
   GarminClientLike,
   getGarminSecret,
   Logger,
+  ObjectStorePort,
   RuntimeConfig,
   StravaClient,
   validateDataConsistency,
@@ -22,6 +23,7 @@ export interface CliDependencies {
   readonly processEnv?: Readonly<Record<string, string | undefined>>
   readonly envFilePath?: string
   readonly createStore?: (options: { readonly dbPath: string, readonly readOnly: boolean, readonly logger: Logger }) => ActivityStorePort
+  readonly createObjectStore?: () => ObjectStorePort
   readonly createFormatPort?: () => ActivityFormatPort
   readonly createStravaClient?: (options: {
     readonly clientId: string
