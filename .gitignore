@@ -2,7 +2,6 @@
 .idea
 .zed
 .cache
-*.pyc
 node_modules
 yarn-error.log
 dist/
@@ -20,7 +19,3 @@ danpalmer.sql
 
 .env*
 config.yaml
-.mypy_cache
-.pdm-python
-.venv/
-.coverage
