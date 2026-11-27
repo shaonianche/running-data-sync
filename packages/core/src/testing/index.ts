@@ -19,5 +19,6 @@ export {
   FIXTURE_POSTER_TRACKS,
   FIXTURE_VENDOR_SYNC_ROWS,
 } from './fixtures.js'
+export { InMemoryObjectStore } from './in-memory-object-store.js'
 export { InMemoryActivityStore } from './in-memory-store.js'
 export type { InMemoryActivityStoreOptions } from './in-memory-store.js'

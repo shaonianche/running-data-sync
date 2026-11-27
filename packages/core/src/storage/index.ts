@@ -42,6 +42,12 @@ export {
   resolvePolylinePrivacyConfig,
 } from './polyline.js'
 export {
+  buildR2Endpoint,
+  R2ObjectStore,
+  type R2ObjectStoreConfig,
+  type S3LikeClient,
+} from './r2-object-store.js'
+export {
   ACTIVITIES_COLUMNS,
   ACTIVITIES_FLYBY_COLUMNS,
   ACTIVITIES_FLYBY_SCHEMA,
