@@ -4,7 +4,7 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm --filter web build",
   "outputDirectory": "apps/web/dist",
-  "ignoreCommand": "[ \"$VERCEL_GIT_PREVIOUS_SHA\" ]&&[ \"$VERCEL_GIT_COMMIT_SHA\" ]&&git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- apps/web packages/core/src/types.ts packages/core/src/foundation/types.ts packages/core/package.json package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json vercel.json",
+  "ignoreCommand": "[ \"$VERCEL_GIT_PREVIOUS_SHA\" ]&&git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- apps/web packages/core package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json vercel.json",
   "git": {
     "deploymentEnabled": {
       "gh-pages": false
