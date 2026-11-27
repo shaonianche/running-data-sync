@@ -44,8 +44,13 @@ export {
   exportParquet,
   type ExportParquetOptions,
   type ExportParquetResult,
+  isPublicParquetTable,
   loadActivities,
   type LoadActivitiesOptions,
+  PUBLIC_PARQUET_TABLES,
+  PUBLIC_PROJECTION_BOUNDARY,
+  type PublicParquetTable,
+  resolvePublicParquetTables,
   sanitizeForActivityJson,
   serializeActivitiesJson,
 } from './export.js'

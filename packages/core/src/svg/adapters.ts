@@ -9,8 +9,11 @@ import type {
   SvgPosterGenerator,
 } from '../contracts/index.js'
 import type { Activity } from '../foundation/types.js'
+import type { PolylinePrivacyOptions } from '../storage/polyline.js'
 import { readdir, readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
+import process from 'node:process'
+import { filterPolyline } from '../storage/polyline.js'
 import { ParameterError } from './errors.js'
 import { renderPosterSvg } from './poster.js'
 import { parseDatetimeToLocal } from './timezone.js'
@@ -55,6 +58,14 @@ export function parsedTrackToPosterTrack(
   }
 }
 
+function isTruthyEnvFlag(value: string | undefined): boolean {
+  if (!value) {
+    return false
+  }
+  const normalized = value.trim().toLowerCase()
+  return normalized !== '' && normalized !== '0' && normalized !== 'false' && normalized !== 'no'
+}
+
 export interface LoadPosterTracksFromRepositoryOptions {
   readonly onlyRun?: boolean
   readonly types?: readonly string[]
@@ -62,6 +73,13 @@ export interface LoadPosterTracksFromRepositoryOptions {
   readonly hasPolyline?: boolean
   readonly year?: string
   readonly specialRunIds?: ReadonlySet<number> | readonly number[]
+  /**
+   * Whether to apply privacy polyline filtering (`filterPolyline`) to `summaryPolyline`.
+   * Defaults to `true` unless `IGNORE_BEFORE_SAVING` is truthy in env.
+   */
+  readonly applyPolylineFilter?: boolean
+  /** Privacy polyline filtering options. */
+  readonly polylineOptions?: PolylinePrivacyOptions
 }
 
 /**
@@ -93,15 +111,25 @@ export async function loadPosterTracksFromRepository(
     ? (options.specialRunIds instanceof Set ? options.specialRunIds : new Set(options.specialRunIds))
     : null
 
+  const env = options.polylineOptions?.env ?? process.env
+  const shouldFilterPolyline = options.applyPolylineFilter ?? !isTruthyEnvFlag(env.IGNORE_BEFORE_SAVING)
+
   const tracks: PosterTrack[] = []
   for (const activity of activities) {
     if (!yearRange.containsDate(activity.start_date_local)) {
       continue
     }
+    const rawPolyline = activity.summary_polyline ?? null
+    const summaryPolyline = shouldFilterPolyline
+      ? filterPolyline(rawPolyline, options.polylineOptions)
+      : rawPolyline
     tracks.push(
-      activityToPosterTrack(activity, {
-        special: specialSet ? specialSet.has(activity.run_id) : false,
-      }),
+      activityToPosterTrack(
+        { ...activity, summary_polyline: summaryPolyline },
+        {
+          special: specialSet ? specialSet.has(activity.run_id) : false,
+        },
+      ),
     )
   }
 
@@ -124,6 +152,8 @@ export async function renderPosterFromRepository(
     hasPolyline: options.hasPolyline,
     year: options.year,
     specialRunIds: options.specialRunIds,
+    applyPolylineFilter: options.applyPolylineFilter,
+    polylineOptions: options.polylineOptions,
   })
   return renderPosterSvg(tracks, options, generator)
 }

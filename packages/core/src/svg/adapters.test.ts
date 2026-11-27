@@ -223,4 +223,25 @@ describe('decoupled SVG data-source adapters', () => {
     const converted = parsedTrackToPosterTrack(utcParsed, { useLocalTime: true })
     expect(converted.startDateLocal).toBe('2025-03-15T08:30:00')
   })
+
+  it('applies filterPolyline privacy clipping when loading poster tracks from repository', async () => {
+    const activity = createOutdoorRunActivity({ run_id: 9001 })
+    const repo = new InMemoryActivityStore({ activities: [activity] })
+
+    const clippedTracks = await loadPosterTracksFromRepository(repo, {
+      polylineOptions: {
+        ignoreStartEndRangeMeters: 700,
+        ignoreRangeMeters: 0,
+        ignorePoints: [],
+      },
+    })
+    expect(clippedTracks).toHaveLength(1)
+    expect(clippedTracks[0]?.summaryPolyline).not.toBe(activity.summary_polyline)
+    expect(clippedTracks[0]?.summaryPolyline).not.toBeNull()
+
+    const unfilteredTracks = await loadPosterTracksFromRepository(repo, {
+      applyPolylineFilter: false,
+    })
+    expect(unfilteredTracks[0]?.summaryPolyline).toBe(activity.summary_polyline)
+  })
 })

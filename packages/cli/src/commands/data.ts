@@ -54,6 +54,7 @@ export async function handleData(args: readonly string[], ctx: CliCommandContext
         'help': { type: 'boolean', short: 'h', default: false },
         'tables': { type: 'string', multiple: true },
         'output-dir': { type: 'string' },
+        'exclude-flyby': { type: 'boolean', default: false },
       },
     })
     if (parsed.values.help) {
@@ -69,6 +70,7 @@ export async function handleData(args: readonly string[], ctx: CliCommandContext
       dbPath: ctx.runtime.sqlFile,
       outputDir: parsed.values['output-dir'] ? path.resolve(parsed.values['output-dir']) : ctx.runtime.dbDir,
       tables: tableList.length > 0 ? tableList : undefined,
+      includeFlyby: parsed.values['exclude-flyby'] ? false : undefined,
       logger: ctx.logger,
     })
     ctx.io.stdout(`${JSON.stringify(result, null, 2)}\n`)
